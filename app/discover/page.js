@@ -1,7 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
-
+import toast from "react-hot-toast";
 export default function DiscoverPage() {
   const [users, setUsers] = useState([]);
 
@@ -31,12 +32,17 @@ export default function DiscoverPage() {
 
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        console.error("Like failed:", err);
+        toast.error(err || "Like failed");
         return;
       }
 
       const data = await res.json();
-      console.log("Liked:", data);
+
+      if (data.match) {
+        toast.success("🎉 It's a Match!");
+      } else {
+        toast.success("👍 Liked user");
+      }
 
       // Remove liked user from grid
       setUsers((prev) => prev.filter((u) => u._id !== userId));
@@ -61,7 +67,7 @@ export default function DiscoverPage() {
       }
 
       const data = await res.json();
-      console.log("Disliked:", data);
+      toast.success("👎 Disliked user");
 
       // Remove disliked user from grid
       setUsers((prev) => prev.filter((u) => u._id !== userId));
@@ -80,11 +86,13 @@ export default function DiscoverPage() {
             key={user._id}
             className="bg-gray-800 p-4 rounded shadow flex flex-col items-center"
           >
-            <img
-              src={user.images?.[0]?.url || "/placeholder.jpg"}
-              alt={user.name}
-              className="w-full h-64 object-cover rounded"
-            />
+            <Link href={`/profile/${user._id}`} className="w-full">
+              <img
+                src={user.images?.[0]?.url || "/placeholder.jpg"}
+                alt={user.name}
+                className="w-full h-64 object-cover rounded cursor-pointer hover:opacity-90 transition"
+              />
+            </Link>
             <h2 className="mt-2 text-lg font-semibold">{user.name}</h2>
             <p className="text-sm text-gray-400">{user.bio}</p>
 
