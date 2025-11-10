@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { CldUploadWidget } from "next-cloudinary";
 
 export default function Home() {
   return (
