@@ -1,56 +1,13 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-
-function ImageCarousel({ images, currentIndex, onClose }) {
-  const [current, setCurrent] = useState(currentIndex);
-
-  function next() {
-    setCurrent((prev) => (prev + 1) % images.length);
-  }
-
-  function prev() {
-    setCurrent((prev) => (prev - 1 + images.length) % images.length);
-  }
-
-  return (
-    
-    <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
-      <button
-        className="absolute top-4 right-4 text-white text-2xl"
-        onClick={onClose}
-      >
-        ✖
-      </button>
-
-      <button
-        className="absolute left-4 text-white text-3xl"
-        onClick={prev}
-      >
-        ⬅
-      </button>
-
-      <img
-        src={images[current]}
-        alt="current"
-        className="max-h-[80vh] max-w-[90vw] rounded shadow-lg"
-      />
-
-      <button
-        className="absolute right-4 text-white text-3xl"
-        onClick={next}
-      >
-        ➡
-      </button>
-    </div>
-  );
-}
+import ImageCarousel from "@/components/ImageCarousel";
 
 export default function PublicProfile() {
   const { id } = useParams();
   const [profile, setProfile] = useState(null);
-  const [carouselOpen, setCarouselOpen] = useState(false);
-  const [carouselIndex, setCarouselIndex] = useState(0);
+  const [open, setOpen] = useState(false);
+  const [index, setIndex] = useState(0);
 
   useEffect(() => {
     async function fetchProfile() {
@@ -60,19 +17,19 @@ export default function PublicProfile() {
         setProfile(data.user);
       }
     }
-    if (id) fetchProfile();
+    fetchProfile();
   }, [id]);
 
   if (!profile) {
     return <p className="text-white">Loading profile...</p>;
   }
-
+  console.log(profile.images);
   return (
     <div className="dark bg-gray-900 text-white min-h-screen p-6 flex flex-col items-center">
-      {/* Hero */}
+      {/* Hero Section */}
       <div className="w-full max-w-2xl bg-gray-800 rounded-lg shadow-lg p-6 text-center">
         <img
-          src={profile.images?.[0]}
+          src={profile.images?.[0].url}
           alt={profile.name}
           className="w-40 h-40 object-cover rounded-full mx-auto border-4 border-pink-500"
         />
@@ -80,39 +37,49 @@ export default function PublicProfile() {
           {profile.name}, {profile.age}
         </h1>
         <p className="text-gray-400">{profile.gender}</p>
+
+        {/* Interaction Buttons */}
+        <div className="flex justify-center gap-4 mt-6">
+          <button className="bg-pink-600 hover:bg-pink-700 px-6 py-2 rounded-full font-semibold">
+            ❤️ Like
+          </button>
+          <button className="bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded-full font-semibold">
+            💬 Message
+          </button>
+        </div>
       </div>
 
-      {/* Bio */}
+      {/* Bio Section */}
       <div className="w-full max-w-2xl bg-gray-800 rounded-lg shadow-lg p-6 mt-6">
         <h2 className="text-xl font-semibold mb-2">About Me</h2>
         <p className="text-gray-300">{profile.bio}</p>
       </div>
 
-      {/* Gallery */}
+      {/* Gallery Section */}
       <div className="w-full max-w-2xl bg-gray-800 rounded-lg shadow-lg p-6 mt-6">
         <h2 className="text-xl font-semibold mb-2">Photos</h2>
         <div className="grid grid-cols-3 gap-2">
-          {profile.images?.map((url, i) => (
+          {profile.images.map((img, i) => (
             <img
               key={i}
-              src={url}
-              alt="profile"
+              src={img.url}
+              alt="thumb"
               className="w-full h-32 object-cover rounded cursor-pointer"
               onClick={() => {
-                setCarouselIndex(i);
-                setCarouselOpen(true);
+                console.log("Clicked thumbnail", i);
+                setIndex(i);
+                setOpen(true);
               }}
             />
           ))}
         </div>
       </div>
-
-      {/* Carousel Modal */}
-      {carouselOpen && (
+      {open && (
         <ImageCarousel
           images={profile.images}
-          currentIndex={carouselIndex}
-          onClose={() => setCarouselOpen(false)}
+          setOpen={setOpen}
+          currentIndex={index}
+          onClose={() => setOpen(false)}
         />
       )}
     </div>
