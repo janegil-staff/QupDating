@@ -32,7 +32,7 @@ export default function DiscoverPage() {
   useEffect(() => {
     fetchUsers(); // initial load
   }, []);
- 
+
   const handleLike = async (targetUserId) => {
     console.log(targetUserId);
 
@@ -80,13 +80,16 @@ export default function DiscoverPage() {
       console.error("Dislike error:", err);
     }
   }
+  const uniqueUsers = Array.from(
+    new Map(users.map((u) => [u._id, u])).values()
+  );
 
   return (
     <div className="min-h-screen bg-gray-900 text-white p-6">
       <h1 className="text-2xl font-bold mb-6">Discover</h1>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {users.map((user) => (
+        {uniqueUsers.map((user) => (
           <div
             key={user._id}
             className="bg-gray-800 p-4 rounded shadow flex flex-col items-center"

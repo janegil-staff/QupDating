@@ -29,7 +29,7 @@ export default function PublicProfile() {
       {/* Hero Section */}
       <div className="w-full max-w-2xl bg-gray-800 rounded-lg shadow-lg p-6 text-center">
         <img
-          src={profile.images?.[0].url}
+          src={profile.images?.[0]?.url}
           alt={profile.name}
           className="w-40 h-40 object-cover rounded-full mx-auto border-4 border-pink-500"
         />
@@ -59,7 +59,7 @@ export default function PublicProfile() {
       <div className="w-full max-w-2xl bg-gray-800 rounded-lg shadow-lg p-6 mt-6">
         <h2 className="text-xl font-semibold mb-2">Photos</h2>
         <div className="grid grid-cols-3 gap-2">
-          {profile.images.map((img, i) => (
+          {profile.images?.map((img, i) => (
             <img
               key={i}
               src={img.url}
