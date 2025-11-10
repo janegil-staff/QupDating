@@ -23,7 +23,7 @@ export default function PublicProfile() {
   if (!profile) {
     return <p className="text-white">Loading profile...</p>;
   }
-  console.log(profile.images);
+
   return (
     <div className="dark bg-gray-900 text-white min-h-screen p-6 flex flex-col items-center">
       {/* Hero Section */}

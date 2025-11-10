@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import ImageUploader from "@/components/ImageUploader";
-import { signIn } from "next-auth/react";
 
 export default function RegisterPage() {
   const [localImages, setLocalImages] = useState([]);

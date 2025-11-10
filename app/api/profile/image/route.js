@@ -11,7 +11,40 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
+export async function POST(req) {
+  try {
+    const formData = await req.formData();
+    const file = formData.get("file");
+
+    if (!file) {
+      return NextResponse.json({ error: "No file provided" }, { status: 400 });
+    }
+
+    // Convert file to buffer
+    const arrayBuffer = await file.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+
+    // Upload to Cloudinary
+    const result = await new Promise((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        { resource_type: "image" },
+        (error, uploaded) => {
+          if (error) reject(error);
+          else resolve(uploaded);
+        }
+      );
+      uploadStream.end(buffer);
+    });
+
+    return NextResponse.json({ url: result.secure_url });
+  } catch (err) {
+    console.error("Upload error:", err);
+    return NextResponse.json({ error: err.message }, { status: 500 });
+  }
+}
+
 export async function DELETE(req) {
+  console.log("ENTERING");
   const session = await getServerSession(authOptions);
   if (!session?.user?.email) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

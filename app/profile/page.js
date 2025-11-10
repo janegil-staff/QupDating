@@ -1,120 +1,202 @@
 "use client";
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
 
-function ImageCarousel({ images, currentIndex, onClose }) {
-  const [current, setCurrent] = useState(currentIndex);
+export default function EditProfile() {
+  const [profile, setProfile] = useState({
+    name: "",
+    age: "",
+    gender: "",
+    bio: "",
+    images: [],
+  });
+  const [loading, setLoading] = useState(true);
 
-  function next() {
-    setCurrent((prev) => (prev + 1) % images.length);
-  }
-
-  function prev() {
-    setCurrent((prev) => (prev - 1 + images.length) % images.length);
-  }
-
-  return (
-    
-    <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
-      <button
-        className="absolute top-4 right-4 text-white text-2xl"
-        onClick={onClose}
-      >
-        ✖
-      </button>
-
-      <button
-        className="absolute left-4 text-white text-3xl"
-        onClick={prev}
-      >
-        ⬅
-      </button>
-
-      <img
-        src={images[current]}
-        alt="current"
-        className="max-h-[80vh] max-w-[90vw] rounded shadow-lg"
-      />
-
-      <button
-        className="absolute right-4 text-white text-3xl"
-        onClick={next}
-      >
-        ➡
-      </button>
-    </div>
-  );
-}
-
-export default function PublicProfile() {
-  const { id } = useParams();
-  const [profile, setProfile] = useState(null);
-  const [carouselOpen, setCarouselOpen] = useState(false);
-  const [carouselIndex, setCarouselIndex] = useState(0);
-
+  // Fetch current profile
   useEffect(() => {
     async function fetchProfile() {
-      const res = await fetch(`/api/users/${id}`);
-      if (res.ok) {
-        const data = await res.json();
-        setProfile(data.user);
+      try {
+        const res = await fetch("/api/profile");
+        if (res.ok) {
+          const data = await res.json();
+          setProfile(data.user);
+        }
+      } catch (err) {
+        console.error("Error fetching profile:", err);
+      } finally {
+        setLoading(false);
       }
     }
-    if (id) fetchProfile();
-  }, [id]);
+    fetchProfile();
+  }, []);
 
-  if (!profile) {
-    return <p className="text-white">Loading profile...</p>;
+  async function handleDelete(img) {
+    try {
+      const res = await fetch("/api/profile/image", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ public_id: img.public_id }),
+      });
+
+      if (!res.ok) throw new Error("Delete failed");
+
+      // Update local state after success
+      setProfile((prev) => ({
+        ...prev,
+        images: prev.images.filter((i) => i.public_id !== img.public_id),
+      }));
+    } catch (err) {
+      console.error("Delete error:", err);
+      alert("Could not delete image ❌");
+    }
   }
+
+  async function handleUpload(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const uploadRes = await fetch("/api/profile/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!uploadRes.ok) throw new Error("Upload failed");
+      const data = await uploadRes.json();
+
+      setProfile((prev) => ({
+        ...prev,
+        images: [
+          ...(prev.images || []),
+          { url: data.url, public_id: data.public_id },
+        ],
+      }));
+    } catch (err) {
+      console.error("Upload error:", err);
+      alert("Could not upload image ❌");
+    }
+  }
+
+  async function handleSave() {
+    try {
+      const res = await fetch("/api/profile", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: profile.name,
+          age: profile.age,
+          gender: profile.gender,
+          bio: profile.bio,
+          images: profile.images,
+        }),
+      });
+
+      if (res.ok) {
+        alert("Profile updated ✅");
+      } else {
+        alert("Error saving profile ❌");
+      }
+    } catch (err) {
+      console.error("Save error:", err);
+      alert("Error saving profile ❌");
+    }
+  }
+
+  if (loading) return <p className="text-white">Loading...</p>;
 
   return (
     <div className="dark bg-gray-900 text-white min-h-screen p-6 flex flex-col items-center">
-      {/* Hero */}
-      <div className="w-full max-w-2xl bg-gray-800 rounded-lg shadow-lg p-6 text-center">
-        <img
-          src={profile.images?.[0]}
-          alt={profile.name}
-          className="w-40 h-40 object-cover rounded-full mx-auto border-4 border-pink-500"
+
+      <div className="w-full max-w-2xl bg-gray-800 rounded-lg shadow-lg p-6">
+              <a
+        href={`/profile/${profile._id}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="bg-green-600 hover:bg-green-700 px-6 py-2 float-right rounded-full font-semibold ml-4"
+      >
+        Preview Public Profile
+      </a>
+      <br />
+        <h1 className="text-2xl font-bold mb-4">Edit Your Profile</h1>
+
+        {/* Name */}
+        <label className="block mb-2">Name</label>
+        <input
+          type="text"
+          value={profile.name}
+          onChange={(e) => setProfile({ ...profile, name: e.target.value })}
+          className="w-full p-2 mb-4 rounded bg-gray-700 text-white"
         />
-        <h1 className="text-3xl font-bold mt-4">
-          {profile.name}, {profile.age}
-        </h1>
-        <p className="text-gray-400">{profile.gender}</p>
-      </div>
 
-      {/* Bio */}
-      <div className="w-full max-w-2xl bg-gray-800 rounded-lg shadow-lg p-6 mt-6">
-        <h2 className="text-xl font-semibold mb-2">About Me</h2>
-        <p className="text-gray-300">{profile.bio}</p>
-      </div>
+        {/* Age */}
+        <label className="block mb-2">Age</label>
+        <input
+          type="number"
+          value={profile.age}
+          onChange={(e) => setProfile({ ...profile, age: e.target.value })}
+          className="w-full p-2 mb-4 rounded bg-gray-700 text-white"
+        />
 
-      {/* Gallery */}
-      <div className="w-full max-w-2xl bg-gray-800 rounded-lg shadow-lg p-6 mt-6">
-        <h2 className="text-xl font-semibold mb-2">Photos</h2>
-        <div className="grid grid-cols-3 gap-2">
-          {profile.images?.map((url, i) => (
-            <img
-              key={i}
-              src={url}
-              alt="profile"
-              className="w-full h-32 object-cover rounded cursor-pointer"
-              onClick={() => {
-                setCarouselIndex(i);
-                setCarouselOpen(true);
-              }}
-            />
+        {/* Gender */}
+        <label className="block mb-2">Gender</label>
+        <input
+          type="text"
+          value={profile.gender}
+          onChange={(e) => setProfile({ ...profile, gender: e.target.value })}
+          className="w-full p-2 mb-4 rounded bg-gray-700 text-white"
+        />
+
+        {/* Bio */}
+        <label className="block mb-2">Bio</label>
+        <textarea
+          value={profile.bio}
+          onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
+          className="w-full p-2 mb-4 rounded bg-gray-700 text-white"
+        />
+
+        {/* Gallery */}
+        <label className="block mb-2">Photos</label>
+        <div className="grid grid-cols-3 gap-2 mb-4">
+          {profile.images?.map((img, i) => (
+            <div key={i} className="relative group">
+              <img
+                src={img.url}
+                alt="profile"
+                className="w-full h-32 object-cover rounded"
+              />
+              <button
+                className="absolute top-1 right-1 bg-red-600 text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition"
+                onClick={() => handleDelete(img)}
+              >
+                ✖
+              </button>
+            </div>
           ))}
-        </div>
-      </div>
 
-      {/* Carousel Modal */}
-      {carouselOpen && (
-        <ImageCarousel
-          images={profile.images}
-          currentIndex={carouselIndex}
-          onClose={() => setCarouselOpen(false)}
-        />
-      )}
+          {/* Upload tile */}
+          <label className="flex items-center justify-center w-full h-32 bg-gray-700 rounded cursor-pointer hover:bg-gray-600 transition">
+            <span className="text-gray-300 font-bold text-lg">
+              ＋ Add Photo
+            </span>
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleUpload}
+            />
+          </label>
+        </div>
+
+        {/* Save button */}
+        <button
+          onClick={handleSave}
+          className="bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded-full font-semibold"
+        >
+          Save Changes
+        </button>
+      </div>
     </div>
   );
 }
