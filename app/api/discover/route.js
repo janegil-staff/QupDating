@@ -1,11 +1,11 @@
-// app/api/discover/route.js
-import { getServerSession } from "next-auth";
-import User from "@/models/User";
 import { NextResponse } from "next/server";
+import User from "@/models/User";
+import { getServerSession } from "next-auth";
+import mongoose from "mongoose";
 import { authOptions } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
 
-export async function GET() {
+export async function GET(req) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
@@ -13,33 +13,39 @@ export async function GET() {
     }
 
     await connectDB();
+    const { searchParams } = new URL(req.url);
+    const cursor = searchParams.get("cursor");
 
-    const currentUser = await User.findOne({ email: session.user.email }).lean();
+    const currentUser = await User.findOne({ email: session.user.email });
     if (!currentUser) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    // Defensive defaults
-    const likedIds = currentUser.likes || [];
-    const dislikedIds = currentUser.dislikes || [];
+    const oppositeGender = currentUser.gender === "male" ? "female" : "male";
 
-    // Opposite gender filter
-    let oppositeGender;
-    if (currentUser.gender === "male") oppositeGender = "female";
-    else if (currentUser.gender === "female") oppositeGender = "male";
-    else oppositeGender = { $ne: currentUser.gender };
-
-    const users = await User.find({
-      _id: { $ne: currentUser._id, $nin: [...likedIds, ...dislikedIds] },
+    const query = {
+      _id: {
+        $ne: currentUser._id,
+        ...(cursor && { $gt: new mongoose.Types.ObjectId(cursor) }),
+      },
       gender: oppositeGender,
-    })
-      .select("name age bio images gender")
-      .sort({ createdAt: -1 }) 
+      $nor: [
+        { _id: { $in: currentUser.likes } },
+        { _id: { $in: currentUser.dislikes } },
+        { _id: { $in: currentUser.matches } },
+      ],
+    };
+
+    const users = await User.find(query)
+      .sort({ createdAt: -1 })
+      .limit(20)
       .lean();
 
-    return NextResponse.json({ users });
+    const nextCursor = users.length > 0 ? users[users.length - 1]._id.toString() : null;
+
+    return NextResponse.json({ users, nextCursor });
   } catch (err) {
-    console.error("Discover error:", err);
+    console.error("Discover route error:", err);
     return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }

@@ -3,53 +3,58 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+
 export default function DiscoverPage() {
   const [users, setUsers] = useState([]);
+  const [cursor, setCursor] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  // Load users from your backend
-  useEffect(() => {
-    async function fetchUsers() {
-      try {
-        const res = await fetch("/api/discover");
-        if (!res.ok) throw new Error("Failed to load users");
-        const data = await res.json();
-        setUsers(data.users || []);
-      } catch (err) {
-        console.error("Discover fetch error:", err);
-      }
-    }
-    fetchUsers();
-  }, []);
-
-  // Like handler
-  async function handleLike(userId) {
+  const fetchUsers = async () => {
+    setLoading(true);
     try {
-      const res = await fetch("/api/like", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ toUserId: userId }),
-      });
-
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        toast.error(err || "Like failed");
-        return;
-      }
-
+      const res = await fetch(
+        `/api/discover${cursor ? `?cursor=${cursor}` : ""}`
+      );
       const data = await res.json();
-
-      if (data.match) {
-        toast.success("🎉 It's a Match!");
+      if (res.ok) {
+        setUsers((prev) => [...prev, ...data.users]);
+        setCursor(data.nextCursor);
       } else {
-        toast.success("👍 Liked user");
+        toast.error(data.error || "Failed to load users");
       }
-
-      // Remove liked user from grid
-      setUsers((prev) => prev.filter((u) => u._id !== userId));
     } catch (err) {
-      console.error("Like error:", err);
+      toast.error("Server error");
+    } finally {
+      setLoading(false);
     }
-  }
+  };
+
+  useEffect(() => {
+    fetchUsers(); // initial load
+  }, []);
+ 
+  const handleLike = async (targetUserId) => {
+    console.log(targetUserId);
+
+    const res = await fetch("/api/like", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ toUserId: targetUserId }), // ✅ correct
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      toast.error(err || "Like failed");
+      return;
+    }
+
+    const data = await res.json();
+    if (data.match) {
+      toast.success("🎉 It's a Match!");
+    } else {
+      toast.success("👍 Liked user");
+    }
+    setUsers((prev) => prev.filter((u) => u._id !== targetUserId));
+  };
 
   // Dislike handler
   async function handleDislike(userId) {
@@ -113,6 +118,17 @@ export default function DiscoverPage() {
           </div>
         ))}
       </div>
+      {cursor && (
+        <div className="mt-6 text-center">
+          <button
+            onClick={fetchUsers}
+            disabled={loading}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded"
+          >
+            {loading ? "Loading..." : "Load More"}
+          </button>
+        </div>
+      )}
     </div>
   );
 }
