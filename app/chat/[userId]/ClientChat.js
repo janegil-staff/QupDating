@@ -2,76 +2,101 @@
 import { useEffect, useState, useRef } from "react";
 import { io } from "socket.io-client";
 import toast from "react-hot-toast";
+import { useSession } from "next-auth/react";
 
-const socket = io({
-  path: "/api/socket",
-});
+const socket = io({ path: "/api/socket" });
 
 export default function ClientChat({ userId }) {
+  const { data: session } = useSession();
+  const sessionUserId = session?.user?.id;
+  const roomId =
+    sessionUserId && userId ? [sessionUserId, userId].sort().join("-") : null;
+
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [typing, setTyping] = useState(false);
   const scrollRef = useRef(null);
   const typingTimeout = useRef(null);
 
-  // Fetch message history
   useEffect(() => {
-    fetch(`/api/messages?userId=${userId}`)
-      .then((res) => res.json())
-      .then((data) => setMessages(data.messages))
-      .catch(() => toast.error("Failed to load messages"));
-  }, [userId]);
+    if (!roomId) return;
 
-  // Socket setup
-  useEffect(() => {
     socket.connect();
-    socket.emit("join", userId);
+    console.log("✅ Connecting to socket with roomId:", roomId);
+    socket.emit("join", roomId);
+
+    socket.on("connect", () => {
+      console.log("🔌 Socket connected:", socket.id);
+    });
 
     socket.on("message", (msg) => {
-      setMessages((prev) => [...prev, msg]);
+      setMessages((prev = []) => {
+        // ✅ Prevent duplicates by checking _id
+        if (prev.some((m) => m._id === msg._id)) return prev;
+        return [...prev, msg];
+      });
     });
 
     socket.on("typing", () => setTyping(true));
     socket.on("stopTyping", () => setTyping(false));
-
     return () => {
+      socket.off("message");
       socket.disconnect();
     };
-  }, [userId]);
+  }, [roomId]);
 
-  // Scroll to bottom on new messages
+  useEffect(() => {
+    if (!roomId) return;
+    fetch(`/api/messages?roomId=${roomId}`)
+      .then((res) => res.json())
+      .then((data) => setMessages(data.messages || []))
+      .catch(() => toast.error("Failed to load messages"));
+  }, [roomId]);
+
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [messages]);
+  }, [messages, typing]);
 
-  // Handle input change + typing emit
   const handleInputChange = (e) => {
     setInput(e.target.value);
-    socket.emit("typing", { roomId: userId });
+    if (roomId) socket.emit("typing", { roomId });
 
     clearTimeout(typingTimeout.current);
     typingTimeout.current = setTimeout(() => {
-      socket.emit("stopTyping", { roomId: userId });
+      if (roomId) socket.emit("stopTyping", { roomId });
     }, 1000);
   };
-
-  // Send message
   const sendMessage = async () => {
-    if (!input.trim()) return;
-    const res = await fetch("/api/messages", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ receiverId: userId, content: input }),
-    });
-    const data = await res.json();
-    if (res.ok) {
-      socket.emit("message", { ...data.message, roomId: userId });
-      setMessages((prev) => [...prev, data.message]);
-      setInput("");
-    } else {
-      toast.error(data.error || "Failed to send");
+    if (!input.trim() || !roomId || !sessionUserId) return;
+
+    const tempMessage = {
+      _id: Date.now().toString(),
+      content: input,
+      sender: sessionUserId,
+      senderName: "You",
+      senderImage: null,
+      createdAt: new Date().toISOString(),
+      roomId,
+    };
+
+    // ✅ Emit to socket for instant delivery
+    socket.emit("message", tempMessage);
+
+    // ✅ Update local UI immediately
+    setMessages((prev = []) => [...prev, tempMessage]);
+    setInput("");
+
+    // ✅ Persist full message to DB
+    try {
+      await fetch("/api/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(tempMessage), // ✅ send full message
+      });
+    } catch {
+      toast.error("Failed to save message");
     }
   };
 
@@ -87,7 +112,7 @@ export default function ClientChat({ userId }) {
           <p className="text-sm text-gray-400 mb-2">User is typing…</p>
         )}
         {messages.map((msg) => {
-          const isSender = msg.sender === userId;
+          const isSender = msg.sender === sessionUserId;
           return (
             <div
               key={msg._id}
@@ -98,7 +123,7 @@ export default function ClientChat({ userId }) {
               {!isSender && (
                 <img
                   src={msg.senderImage || "/placeholder.jpg"}
-                  alt="Sender avatar"
+                  alt={msg.senderName || "User"}
                   className="w-8 h-8 rounded-full mr-2"
                 />
               )}
@@ -122,20 +147,26 @@ export default function ClientChat({ userId }) {
         })}
       </div>
 
-      <div className="flex gap-2">
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          sendMessage();
+        }}
+        className="flex items-center gap-2 bg-gray-800 rounded px-3 py-2"
+      >
         <input
           value={input}
           onChange={handleInputChange}
-          className="flex-1 px-4 py-2 rounded bg-gray-800 text-white"
-          placeholder="Type your message..."
+          className="flex-1 bg-transparent text-white placeholder-gray-400 outline-none"
+          placeholder="Skriv en melding…"
         />
         <button
-          onClick={sendMessage}
-          className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
+          type="submit"
+          className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded transition"
         >
           Send
         </button>
-      </div>
+      </form>
     </div>
   );
 }

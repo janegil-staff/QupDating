@@ -2,7 +2,13 @@ import { Server } from "socket.io";
 
 let io;
 
-export default function socketHandler(req, res) {
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
+
+export default function handler(req, res) {
   if (!res.socket.server.io) {
     io = new Server(res.socket.server, {
       path: "/api/socket",
@@ -10,33 +16,20 @@ export default function socketHandler(req, res) {
     });
 
     io.on("connection", (socket) => {
-      console.log("🔌 Socket connected:", socket.id);
-
-      // Join room
       socket.on("join", (roomId) => {
         socket.join(roomId);
-        console.log(`🛏️ Joined room: ${roomId}`);
       });
 
-      // Relay message
       socket.on("message", (msg) => {
-        if (msg.roomId) {
-          io.to(msg.roomId).emit("message", msg);
-          console.log(`📨 Relayed message to room ${msg.roomId}`);
-        }
+        io.to(msg.roomId).emit("message", msg);
       });
 
-      // Typing indicator
       socket.on("typing", ({ roomId }) => {
         io.to(roomId).emit("typing");
       });
 
       socket.on("stopTyping", ({ roomId }) => {
         io.to(roomId).emit("stopTyping");
-      });
-
-      socket.on("disconnect", () => {
-        console.log("❌ Socket disconnected:", socket.id);
       });
     });
 

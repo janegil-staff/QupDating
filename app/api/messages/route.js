@@ -1,61 +1,53 @@
-import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import Message from "@/models/Message";
-import User from "@/models/User";
 import { connectDB } from "@/lib/db";
-import { authOptions } from "@/lib/auth";
+import Message from "@/models/Message";
+import { NextResponse } from "next/server";
 
-export async function GET(req) {
+export async function POST(req) {
+ 
+  await connectDB();
+  const body = await req.json();
+   console.log("ENTERING", body);
+  const { roomId, content, sender, senderName, senderImage, createdAt, _id } =
+    body;
+
+  if (!roomId || !content || !sender || !_id || !createdAt) {
+    return NextResponse.json(
+      { error: "Missing required fields" },
+      { status: 400 }
+    );
+  }
+
   try {
-    const session = await getServerSession(authOptions);
-    const { searchParams } = new URL(req.url);
-    const otherUserId = searchParams.get("userId");
+    const message = await Message.create({
+      roomId,
+      content,
+      sender,
+      senderName,
+      senderImage,
+      createdAt,
+    });
 
-    await connectDB();
-    const currentUser = await User.findOne({ email: session.user.email });
-
-    const messages = await Message.find({
-      $or: [
-        { sender: currentUser._id, receiver: otherUserId },
-        { sender: otherUserId, receiver: currentUser._id },
-      ],
-    })
-      .sort({ createdAt: 1 })
-      .populate("sender", "name images");
-
-    const formatted = messages.map((msg) => ({
-      _id: msg._id,
-      content: msg.content,
-      sender: msg.sender._id.toString(),
-      senderName: msg.sender.name,
-      senderImage: msg.sender.images?.[0]?.url || null,
-      createdAt: msg.createdAt,
-    }));
-
-    return NextResponse.json({ messages: formatted });
-  } catch (err) {
-    console.error("Message fetch error:", err);
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
+    return NextResponse.json({ success: true, message }, { status: 201 });
+  } catch (error) {
+    console.error("❌ Failed to save message:", error);
+    return NextResponse.json({ error: "Database error" }, { status: 500 });
   }
 }
 
-export async function POST(req) {
+export async function GET(req) {
+  await connectDB(); // ✅ ensure await
+  const { searchParams } = new URL(req.url);
+  const roomId = searchParams.get("roomId");
+
+  if (!roomId) {
+    return NextResponse.json({ error: "Missing roomId" }, { status: 400 });
+  }
+
   try {
-    const session = await getServerSession(authOptions);
-    const { receiverId, content } = await req.json();
-
-    await connectDB();
-    const sender = await User.findOne({ email: session.user.email });
-
-    const message = await Message.create({
-      sender: sender._id,
-      receiver: receiverId,
-      content,
-    });
-
-    return NextResponse.json({ success: true, message });
-  } catch (err) {
-    console.error("Message send error:", err);
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
+    const messages = await Message.find({ roomId }).sort({ createdAt: 1 });
+    return NextResponse.json({ messages }, { status: 200 });
+  } catch (error) {
+    console.error("❌ Failed to fetch messages:", error);
+    return NextResponse.json({ error: "Database error" }, { status: 500 });
   }
 }

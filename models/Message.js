@@ -1,12 +1,12 @@
 import mongoose from "mongoose";
 
-const messageSchema = new mongoose.Schema(
-  {
-    sender: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-    receiver: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-    content: { type: String, required: true },
-  },
-  { timestamps: true }
-);
+const MessageSchema = new mongoose.Schema({
+  roomId: String,
+  content: String,
+  sender: String,
+  senderName: String,
+  senderImage: String,
+  createdAt: String,
+});
 
-export default mongoose.models.Message || mongoose.model("Message", messageSchema);
+export default mongoose.models.Message || mongoose.model("Message", MessageSchema);
