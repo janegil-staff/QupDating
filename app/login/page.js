@@ -4,7 +4,7 @@ import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
-export default async function LoginPage() {
+export default function LoginPage() {
  
   const [form, setForm] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);

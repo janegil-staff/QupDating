@@ -4,8 +4,10 @@ import { useParams } from "next/navigation";
 import ImageCarousel from "@/components/ImageCarousel";
 import Link from "next/link";
 import toast from "react-hot-toast";
+import { protect } from "@/lib/protect";
 
-export default function PublicProfile() {
+export default async function PublicProfile() {
+  await protect();
   const { id } = useParams();
   const [profile, setProfile] = useState(null);
   const [open, setOpen] = useState(false);
@@ -62,7 +64,7 @@ export default function PublicProfile() {
       toast.success("👍 Liked user");
     }
   };
-console.log(profile);
+  console.log(profile);
   return (
     <div className="dark bg-gray-900 text-white min-h-screen p-6 flex flex-col items-center">
       {/* Hero Section */}

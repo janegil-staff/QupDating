@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 
 export default function EditProfile() {
+  
   const [profile, setProfile] = useState({
     name: "",
     age: "",

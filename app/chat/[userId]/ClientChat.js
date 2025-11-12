@@ -123,7 +123,7 @@ export default function ClientChat({ userId }) {
             >
               {!isSender && (
                 <img
-                  src={msg.sender.images?.[0]?.url || "/images/placeholder.png"}
+                  src={msg.sender.profileImage || "/images/placeholder.png"}
                   alt={msg.sender.name || "Bruker"}
                   className="w-8 h-8 rounded-full mr-2"
                 />
@@ -145,7 +145,7 @@ export default function ClientChat({ userId }) {
               </div>
               {isSender && (
                 <img
-                  src={msg.sender.images?.[0]?.url || "/images/placeholder.png"}
+                  src={msg.sender.profileImage || "/images/placeholder.png"}
                   alt="Du"
                   className="w-8 h-8 rounded-full ml-2"
                 />
