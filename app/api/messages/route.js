@@ -48,7 +48,7 @@ export async function GET(req) {
   };
 
   const messages = await Message.find(query)
-    .sort({ _id: -1 })
+    .sort({ _id: 1 })
     .populate("sender")
     .limit(20)
     .lean();

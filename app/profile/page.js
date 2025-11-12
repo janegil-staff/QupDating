@@ -2,7 +2,6 @@
 import { useEffect, useState } from "react";
 
 export default function EditProfile() {
-  
   const [profile, setProfile] = useState({
     name: "",
     age: "",
@@ -56,6 +55,13 @@ export default function EditProfile() {
   async function handleUpload(e) {
     const file = e.target.files[0];
     if (!file) return;
+    const files = Array.from(e.target.files);
+    const total = profile.images.length + files.length;
+    
+    if (total > 6) {
+      alert("Du kan kun laste opp 6 bilder.");
+      return;
+    }
 
     try {
       const formData = new FormData();
@@ -204,7 +210,7 @@ export default function EditProfile() {
             </div>
           ))}
 
-          {/* Upload tile */}
+          { profile.images.length < 6 && 
           <label className="flex items-center justify-center w-full h-32 bg-gray-700 rounded cursor-pointer hover:bg-gray-600 transition">
             <span className="text-gray-300 font-bold text-lg">
               ＋ Add Photo
@@ -216,6 +222,7 @@ export default function EditProfile() {
               onChange={handleUpload}
             />
           </label>
+          }
         </div>
 
         {/* Save button */}
