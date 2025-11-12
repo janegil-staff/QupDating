@@ -4,16 +4,9 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import ImageUploader from "@/components/ImageUploader";
 import { signIn } from "next-auth/react";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
-import { redirect } from "next/navigation";
 
-export default async function RegisterPage() {
-  const session = await getServerSession(authOptions);
 
-  if (session) {
-    redirect("/dashboard");
-  }
+export default function RegisterPage() {
 
   const [localImages, setLocalImages] = useState([]);
   const router = useRouter();
