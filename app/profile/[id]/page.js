@@ -62,13 +62,13 @@ export default function PublicProfile() {
       toast.success("👍 Liked user");
     }
   };
-
+console.log(profile);
   return (
     <div className="dark bg-gray-900 text-white min-h-screen p-6 flex flex-col items-center">
       {/* Hero Section */}
       <div className="w-full max-w-2xl bg-gray-800 rounded-lg shadow-lg p-6 text-center">
         <img
-          src={profile.images?.[0]?.url}
+          src={profile.profileImage}
           alt={profile.name}
           className="w-40 h-40 object-cover rounded-full mx-auto border-4 border-pink-500"
         />

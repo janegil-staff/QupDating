@@ -43,23 +43,32 @@ export async function POST(req) {
     return new Response(JSON.stringify({ success: true }), { status: 200 });
   } catch (err) {
     console.error("Profile update error:", err);
-    return new Response(JSON.stringify({ error: err.message }), { status: 500 });
+    return new Response(JSON.stringify({ error: err.message }), {
+      status: 500,
+    });
   }
 }
 
 export async function PUT(req) {
   const session = await getServerSession(authOptions);
   if (!session) {
-    return new Response(JSON.stringify({ error: "Not authenticated" }), { status: 401 });
+    return new Response(JSON.stringify({ error: "Not authenticated" }), {
+      status: 401,
+    });
   }
 
+  const userId = session.user.id;
   const body = await req.json();
-  const { name, age, gender, bio, images } = body;
+  const { name, age, gender, bio, images, profileImage } = body;
 
-  await User.updateOne(
-    { email: session.user.email },
-    { name, age, gender, bio, images }
-  );
+  await User.findByIdAndUpdate(userId, {
+    name,
+    age,
+    gender,
+    bio,
+    images,
+    profileImage,
+  });
 
   return new Response(JSON.stringify({ success: true }), { status: 200 });
 }

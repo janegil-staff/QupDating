@@ -8,7 +8,9 @@ export default function EditProfile() {
     gender: "",
     bio: "",
     images: [],
+    profileImage: "", // ✅ new field
   });
+
   const [loading, setLoading] = useState(true);
 
   // Fetch current profile
@@ -78,6 +80,22 @@ export default function EditProfile() {
       alert("Could not upload image ❌");
     }
   }
+  async function handleSetProfileImage(imageUrl) {
+    try {
+      const res = await fetch("/api/users/profile-image", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ imageUrl }),
+      });
+
+      if (!res.ok) throw new Error("Failed to update profile image");
+
+      setProfile((prev) => ({ ...prev, profileImage: imageUrl }));
+    } catch (err) {
+      console.error("Error setting profile image:", err);
+      alert("Kunne ikke oppdatere profilbildet ❌");
+    }
+  }
 
   async function handleSave() {
     try {
@@ -90,6 +108,7 @@ export default function EditProfile() {
           gender: profile.gender,
           bio: profile.bio,
           images: profile.images,
+          profileImage: profile.profileImage,
         }),
       });
 
@@ -108,17 +127,16 @@ export default function EditProfile() {
 
   return (
     <div className="dark bg-gray-900 text-white min-h-screen p-6 flex flex-col items-center">
-
       <div className="w-full max-w-2xl bg-gray-800 rounded-lg shadow-lg p-6">
-              <a
-        href={`/profile/${profile._id}`}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="bg-green-600 hover:bg-green-700 px-6 py-2 float-right rounded-full font-semibold ml-4"
-      >
-        Preview Public Profile
-      </a>
-      <br />
+        <a
+          href={`/profile/${profile._id}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="bg-green-600 hover:bg-green-700 px-6 py-2 float-right rounded-full font-semibold ml-4"
+        >
+          Preview Public Profile
+        </a>
+        <br />
         <h1 className="text-2xl font-bold mb-4">Edit Your Profile</h1>
 
         {/* Name */}
@@ -164,13 +182,23 @@ export default function EditProfile() {
               <img
                 src={img.url}
                 alt="profile"
-                className="w-full h-32 object-cover rounded"
+                className={`w-full h-32 object-cover rounded border-4 ${
+                  profile.profileImage === img.url
+                    ? "border-green-500"
+                    : "border-transparent"
+                }`}
               />
               <button
                 className="absolute top-1 right-1 bg-red-600 text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition"
                 onClick={() => handleDelete(img)}
               >
                 ✖
+              </button>
+              <button
+                className="absolute bottom-1 left-1 bg-blue-600 text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition"
+                onClick={() => handleSetProfileImage(img.url)}
+              >
+                Bruk som profilbilde
               </button>
             </div>
           ))}

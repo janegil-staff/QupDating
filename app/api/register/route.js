@@ -19,15 +19,21 @@ export async function POST(req) {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     await connectDB();
-    console.log("Creating user...");
+    console.log("Profile image:", images.length > 0 ? images[0].url : "/images/placeholder.png");
+
     const user = await User.create({
       name,
       email,
       password: hashedPassword,
       age,
       gender,
-      images, // ✅ full array of { url, public_id }
+      images,
+      profileImage: images.length > 0 ? images[0].url : "/images/placeholder.png"
     });
+
+
+    console.log("Profile image:", images.length > 0 ? images[0].url : "/images/placeholder.png");
+
     console.log("User created:", user);
     return NextResponse.json({ success: true, user });
   } catch (err) {

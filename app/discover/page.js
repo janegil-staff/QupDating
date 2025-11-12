@@ -80,7 +80,7 @@ export default function DiscoverPage() {
           <div key={user._id} className="bg-gray-900 p-4 rounded-xl shadow flex flex-col items-center">
             <Link href={`/profile/${user._id}`} className="w-full">
               <img
-                src={user.images?.[0]?.url || "/placeholder.jpg"}
+                src={user.profileImage || "/placeholder.jpg"}
                 alt={user.name}
                 className="w-full h-64 object-cover rounded-lg cursor-pointer hover:opacity-90 transition"
               />

@@ -63,7 +63,7 @@ export default function DashboardPage() {
         `/api/messages?roomId=${room}${cursor ? `&cursor=${cursor}` : ""}`
       );
       const data = await res.json();
-console.log("Fetched messages response:", data);
+      console.log("Fetched messages response:", data);
 
       setMessages((prev) => {
         const all = [...data.messages.reverse(), ...prev];
@@ -74,12 +74,14 @@ console.log("Fetched messages response:", data);
       if (Array.isArray(data.messages)) {
         const reversed = [...data.messages].reverse(); // ✅ safe copy
         setMessages((prev) => {
-          const all = [...reversed, ...prev];
+          const incoming = Array.isArray(data?.messages) ? data.messages : [];
+          const all = [...incoming.reverse(), ...prev];
           const unique = Array.from(
             new Map(all.map((m) => [m._id, m])).values()
           );
           return unique;
         });
+
         setCursor(data.nextCursor || null);
         setHasMore(data.hasMore !== false);
       } else {
@@ -158,9 +160,7 @@ console.log("Fetched messages response:", data);
                   <div className="flex flex-row items-center ">
                     <img
                       className="float-left rounded-md mr-4"
-                      src={
-                        msg.sender.images?.[0].url || "/images/placeholder.png"
-                      }
+                      src={msg.sender.profileImage || "/images/placeholder.png"}
                       width={50}
                       height={50}
                     />

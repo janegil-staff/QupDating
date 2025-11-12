@@ -8,9 +8,13 @@ const UserSchema = new mongoose.Schema({
   gender: { type: String, enum: ["male", "female", "other"] },
   bio: String,
   images: [{ url: String, public_id: String }],
+  profileImage: {
+    type: String, // URL of the selected image
+    required: true // fallback if none selected
+  },
   likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
   dislikes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
-   matches: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+  matches: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
   createdAt: { type: Date, default: Date.now },
 });
 

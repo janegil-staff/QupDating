@@ -1,4 +1,3 @@
-
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -11,9 +10,12 @@ export async function connectDB() {
   if (mongoose.connection.readyState >= 1) return;
 
   try {
-    await mongoose.connect("mongodb+srv://janstovr:fooBar83@cluster0.3dwqjjw.mongodb.net/qup-dating?appName=Cluster0", {
-      dbName: "qup-dating",
-    });
+    await mongoose.connect(
+      "mongodb+srv://janstovr:fooBar83@cluster0.3dwqjjw.mongodb.net/qup-dating?appName=Cluster0",
+      {
+        dbName: "qup-dating",
+      }
+    );
     console.log("✅ Connected to MongoDB");
   } catch (err) {
     console.error("❌ MongoDB connection error:", err);
@@ -21,13 +23,14 @@ export async function connectDB() {
   }
 }
 
-
 async function seedUsers() {
   await connectDB();
 
-  const res = await fetch("https://randomuser.me/api/?results=50&inc=name,gender,email,picture,dob");
+  const res = await fetch(
+    "https://randomuser.me/api/?results=50&inc=name,gender,email,picture,dob"
+  );
   const data = await res.json();
- 
+
   const users = data.results.map((u) => ({
     name: `${u.name.first} ${u.name.last}`,
     email: u.email,
@@ -36,8 +39,9 @@ async function seedUsers() {
     gender: u.gender,
     bio: "This is a sample bio for testing.",
     images: [{ url: u.picture.large, public_id: null }],
+    profilePicture: "/images/placeholder.png",
   }));
- console.log(users);
+  console.log(users);
   await User.insertMany(users);
   console.log("Seeded 50 users ✅");
 }
