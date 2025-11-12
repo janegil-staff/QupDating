@@ -1,5 +1,4 @@
-"use client";
-
+"use client"
 import { useSession } from "next-auth/react";
 import { useEffect, useRef, useState } from "react";
 import { format, isToday, isYesterday } from "date-fns";
