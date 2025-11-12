@@ -66,13 +66,18 @@ export default function DashboardPage() {
       console.log("Fetched messages response:", data);
 
       setMessages((prev) => {
-        const all = [...data.messages.reverse(), ...prev];
+        const all = [
+          ...(Array.isArray(data?.messages) ? data.messages.reverse() : []),
+          ...prev,
+        ];
+
         const unique = Array.from(new Map(all.map((m) => [m._id, m])).values());
         return unique;
       });
 
       if (Array.isArray(data.messages)) {
         const reversed = [...data.messages].reverse(); // ✅ safe copy
+
         setMessages((prev) => {
           const incoming = Array.isArray(data?.messages) ? data.messages : [];
           const all = [...incoming.reverse(), ...prev];
