@@ -10,9 +10,12 @@ export async function GET(req) {
   if (!roomId) {
     return NextResponse.json({ error: "Missing roomId" }, { status: 400 });
   }
-
   try {
-    const messages = await Message.find({ roomId }).sort({ createdAt: 1 });
+    const messages = await Message.find({ roomId })
+      .populate("sender")
+      .sort({ createdAt: 1 });
+
+      console.log("MEssages", messages);
     return NextResponse.json({ messages }, { status: 200 });
   } catch (error) {
     console.error("❌ Failed to fetch messages:", error);

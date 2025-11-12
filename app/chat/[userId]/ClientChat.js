@@ -30,8 +30,7 @@ export default function ClientChat({ userId }) {
     });
 
     socket.on("message", (msg) => {
-      setMessages((prev = []) => {
-        // ✅ Prevent duplicates by checking _id
+      setMessages((prev) => {
         if (prev.some((m) => m._id === msg._id)) return prev;
         return [...prev, msg];
       });
@@ -112,7 +111,9 @@ export default function ClientChat({ userId }) {
           <p className="text-sm text-gray-400 mb-2">User is typing…</p>
         )}
         {messages.map((msg) => {
-          const isSender = msg.sender === sessionUserId;
+          const isSender =
+            msg.sender === sessionUserId || msg.sender?._id === sessionUserId;
+
           return (
             <div
               key={msg._id}
@@ -122,8 +123,8 @@ export default function ClientChat({ userId }) {
             >
               {!isSender && (
                 <img
-                  src={msg.senderImage || "/placeholder.jpg"}
-                  alt={msg.senderName || "User"}
+                  src={msg.sender.images?.[0]?.url || "/images/placeholder.png"}
+                  alt={msg.sender.name || "Bruker"}
                   className="w-8 h-8 rounded-full mr-2"
                 />
               )}
@@ -142,6 +143,13 @@ export default function ClientChat({ userId }) {
                   })}
                 </p>
               </div>
+              {isSender && (
+                <img
+                  src={msg.sender.images?.[0]?.url || "/images/placeholder.png"}
+                  alt="Du"
+                  className="w-8 h-8 rounded-full ml-2"
+                />
+              )}
             </div>
           );
         })}

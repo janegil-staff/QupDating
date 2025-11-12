@@ -2,19 +2,37 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import ImageCarousel from "@/components/ImageCarousel";
+import Link from "next/link";
+import toast from "react-hot-toast";
 
 export default function PublicProfile() {
   const { id } = useParams();
   const [profile, setProfile] = useState(null);
   const [open, setOpen] = useState(false);
   const [index, setIndex] = useState(0);
+  const [isMatched, setIsMatched] = useState(false);
+
+  useEffect(() => {
+    const checkMatch = async () => {
+      try {
+        const res = await fetch(`/api/match-status?userId=${profile._id}`);
+        const data = await res.json();
+        console.log("DATA", data);
+        setIsMatched(data.isMatched); // ✅ true or false
+      } catch (err) {
+        console.error("Failed to check match status:", err);
+      }
+    };
+
+    if (profile?._id) checkMatch();
+  }, [profile]);
 
   useEffect(() => {
     async function fetchProfile() {
       try {
         const res = await fetch(`/api/users/${id}`);
         const data = await res.json();
- 
+
         if (res.ok) {
           setProfile(data);
         } else {
@@ -30,6 +48,20 @@ export default function PublicProfile() {
   if (!profile) {
     return <p className="text-white">Loading profile...</p>;
   }
+  const handleLike = async () => {
+    const res = await fetch("/api/like", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ toUserId: profile._id }),
+    });
+
+    const data = await res.json();
+    if (data.match) {
+      toast.success("🎉 It's a Match!");
+    } else {
+      toast.success("👍 Liked user");
+    }
+  };
 
   return (
     <div className="dark bg-gray-900 text-white min-h-screen p-6 flex flex-col items-center">
@@ -47,12 +79,20 @@ export default function PublicProfile() {
 
         {/* Interaction Buttons */}
         <div className="flex justify-center gap-4 mt-6">
-          <button className="bg-pink-600 hover:bg-pink-700 px-6 py-2 rounded-full font-semibold">
-            ❤️ Like
+          <button
+            onClick={handleLike}
+            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
+          >
+            👍 Like
           </button>
-          <button className="bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded-full font-semibold">
-            💬 Message
-          </button>
+          {isMatched && (
+            <Link
+              href={`/chat/${profile._id}`}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
+            >
+              💬 Send melding
+            </Link>
+          )}
         </div>
       </div>
 

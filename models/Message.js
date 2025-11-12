@@ -3,10 +3,11 @@ import mongoose from "mongoose";
 const MessageSchema = new mongoose.Schema({
   roomId: String,
   content: String,
-  sender: String,
+  sender: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+  receiver: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   senderName: String,
   senderImage: String,
-  createdAt: String,
+  createdAt: { type: Date, default: Date.now },
 });
 
 export default mongoose.models.Message || mongoose.model("Message", MessageSchema);

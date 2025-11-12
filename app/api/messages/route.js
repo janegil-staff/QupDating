@@ -16,12 +16,12 @@ export async function POST(req) {
       { status: 400 }
     );
   }
-
+const senderId = mongoose.Types.ObjectId.createFromHexString(sender);
   try {
     const message = await Message.create({
       roomId,
       content,
-      sender,
+      sender: senderId,
       senderName,
       senderImage,
       createdAt,
@@ -39,7 +39,8 @@ export async function GET(req) {
   const roomId = searchParams.get("roomId");
   const cursor = searchParams.get("cursor");
 
-  if (!roomId) return NextResponse.json({ error: "Missing roomId" }, { status: 400 });
+  if (!roomId)
+    return NextResponse.json({ error: "Missing roomId" }, { status: 400 });
 
   const query = {
     roomId,
@@ -48,10 +49,14 @@ export async function GET(req) {
 
   const messages = await Message.find(query)
     .sort({ _id: -1 })
+    .populate("sender")
     .limit(20)
     .lean();
 
-  const nextCursor = messages.length === 20 ? messages[messages.length - 1]._id.toString() : null;
+  const nextCursor =
+    messages.length === 20
+      ? messages[messages.length - 1]._id.toString()
+      : null;
 
   return NextResponse.json({
     messages,

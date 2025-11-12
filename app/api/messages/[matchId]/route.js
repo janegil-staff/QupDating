@@ -5,7 +5,7 @@ import { NextResponse } from "next/server";
 export async function GET(req, { params }) {
   await connectDB();
   const messages = await Message.find({ matchId: params.matchId })
-    .populate("sender", "name")
+    .populate("sender")
     .sort({ createdAt: 1 })
     .lean();
 
