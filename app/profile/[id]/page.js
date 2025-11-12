@@ -4,10 +4,8 @@ import { useParams } from "next/navigation";
 import ImageCarousel from "@/components/ImageCarousel";
 import Link from "next/link";
 import toast from "react-hot-toast";
-import { protect } from "@/lib/protect";
 
-export default async function PublicProfile() {
-  await protect();
+export default function PublicProfile() {
   const { id } = useParams();
   const [profile, setProfile] = useState(null);
   const [open, setOpen] = useState(false);
