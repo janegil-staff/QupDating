@@ -1,17 +1,18 @@
+import { connectDB } from "@/lib/db";
 import User from "@/models/User";
-import mongoose from "mongoose";
+import { NextResponse } from "next/server";
 
-if (!mongoose.connection.readyState) {
-  mongoose.connect(process.env.MONGODB_URI);
-}
+export async function GET(_, { params }) {
+  await connectDB();
+  const { id } = await params;
 
-export async function GET(req, context ) {
-  const { id } = await context.params;
-  const user = await User.findById(id).lean();
-  if (!user) {
-    return new Response(JSON.stringify({ error: "User not found" }), {
-      status: 404,
-    });
+  try {
+    const user = await User.findById(id).populate("matches").lean();
+    if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
+
+    return NextResponse.json(user, { status: 200 });
+  } catch (error) {
+    console.error("❌ Failed to fetch user:", error);
+    return NextResponse.json({ error: "Database error" }, { status: 500 });
   }
-  return new Response(JSON.stringify({ user }), { status: 200 });
 }

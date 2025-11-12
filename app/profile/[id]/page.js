@@ -11,13 +11,20 @@ export default function PublicProfile() {
 
   useEffect(() => {
     async function fetchProfile() {
-      const res = await fetch(`/api/users/${id}`);
-      if (res.ok) {
+      try {
+        const res = await fetch(`/api/users/${id}`);
         const data = await res.json();
-        setProfile(data.user);
+ 
+        if (res.ok) {
+          setProfile(data);
+        } else {
+          console.error("Profile fetch failed:", data.error);
+        }
+      } catch (err) {
+        console.error("Fetch error:", err);
       }
     }
-    fetchProfile();
+    if (id) fetchProfile();
   }, [id]);
 
   if (!profile) {

@@ -26,7 +26,7 @@ export async function GET(req) {
     const query = {
       _id: {
         $ne: currentUser._id,
-        ...(cursor && { $gt: new mongoose.Types.ObjectId(cursor) }),
+        ...(cursor && { $lt: new mongoose.Types.ObjectId(cursor) }), // ✅ use $lt for descending
       },
       gender: oppositeGender,
       $nor: [
@@ -37,11 +37,12 @@ export async function GET(req) {
     };
 
     const users = await User.find(query)
-      .sort({ createdAt: -1 })
+      .sort({ _id: -1 }) // ✅ sort newest first by _id
       .limit(20)
       .lean();
 
-    const nextCursor = users.length > 0 ? users[users.length - 1]._id.toString() : null;
+    const nextCursor =
+      users.length > 0 ? users[users.length - 1]._id.toString() : null;
 
     return NextResponse.json({ users, nextCursor });
   } catch (err) {
