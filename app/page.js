@@ -1,15 +1,23 @@
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { redirect } from "next/navigation";
 
-export default function HomePage() {
+export default async function HomePage() {
+  const session = await getServerSession(authOptions);
+
+  if (session) {
+    redirect("/dashboard");
+  }
+
   return (
     <main className="min-h-screen bg-gradient-to-b from-pink-600 via-purple-700 to-gray-900 text-white flex flex-col items-center justify-center px-6">
-      
       <section className="text-center max-w-2xl">
-   
         <h1 className="text-4xl md:text-5xl font-bold mb-4">
           Finn kjærligheten i Bergen
         </h1>
         <p className="text-lg md:text-xl text-gray-200 mb-6">
-          Den norske datingappen som setter ekte forbindelser først. Chat, match og møt folk i nærheten — helt gratis.
+          Den norske datingappen som setter ekte forbindelser først. Chat, match
+          og møt folk i nærheten — helt gratis.
         </p>
         <div className="flex justify-center gap-4">
           <a
