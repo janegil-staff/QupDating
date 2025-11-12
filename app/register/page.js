@@ -3,14 +3,16 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import ImageUploader from "@/components/ImageUploader";
+import { signIn } from "next-auth/react";
 
 export default function RegisterPage() {
   const [localImages, setLocalImages] = useState([]);
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    setIsLoading(true);
     // Upload images first
     const formData = new FormData();
     localImages.forEach((img) => formData.append("images", img.file));
@@ -32,8 +34,19 @@ export default function RegisterPage() {
     });
 
     const data = await res.json();
-    console.log("Registered:", data);
-    router.push("/login");
+    setIsLoading(false);
+    const result = await signIn("credentials", {
+      redirect: false,
+      email: form.get("email"),
+      password: form.get("password"),
+    });
+
+    if (result.ok) {
+      router.push("/profile");
+    } else {
+      console.error("Login failed:", result.error);
+      // Optionally show error to user
+    }
   };
 
   return (
@@ -94,10 +107,42 @@ export default function RegisterPage() {
 
         <button
           type="submit"
-          className="w-full bg-pink-600 hover:bg-pink-700 text-white py-2 rounded-lg font-semibold transition"
+          className="w-full py-2 px-4 bg-pink-500 text-white rounded hover:bg-pink-600 disabled:opacity-50"
+          disabled={isLoading}
         >
-          Registrer deg
+          {isLoading ? (
+            <div className="flex items-center justify-center gap-2">
+              <svg
+                className="animate-spin h-5 w-5 text-white"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                />
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8v8z"
+                />
+              </svg>
+              Oppretter bruker...
+            </div>
+          ) : (
+            "Registrer"
+          )}
         </button>
+
+        <p className="mt-4 text-sm text-center text-gray-400">
+          Allerede medlem?{" "}
+          <a href="/login" className="text-pink-500 hover:underline">
+            Logg inn her
+          </a>
+        </p>
       </form>
     </div>
   );

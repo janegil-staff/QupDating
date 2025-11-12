@@ -30,7 +30,7 @@ export default function DashboardPage() {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages]);
-
+  console.log(session);
   useEffect(() => {
     if (status !== "authenticated") return;
 
@@ -169,9 +169,16 @@ export default function DashboardPage() {
                       width={50}
                       height={50}
                     />
-                    <span className="font-medium text-pink-500">
-                      {msg.sender.name}
-                    </span>
+                    {msg.sender._id === session.user.id && (
+                      <span  style={{ color: "#0070f3"}}>
+                        {msg.sender.name}
+                      </span>
+                    )}
+                    {msg.sender._id !== session.user.id && (
+                      <span className="font-medium text-pink-500">
+                        {msg.sender.name}
+                      </span>
+                    )}
                     <span className="text-gray-200 ml-6 ">{msg.content}</span>
                   </div>
 
