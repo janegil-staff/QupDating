@@ -28,8 +28,9 @@ export default function DashboardPage() {
   const loaderRef = useRef(null);
   const scrollRef = useRef(null);
 
+  // Scroll to bottom whenever messages update
   useEffect(() => {
-    if (scrollRef.current && messages.length > 0 && !cursor) {
+    if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages]);
@@ -110,6 +111,7 @@ export default function DashboardPage() {
     return () => observer.disconnect();
   }, [hasMore, loading]);
 
+  // Socket listener for real-time updates
   useEffect(() => {
     if (status !== "authenticated") return;
 
@@ -129,6 +131,13 @@ export default function DashboardPage() {
           if (prev.some((m) => m._id === msg._id)) return prev;
           return [...prev, msg];
         });
+
+        // Scroll to bottom after DOM updates
+        setTimeout(() => {
+          if (scrollRef.current) {
+            scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+          }
+        }, 100);
       }
     });
 
@@ -149,7 +158,7 @@ export default function DashboardPage() {
         <header className="text-center">
           <h1 className="text-4xl font-bold">Hei {session.user.name} 👋</h1>
           <p className="text-gray-400 mt-2">
-            Velkommen tilbake til Klip – finn kjærligheten i Bergen
+            Velkommen tilbake til Qup – finn kjærligheten i Bergen
           </p>
         </header>
 
@@ -167,8 +176,8 @@ export default function DashboardPage() {
 
           <div className="md:col-span-2 bg-gray-900 p-4 rounded-xl shadow-lg">
             <h2 className="text-xl font-semibold mb-4">Meldinger</h2>
-            <div ref={scrollRef} className="max-h-[400px] overflow-y-auto space-y-4">
-              {uniqueMessages.map((msg) => (
+            <div ref={scrollRef} className="flex flex-col max-h-[400px] overflow-y-auto space-y-4">
+              {uniqueMessages.reverse().map((msg) => (
                 <div
                   key={msg._id}
                   className="bg-gray-800 p-4 rounded-lg shadow hover:shadow-md transition"

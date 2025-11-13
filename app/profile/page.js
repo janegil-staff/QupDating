@@ -57,7 +57,7 @@ export default function EditProfile() {
     if (!file) return;
     const files = Array.from(e.target.files);
     const total = profile.images.length + files.length;
-    
+
     if (total > 6) {
       alert("Du kan kun laste opp 6 bilder.");
       return;
@@ -131,7 +131,7 @@ export default function EditProfile() {
   }
 
   if (loading) return <p className="text-white">Loading...</p>;
-
+  
   return (
     <div className="dark bg-gray-900 text-white min-h-screen p-6 flex flex-col items-center">
       <div className="w-full max-w-2xl bg-gray-800 rounded-lg shadow-lg p-6">
@@ -159,22 +159,30 @@ export default function EditProfile() {
         <label className="block mb-2">Age</label>
         <input
           type="number"
+          name="age"
           value={profile.age}
-          onChange={(e) => setProfile({ ...profile, age: e.target.value })}
-          className="w-full p-2 mb-4 rounded bg-gray-700 text-white"
+         onChange={(e) => setProfile({ ...profile, age: e.target.value })}
+          min={18}
+          max={99}
+          required
+          className="bg-gray-800 text-white p-2 rounded-md w-full border border-gray-700 focus:outline-none focus:ring-2 focus:ring-pink-500"
         />
 
         {/* Gender */}
-        <label className="block mb-2">Gender</label>
-        <input
-          type="text"
+        <label className="block my-2">Gender</label>
+        <select
+          name="gender"
           value={profile.gender}
           onChange={(e) => setProfile({ ...profile, gender: e.target.value })}
-          className="w-full p-2 mb-4 rounded bg-gray-700 text-white"
-        />
+          className="bg-gray-800 text-white p-2 rounded-md w-full border border-gray-700 focus:outline-none focus:ring-2 focus:ring-pink-500"
+        >
+          <option value="male">👨 Mann</option>
+          <option value="female">👩 Kvinne</option>
+          <option value="other">❓ Annet</option>
+        </select>
 
         {/* Bio */}
-        <label className="block mb-2">Bio</label>
+        <label className="block my-2">Bio</label>
         <textarea
           value={profile.bio}
           onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
@@ -210,19 +218,19 @@ export default function EditProfile() {
             </div>
           ))}
 
-          { profile.images.length < 6 && 
-          <label className="flex items-center justify-center w-full h-32 bg-gray-700 rounded cursor-pointer hover:bg-gray-600 transition">
-            <span className="text-gray-300 font-bold text-lg">
-              ＋ Add Photo
-            </span>
-            <input
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={handleUpload}
-            />
-          </label>
-          }
+          {profile.images.length < 6 && (
+            <label className="flex items-center justify-center w-full h-32 bg-gray-700 rounded cursor-pointer hover:bg-gray-600 transition">
+              <span className="text-gray-300 font-bold text-lg">
+                ＋ Add Photo
+              </span>
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleUpload}
+              />
+            </label>
+          )}
         </div>
 
         {/* Save button */}
