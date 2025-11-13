@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 
 export default function DiscoverPage() {
@@ -9,6 +9,7 @@ export default function DiscoverPage() {
   const [cursor, setCursor] = useState(null);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
+  const loaderRef = useRef(null);
 
   const fetchUsers = async () => {
     if (loading || !hasMore) return;
@@ -18,9 +19,13 @@ export default function DiscoverPage() {
       const data = await res.json();
 
       if (res.ok) {
-        setUsers((prev) => [...prev, ...data.users]);
+        setUsers((prev) => {
+          const all = [...prev, ...data.users];
+          const unique = Array.from(new Map(all.map((u) => [u._id, u])).values());
+          return unique;
+        });
         setCursor(data.nextCursor || null);
-        setHasMore(data.hasMore !== false); // default to true unless explicitly false
+        setHasMore(data.hasMore !== false);
       } else {
         toast.error(data.error || "Kunne ikke hente brukere");
       }
@@ -34,6 +39,20 @@ export default function DiscoverPage() {
   useEffect(() => {
     fetchUsers(); // initial load
   }, []);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && hasMore && !loading) {
+          fetchUsers();
+        }
+      },
+      { threshold: 1 }
+    );
+
+    if (loaderRef.current) observer.observe(loaderRef.current);
+    return () => observer.disconnect();
+  }, [hasMore, loading]);
 
   const handleLike = async (targetUserId) => {
     const res = await fetch("/api/like", {
@@ -69,14 +88,12 @@ export default function DiscoverPage() {
     setUsers((prev) => prev.filter((u) => u._id !== userId));
   };
 
-  const uniqueUsers = Array.from(new Map(users.map((u) => [u._id, u])).values());
-
   return (
     <div className="min-h-screen bg-gray-950 text-white p-6">
       <h1 className="text-3xl font-bold mb-6">Oppdag nye profiler</h1>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {uniqueUsers.map((user) => (
+        {users.map((user) => (
           <div key={user._id} className="bg-gray-900 p-4 rounded-xl shadow flex flex-col items-center">
             <Link href={`/profile/${user._id}`} className="w-full">
               <img
@@ -106,17 +123,10 @@ export default function DiscoverPage() {
         ))}
       </div>
 
-      {hasMore && (
-        <div className="mt-10 text-center">
-          <button
-            onClick={fetchUsers}
-            disabled={loading}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded"
-          >
-            {loading ? "Laster inn..." : "Vis flere profiler"}
-          </button>
-        </div>
-      )}
+      <div ref={loaderRef} className="h-10 flex justify-center items-center mt-10">
+        {loading && <span className="text-gray-400">Laster inn flere profiler…</span>}
+        {!hasMore && <span className="text-gray-500">Ingen flere profiler</span>}
+      </div>
     </div>
   );
 }

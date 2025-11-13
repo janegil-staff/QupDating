@@ -5,8 +5,7 @@ import { useRouter } from "next/navigation";
 import ImageUploader from "@/components/ImageUploader";
 import { signIn } from "next-auth/react";
 
-
-export default function RegisterPage() {
+export default  function RegisterPage() {
 
   const [localImages, setLocalImages] = useState([]);
   const router = useRouter();
