@@ -1,16 +1,22 @@
 "use client";
 import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 
 export default function EditProfile() {
   const [profile, setProfile] = useState({
     name: "",
     age: "",
     gender: "",
+    birthdate: "",
     bio: "",
     images: [],
     profileImage: "", // ✅ new field
   });
-
+  const [form, setForm] = useState({
+    birthDay: "",
+    birthMonth: "",
+    birthYear: "",
+  });
   const [loading, setLoading] = useState(true);
 
   // Fetch current profile
@@ -116,22 +122,67 @@ export default function EditProfile() {
           bio: profile.bio,
           images: profile.images,
           profileImage: profile.profileImage,
+          birthdate: profile.birthdate,
         }),
       });
 
       if (res.ok) {
-        alert("Profile updated ✅");
+        toast.success("Profile updated ✅");
       } else {
-        alert("Error saving profile ❌");
+        toast.error("Error saving profile ❌");
       }
     } catch (err) {
       console.error("Save error:", err);
-      alert("Error saving profile ❌");
+      toast.error("Error saving profile ❌");
     }
   }
 
+  useEffect(() => {
+    const birthdate = new Date(profile.birthdate); // from backend
+    setForm((prev) => ({
+      ...prev,
+      birthDay: birthdate.getDate().toString(),
+      birthMonth: (birthdate.getMonth() + 1).toString(),
+      birthYear: birthdate.getFullYear().toString(),
+    }));
+  }, [profile.birthdate]);
+
+  async function handleChange(e) {
+  const { name, value } = e.target;
+
+  // Update form state first
+  const updatedForm = {
+    ...form,
+    [name]: value,
+  };
+  setForm(updatedForm);
+
+  // Then construct the date from updated values
+  const { birthYear, birthMonth, birthDay } = updatedForm;
+  if (birthYear && birthMonth && birthDay) {
+    const bd = new Date(`${birthYear}-${birthMonth}-${birthDay}`);
+
+    try {
+      const res = await fetch("/api/profile", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ birthdate: bd }),
+      });
+
+      if (res.ok) {
+        toast.success("Profile updated ✅");
+      } else {
+        toast.error("Error saving profile ❌");
+      }
+    } catch (err) {
+      console.error("Save error:", err);
+      toast.error("Error saving profile ❌");
+    }
+  }
+}
+
   if (loading) return <p className="text-white">Loading...</p>;
-  
+
   return (
     <div className="dark bg-gray-900 text-white min-h-screen p-6 flex flex-col items-center">
       <div className="w-full max-w-2xl bg-gray-800 rounded-lg shadow-lg p-6">
@@ -155,18 +206,74 @@ export default function EditProfile() {
           className="w-full p-2 mb-4 rounded bg-gray-700 text-white"
         />
 
-        {/* Age */}
-        <label className="block mb-2">Age</label>
-        <input
-          type="number"
-          name="age"
-          value={profile.age}
-         onChange={(e) => setProfile({ ...profile, age: e.target.value })}
-          min={18}
-          max={99}
-          required
-          className="bg-gray-800 text-white p-2 rounded-md w-full border border-gray-700 focus:outline-none focus:ring-2 focus:ring-pink-500"
-        />
+        {/* Birthdate */}
+        <div>
+          <label className="block mb-2 text-sm font-medium text-gray-300">
+            Fødselsdato
+          </label>
+          <div className="grid grid-cols-3 gap-2">
+            {/* Day */}
+            <select
+              name="birthDay"
+              onChange={handleChange}
+              value={form.birthDay}
+              required
+              className="bg-neutral-800 text-white px-4 py-2 rounded-lg border border-gray-700"
+            >
+              <option value="">Dag</option>
+              {[...Array(31)].map((_, i) => (
+                <option key={i + 1} value={i + 1}>
+                  {i + 1}
+                </option>
+              ))}
+            </select>
+            <select
+              name="birthMonth"
+              value={form.birthMonth}
+              onChange={handleChange}
+              required
+              className="bg-neutral-800 text-white px-4 py-2 rounded-lg border border-gray-700"
+            >
+              <option value="">Måned</option>
+              {[
+                "Januar",
+                "Februar",
+                "Mars",
+                "April",
+                "Mai",
+                "Juni",
+                "Juli",
+                "August",
+                "September",
+                "Oktober",
+                "November",
+                "Desember",
+              ].map((month, i) => (
+                <option key={i + 1} value={i + 1}>
+                  {month}
+                </option>
+              ))}
+            </select>
+
+            <select
+              name="birthYear"
+              value={form.birthYear}
+              onChange={handleChange} // ✅ controlled value
+              required
+              className="bg-neutral-800 text-white px-4 py-2 rounded-lg border border-gray-700"
+            >
+              <option value="">År</option>
+              {[...Array(82)].map((_, i) => {
+                const year = new Date().getFullYear() - i - 18;
+                return (
+                  <option key={year} value={year}>
+                    {year}
+                  </option>
+                );
+              })}
+            </select>
+          </div>
+        </div>
 
         {/* Gender */}
         <label className="block my-2">Gender</label>

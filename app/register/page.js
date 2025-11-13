@@ -5,8 +5,7 @@ import { useRouter } from "next/navigation";
 import ImageUploader from "@/components/ImageUploader";
 import { signIn } from "next-auth/react";
 
-export default  function RegisterPage() {
-
+export default function RegisterPage() {
   const [localImages, setLocalImages] = useState([]);
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
@@ -84,14 +83,71 @@ export default  function RegisterPage() {
           className="w-full px-4 py-2 rounded-lg bg-neutral-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pink-500"
         />
 
-        <input
-          type="number"
-          name="age"
-          placeholder="Alder"
-          required
-          min="18"
-          className="w-full px-4 py-2 rounded-lg bg-neutral-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pink-500"
-        />
+        {/* Birthdate */}
+        <div>
+          <label className="block mb-2 text-sm font-medium text-gray-300">
+            Fødselsdato
+          </label>
+          <div className="grid grid-cols-3 gap-2">
+            {/* Day */}
+            <select
+              name="birthDay"
+              required
+              className="bg-neutral-800 text-white px-4 py-2 rounded-lg border border-gray-700"
+            >
+              <option value="">Dag</option>
+              {[...Array(31)].map((_, i) => (
+                <option key={i + 1} value={i + 1}>
+                  {i + 1}
+                </option>
+              ))}
+            </select>
+
+            {/* Month */}
+            <select
+              name="birthMonth"
+              required
+              className="bg-neutral-800 text-white px-4 py-2 rounded-lg border border-gray-700"
+            >
+              <option value="">Måned</option>
+              {[
+                "Januar",
+                "Februar",
+                "Mars",
+                "April",
+                "Mai",
+                "Juni",
+                "Juli",
+                "August",
+                "September",
+                "Oktober",
+                "November",
+                "Desember",
+              ].map((month, i) => (
+                <option key={month} value={i + 1}>
+                  {month}
+                </option>
+              ))}
+            </select>
+
+            {/* Year */}
+            <select
+              name="birthYear"
+              required
+              className="bg-neutral-800 text-white px-4 py-2 rounded-lg border border-gray-700"
+            >
+              <option value="">År</option>
+              {[...Array(82)].map((_, i) => {
+                const year = new Date().getFullYear() - i - 18;
+                return (
+                  <option key={year} value={year}>
+                    {year}
+                  </option>
+                );
+              })}
+            </select>
+          </div>
+        </div>
 
         <select
           name="gender"

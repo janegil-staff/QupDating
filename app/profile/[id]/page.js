@@ -7,6 +7,7 @@ import toast from "react-hot-toast";
 import LikeButton from "@/components/ToggleLikeButton";
 import { useLikeStatus } from "@/hooks/useLikeStatus";
 import { useSession } from "next-auth/react";
+import { getAgeFromDate } from "@/lib/getAgeFromDate";
 
 export default function PublicProfile() {
   const { id } = useParams();
@@ -89,7 +90,7 @@ export default function PublicProfile() {
           className="w-40 h-40 object-cover rounded-full mx-auto border-4 border-pink-500"
         />
         <h1 className="text-3xl font-bold mt-4">
-          {profile.name}, {profile.age}
+          {profile.name}, {getAgeFromDate(profile.birthdate)}
         </h1>
         <p className="text-gray-400">{profile.gender}</p>
 

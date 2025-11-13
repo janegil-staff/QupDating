@@ -59,7 +59,7 @@ export async function PUT(req) {
 
   const userId = session.user.id;
   const body = await req.json();
-  const { name, age, gender, bio, images, profileImage } = body;
+  const { name, age, gender, bio, images, profileImage, birthdate } = body;
 
   await User.findByIdAndUpdate(userId, {
     name,
@@ -67,6 +67,7 @@ export async function PUT(req) {
     gender,
     bio,
     images,
+    birthdate,
     profileImage,
   });
 
