@@ -39,7 +39,7 @@ async function seedUsers() {
     gender: u.gender,
     bio: "This is a sample bio for testing.",
     images: [{ url: u.picture.large, public_id: null }],
-    profilePicture: "/images/placeholder.png",
+    profileImage: u.picture.large,
   }));
   console.log(users);
   await User.insertMany(users);

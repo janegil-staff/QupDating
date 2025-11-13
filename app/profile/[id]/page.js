@@ -4,13 +4,29 @@ import { useParams } from "next/navigation";
 import ImageCarousel from "@/components/ImageCarousel";
 import Link from "next/link";
 import toast from "react-hot-toast";
+import LikeButton from "@/components/ToggleLikeButton";
+import { useLikeStatus } from "@/hooks/useLikeStatus";
+import { useSession } from "next-auth/react";
 
 export default function PublicProfile() {
   const { id } = useParams();
+  const { data: session } = useSession();
+  const currentUserId = session?.user?.id;
   const [profile, setProfile] = useState(null);
   const [open, setOpen] = useState(false);
   const [index, setIndex] = useState(0);
   const [isMatched, setIsMatched] = useState(false);
+  const { isLiked, isMutual, refresh } = useLikeStatus(profile?._id);
+
+  useEffect(() => {
+    const checkLiked = async () => {
+      const res = await fetch(`/api/is-liked?target=${id}`);
+      const data = await res.json();
+      setIsLiked(data.isLiked);
+    };
+
+    if (profile?._id) checkLiked();
+  }, [profile]);
 
   useEffect(() => {
     const checkMatch = async () => {
@@ -62,7 +78,7 @@ export default function PublicProfile() {
       toast.success("👍 Liked user");
     }
   };
-  console.log(profile);
+
   return (
     <div className="dark bg-gray-900 text-white min-h-screen p-6 flex flex-col items-center">
       {/* Hero Section */}
@@ -79,12 +95,10 @@ export default function PublicProfile() {
 
         {/* Interaction Buttons */}
         <div className="flex justify-center gap-4 mt-6">
-          <button
-            onClick={handleLike}
-            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
-          >
-            👍 Like
-          </button>
+          {profile._id !== currentUserId && typeof isLiked === "boolean" && (
+            <LikeButton profileId={profile._id} initialLiked={isLiked} />
+          )}
+
           {isMatched && (
             <Link
               href={`/chat/${profile._id}`}
