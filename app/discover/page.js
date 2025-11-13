@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
-
+import { getAgeFromDate } from "@/lib/getAgeFromDate";
 export default function DiscoverPage() {
   const [users, setUsers] = useState([]);
   const [cursor, setCursor] = useState(null);
@@ -15,13 +15,17 @@ export default function DiscoverPage() {
     if (loading || !hasMore) return;
     setLoading(true);
     try {
-      const res = await fetch(`/api/discover${cursor ? `?cursor=${cursor}` : ""}`);
+      const res = await fetch(
+        `/api/discover${cursor ? `?cursor=${cursor}` : ""}`
+      );
       const data = await res.json();
 
       if (res.ok) {
         setUsers((prev) => {
           const all = [...prev, ...data.users];
-          const unique = Array.from(new Map(all.map((u) => [u._id, u])).values());
+          const unique = Array.from(
+            new Map(all.map((u) => [u._id, u])).values()
+          );
           return unique;
         });
         setCursor(data.nextCursor || null);
@@ -94,7 +98,10 @@ export default function DiscoverPage() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {users.map((user) => (
-          <div key={user._id} className="bg-gray-900 p-4 rounded-xl shadow flex flex-col items-center">
+          <div
+            key={user._id}
+            className="bg-gray-900 p-4 rounded-xl shadow flex flex-col items-center"
+          >
             <Link href={`/profile/${user._id}`} className="w-full">
               <img
                 src={user.profileImage || "/placeholder.jpg"}
@@ -102,7 +109,9 @@ export default function DiscoverPage() {
                 className="w-full h-64 object-cover rounded-lg cursor-pointer hover:opacity-90 transition"
               />
             </Link>
-            <h2 className="mt-2 text-lg font-semibold">{user.name}, {user.age}</h2>
+            <h2 className="mt-2 text-lg font-semibold">
+              {user.name}, {getAgeFromDate(user.birthdate)}
+            </h2>
             <p className="text-sm text-gray-400 text-center">{user.bio}</p>
 
             <div className="flex gap-4 mt-4">
@@ -123,9 +132,16 @@ export default function DiscoverPage() {
         ))}
       </div>
 
-      <div ref={loaderRef} className="h-10 flex justify-center items-center mt-10">
-        {loading && <span className="text-gray-400">Laster inn flere profiler…</span>}
-        {!hasMore && <span className="text-gray-500">Ingen flere profiler</span>}
+      <div
+        ref={loaderRef}
+        className="h-10 flex justify-center items-center mt-10"
+      >
+        {loading && (
+          <span className="text-gray-400">Laster inn flere profiler…</span>
+        )}
+        {!hasMore && (
+          <span className="text-gray-500">Ingen flere profiler</span>
+        )}
       </div>
     </div>
   );
