@@ -3,6 +3,7 @@ import { useEffect, useState, useRef } from "react";
 import { io } from "socket.io-client";
 import toast from "react-hot-toast";
 import { useSession } from "next-auth/react";
+import EmojiPicker from "emoji-picker-react";
 
 const socket = io({ path: "/api/socket" });
 
@@ -11,6 +12,8 @@ export default function ClientChat({ userId }) {
   const sessionUserId = session?.user?.id;
   const roomId =
     sessionUserId && userId ? [sessionUserId, userId].sort().join("-") : null;
+
+  const [showPicker, setShowPicker] = useState(false);
 
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
@@ -162,6 +165,14 @@ export default function ClientChat({ userId }) {
         }}
         className="flex items-center gap-2 bg-gray-800 rounded px-3 py-2"
       >
+        <button
+          type="button"
+          onClick={() => setShowPicker(true)}
+          className="text-xl hover:scale-110 transition"
+        >
+          😊
+        </button>
+
         <input
           value={input}
           onChange={handleInputChange}
@@ -174,6 +185,25 @@ export default function ClientChat({ userId }) {
         >
           Send
         </button>
+        {showPicker && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+            <div className="bg-gray-900 rounded-lg shadow-lg p-4 max-w-sm w-full relative">
+              <button
+                onClick={() => setShowPicker(false)}
+                className="absolute top-2 right-2 text-white text-xl hover:text-pink-400"
+              >
+                ×
+              </button>
+              <EmojiPicker
+                theme="dark"
+                onEmojiClick={(emojiData) => {
+                  setInput((prev) => prev + emojiData.emoji);
+                  setShowPicker(false);
+                }}
+              />
+            </div>
+          </div>
+        )}
       </form>
     </div>
   );
