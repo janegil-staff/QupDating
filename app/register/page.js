@@ -34,12 +34,12 @@ export default function RegisterPage() {
     });
 
     const data = await res.json();
-    setIsLoading(false);
     const result = await signIn("credentials", {
-      redirect: false,
       email: form.get("email"),
       password: form.get("password"),
+      redirect: false,
     });
+    setIsLoading(false);
 
     if (result.ok) {
       router.push("/profile");

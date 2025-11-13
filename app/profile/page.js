@@ -3,21 +3,89 @@ import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
 export default function EditProfile() {
+  const [showModal, setShowModal] = useState(false);
+
   const [profile, setProfile] = useState({
     name: "",
-    age: "",
     gender: "",
     birthdate: "",
     bio: "",
     images: [],
-    profileImage: "", // ✅ new field
+    profileImage: "",
+    appearance: "",
+    height: "",
+    bodyType: "",
+    hasChildren: "",
+    wantsChildren: "",
+    smoking: "",
+    location: "",
+    lookingFor: "",
+    religion: "",
+    education: "",
+    occupation: "",
+    willingToRelocate: "",
+    tags: "",
+    relationshipStatus: "",
+    lookingFor: "",
+    drinking: "",
   });
   const [form, setForm] = useState({
+    name: "",
+    gender: "",
     birthDay: "",
     birthMonth: "",
     birthYear: "",
+    bio: "",
+    appearance: "",
+    height: "",
+    bodyType: "",
+    hasChildren: "",
+    wantsChildren: "",
+    smoking: "",
+    drinking: "",
+    relationshipStatus: "",
+    willingToRelocate: "",
+    education: "",
+    religion: "",
+    occupation: "",
+    location: "",
+    lookingFor: "",
+    tags: "",
+    profileImage: "",
+    images: [],
   });
+
   const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    if (!loading && profile) {
+      const birthdate = new Date(profile.birthdate);
+      setForm({
+        name: profile.name || "",
+        gender: profile.gender || "",
+        birthDay: birthdate.getDate().toString(),
+        birthMonth: (birthdate.getMonth() + 1).toString(),
+        birthYear: birthdate.getFullYear().toString(),
+        bio: profile.bio || "",
+        appearance: profile.appearance || "",
+        height: profile.height?.toString() || "",
+        bodyType: profile.bodyType || "",
+        hasChildren: profile.hasChildren?.toString() || "",
+        wantsChildren: profile.wantsChildren?.toString() || "",
+        smoking: profile.smoking || "",
+        drinking: profile.drinking || "",
+        relationshipStatus: profile.relationshipStatus || "",
+        willingToRelocate: profile.willingToRelocate?.toString() || "",
+        education: profile.education || "",
+        religion: profile.religion || "",
+        occupation: profile.occupation || "",
+        location: profile.location || "",
+        lookingFor: profile.lookingFor || "",
+        tags: Array.isArray(profile.tags) ? profile.tags.join(" ") : "",
+        profileImage: profile.profileImage || "",
+        images: profile.images || [],
+      });
+    }
+  }, [loading, profile]);
 
   // Fetch current profile
   useEffect(() => {
@@ -110,22 +178,37 @@ export default function EditProfile() {
     }
   }
 
-  async function handleSave() {
+  async function handleSaveForImages() {
     try {
       const res = await fetch("/api/profile", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: profile.name,
-          age: profile.age,
-          gender: profile.gender,
-          bio: profile.bio,
-          images: profile.images,
-          profileImage: profile.profileImage,
-          birthdate: profile.birthdate,
+          name: form.name,
+          gender: form.gender,
+          birthdate: form.birthdate,
+          bio: form.bio,
+          images: form.images,
+          profileImage: form.profileImage,
+          appearance: form.appearance,
+          height: form.height,
+          bodyType: form.bodyType,
+          hasChildren: form.hasChildren,
+          wantsChildren: form.wantsChildren,
+          smoking: form.smoking,
+          location: form.location,
+          lookingFor: form.lookingFor,
+          religion: form.religion,
+          education: form.education,
+          occupation: form.occupation,
+          willingToRelocate: form.willingToRelocate,
+          tags: form.tags,
+          relationshipStatus: form.relationshipStatus,
+          lookingFor: form.lookingFor,
+          drinking: form.drinking,
         }),
       });
-
+      console.log(res);
       if (res.ok) {
         toast.success("Profile updated ✅");
       } else {
@@ -148,67 +231,111 @@ export default function EditProfile() {
   }, [profile.birthdate]);
 
   async function handleChange(e) {
-  const { name, value } = e.target;
+    const { name, value } = e.target;
 
-  // Update form state first
-  const updatedForm = {
-    ...form,
-    [name]: value,
-  };
-  setForm(updatedForm);
+    // Update form state first
+    const updatedForm = {
+      ...form,
+      [name]: value,
+    };
+    setForm(updatedForm);
 
-  // Then construct the date from updated values
-  const { birthYear, birthMonth, birthDay } = updatedForm;
-  if (birthYear && birthMonth && birthDay) {
-    const bd = new Date(`${birthYear}-${birthMonth}-${birthDay}`);
+    // Then construct the date from updated values
+    const { birthYear, birthMonth, birthDay } = updatedForm;
+    if (birthYear && birthMonth && birthDay) {
+      const bd = new Date(`${birthYear}-${birthMonth}-${birthDay}`);
+
+      try {
+        const res = await fetch("/api/profile", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ birthdate: bd }),
+        });
+
+        if (res.ok) {
+          toast.success("Profile updated ✅");
+        } else {
+          toast.error("Error saving profile ❌");
+        }
+      } catch (err) {
+        console.error("Save error:", err);
+        toast.error("Error saving profile ❌");
+      }
+    }
+  }
+  async function handleSave() {
+    const birthdate = new Date(
+      `${form.birthYear}-${form.birthMonth}-${form.birthDay}`
+    );
+
+    const payload = {
+      ...form,
+      birthdate,
+      height: parseInt(form.height) || null,
+      hasChildren: form.hasChildren === "true",
+      wantsChildren: form.wantsChildren === "true",
+      willingToRelocate: form.willingToRelocate === "true",
+      tags: form.tags?.split(" ").filter(Boolean),
+    };
 
     try {
       const res = await fetch("/api/profile", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ birthdate: bd }),
+        body: JSON.stringify(payload),
       });
 
       if (res.ok) {
-        toast.success("Profile updated ✅");
+        toast.success("Profil oppdatert ✅");
       } else {
-        toast.error("Error saving profile ❌");
+        toast.error("Kunne ikke lagre endringer ❌");
       }
     } catch (err) {
       console.error("Save error:", err);
-      toast.error("Error saving profile ❌");
+      toast.error("Serverfeil ❌");
     }
   }
-}
 
   if (loading) return <p className="text-white">Loading...</p>;
 
   return (
     <div className="dark bg-gray-900 text-white min-h-screen p-6 flex flex-col items-center">
-      <div className="w-full max-w-2xl bg-gray-800 rounded-lg shadow-lg p-6">
-        <a
-          href={`/profile/${profile._id}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="bg-green-600 hover:bg-green-700 px-6 py-2 float-right rounded-full font-semibold ml-4"
-        >
-          Preview Public Profile
-        </a>
-        <br />
-        <h1 className="text-2xl font-bold mb-4">Edit Your Profile</h1>
+      <div className="w-full bg-neutral-900 text-white p-6 rounded-xl shadow-lg max-w-3xl mx-auto space-y-6">
+        <h2 className="text-2xl font-bold text-center">Din Profil</h2>
+
+        <div className="flex justify-between">
+          <dic>
+            <button
+              onClick={() => setShowModal(true)}
+              className="bg-pink-600 hover:bg-pink-700 text-white font-bold py-2 px-4 rounded-lg transition"
+            >
+              Last opp bilde
+            </button>
+          </dic>
+
+          <div>
+            <a
+              href={`/profile/${profile._id}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-green-600 hover:bg-green-700 px-6 py-2 float-right rounded-full font-semibold ml-4"
+            >
+              Preview Public Profile
+            </a>
+          </div>
+        </div>
 
         {/* Name */}
-        <label className="block mb-2">Name</label>
+        <label className="block mb-1 text-sm text-gray-400">Name</label>
         <input
           type="text"
-          value={profile.name}
-          onChange={(e) => setProfile({ ...profile, name: e.target.value })}
-          className="w-full p-2 mb-4 rounded bg-gray-700 text-white"
+          value={form.name || ""}
+          onChange={(e) => setForm({ ...form, name: e.target.value })}
+          className="w-full bg-neutral-800 border border-gray-700 rounded-lg px-4 py-2"
         />
-
         {/* Birthdate */}
         <div>
-          <label className="block mb-2 text-sm font-medium text-gray-300">
+          <label className="block mb-1 text-sm text-gray-400">
             Fødselsdato
           </label>
           <div className="grid grid-cols-3 gap-2">
@@ -276,78 +403,425 @@ export default function EditProfile() {
         </div>
 
         {/* Gender */}
-        <label className="block my-2">Gender</label>
-        <select
-          name="gender"
-          value={profile.gender}
-          onChange={(e) => setProfile({ ...profile, gender: e.target.value })}
-          className="bg-gray-800 text-white p-2 rounded-md w-full border border-gray-700 focus:outline-none focus:ring-2 focus:ring-pink-500"
-        >
-          <option value="male">👨 Mann</option>
-          <option value="female">👩 Kvinne</option>
-          <option value="other">❓ Annet</option>
-        </select>
-
-        {/* Bio */}
-        <label className="block my-2">Bio</label>
-        <textarea
-          value={profile.bio}
-          onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
-          className="w-full p-2 mb-4 rounded bg-gray-700 text-white"
-        />
-
-        {/* Gallery */}
-        <label className="block mb-2">Photos</label>
-        <div className="grid grid-cols-3 gap-2 mb-4">
-          {profile.images?.map((img, i) => (
-            <div key={i} className="relative group">
-              <img
-                src={img.url}
-                alt="profile"
-                className={`w-full h-32 object-cover rounded border-4 ${
-                  profile.profileImage === img.url
-                    ? "border-green-500"
-                    : "border-transparent"
-                }`}
-              />
-              <button
-                className="absolute top-1 right-1 bg-red-600 text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition"
-                onClick={() => handleDelete(img)}
-              >
-                ✖
-              </button>
-              <button
-                className="absolute bottom-1 left-1 bg-blue-600 text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition"
-                onClick={() => handleSetProfileImage(img.url)}
-              >
-                Bruk som profilbilde
-              </button>
-            </div>
-          ))}
-
-          {profile.images.length < 6 && (
-            <label className="flex items-center justify-center w-full h-32 bg-gray-700 rounded cursor-pointer hover:bg-gray-600 transition">
-              <span className="text-gray-300 font-bold text-lg">
-                ＋ Add Photo
-              </span>
-              <input
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handleUpload}
-              />
-            </label>
-          )}
+        <div>
+          <label className="block mb-1 text-sm text-gray-400">Kjønn</label>
+          <select
+            name="gender"
+            value={form.gender || ""}
+            onChange={(e) => setForm({ ...form, gender: e.target.value })}
+            className="w-full bg-neutral-800 border border-gray-700 rounded-lg px-4 py-2"
+          >
+            <option value="">Velg kjønn</option>
+            <option value="Male">Mann</option>
+            <option value="Female">Kvinne</option>
+            <option value="Other">Annet</option>
+          </select>
         </div>
 
-        {/* Save button */}
+        {/* Height */}
+        <div>
+          <label className="block mb-1 text-sm text-gray-400">Høyde (cm)</label>
+          <input
+            type="number"
+            name="height"
+            value={form.height || ""}
+            onChange={(e) => setForm({ ...form, height: e.target.value })}
+            className="w-full bg-neutral-800 border border-gray-700 rounded-lg px-4 py-2"
+          />
+        </div>
+
+        {/* Children */}
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block mb-1 text-sm text-gray-400">
+              Har barn?
+            </label>
+            <select
+              name="hasChildren"
+              value={form.hasChildren || ""}
+              onChange={(e) =>
+                setForm({ ...form, hasChildren: e.target.value })
+              }
+              className="w-full bg-neutral-800 border border-gray-700 rounded-lg px-4 py-2"
+            >
+              <option value="">Velg</option>
+              <option value="true">Ja</option>
+              <option value="false">Nei</option>
+            </select>
+          </div>
+          <div>
+            <label className="block mb-1 text-sm text-gray-400">
+              Vil ha barn?
+            </label>
+            <select
+              name="wantsChildren"
+              value={form.wantsChildren || ""}
+              onChange={(e) =>
+                setForm({ ...form, wantsChildren: e.target.value })
+              }
+              className="w-full bg-neutral-800 border border-gray-700 rounded-lg px-4 py-2"
+            >
+              <option value="">Velg</option>
+              <option value="true">Ja</option>
+              <option value="false">Nei</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Smoking & Drinking */}
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block mb-1 text-sm text-gray-400">Røyker?</label>
+            <select
+              name="smoking"
+              value={form.smoking || ""}
+              onChange={(e) => setForm({ ...form, smoking: e.target.value })}
+              className="w-full bg-neutral-800 border border-gray-700 rounded-lg px-4 py-2"
+            >
+              <option value="">Velg</option>
+              <option value="Yes">Ja</option>
+              <option value="No">Nei</option>
+              <option value="Occasionally">Av og til</option>
+            </select>
+          </div>
+          <div>
+            <label className="block mb-1 text-sm text-gray-400">Drikker?</label>
+            <select
+              name="drinking"
+              value={form.drinking || ""}
+              onChange={(e) => setForm({ ...form, drinking: e.target.value })}
+              className="w-full bg-neutral-800 border border-gray-700 rounded-lg px-4 py-2"
+            >
+              <option value="">Velg</option>
+              <option value="None">Aldri</option>
+              <option value="Light / social drinker">Lett / sosialt</option>
+              <option value="Heavy">Ofte</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Tags */}
+        <div>
+          <label className="block mb-1 text-sm text-gray-400">
+            Merk deg selv med hashtags
+          </label>
+          <input
+            type="text"
+            name="tags"
+            value={form.tags || []}
+            onChange={(e) => setForm({ ...form, tags: e.target.value })}
+            placeholder="#CatLover #fjelltur #pizza"
+            className="w-full bg-neutral-800 border border-gray-700 rounded-lg px-4 py-2"
+          />
+        </div>
+
+        {/* Bio */}
+        <div>
+          <label className="block mb-1 text-sm text-gray-400">Om deg</label>
+          <textarea
+            name="bio"
+            value={form.bio || ""}
+            onChange={(e) => setForm({ ...form, bio: e.target.value })}
+            rows={4}
+            className="w-full bg-neutral-800 border border-gray-700 rounded-lg px-4 py-2 resize-none"
+          />
+        </div>
+
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {/* Smoking */}
+          <div>
+            <label className="block mb-1 text-sm text-gray-400">Røyker?</label>
+            <select
+              name="smoking"
+              value={form.smoking || ""}
+              onChange={(e) => setForm({ ...form, smoking: e.target.value })}
+              className="w-full bg-neutral-800 border border-gray-700 rounded-lg px-4 py-2"
+            >
+              <option value="">Velg</option>
+              <option value="Yes">Ja</option>
+              <option value="No">Nei</option>
+              <option value="Occasionally">Av og til</option>
+            </select>
+          </div>
+
+          {/* Drinking */}
+          <div>
+            <label className="block mb-1 text-sm text-gray-400">Drikker?</label>
+            <select
+              name="drinking"
+              value={form.drinking || ""}
+              onChange={(e) => setForm({ ...form, drinking: e.target.value })}
+              className="w-full bg-neutral-800 border border-gray-700 rounded-lg px-4 py-2"
+            >
+              <option value="">Velg</option>
+              <option value="None">Aldri</option>
+              <option value="Light / social drinker">Lett / sosialt</option>
+              <option value="Heavy">Ofte</option>
+            </select>
+          </div>
+
+          {/* Has Children */}
+          <div>
+            <label className="block mb-1 text-sm text-gray-400">
+              Har barn?
+            </label>
+            <select
+              name="hasChildren"
+              value={form.hasChildren || ""}
+              onChange={(e) =>
+                setForm({ ...form, hasChildren: e.target.value })
+              }
+              className="w-full bg-neutral-800 border border-gray-700 rounded-lg px-4 py-2"
+            >
+              <option value="">Velg</option>
+              <option value="true">Ja</option>
+              <option value="false">Nei</option>
+            </select>
+          </div>
+
+          {/* Wants Children */}
+          <div>
+            <label className="block mb-1 text-sm text-gray-400">
+              Vil ha barn?
+            </label>
+            <select
+              name="wantsChildren"
+              value={form.wantsChildren || ""}
+              onChange={(e) =>
+                setForm({ ...form, wantsChildren: e.target.value })
+              }
+              className="w-full bg-neutral-800 border border-gray-700 rounded-lg px-4 py-2"
+            >
+              <option value="">Velg</option>
+              <option value="true">Ja</option>
+              <option value="false">Nei</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Willing to Relocate */}
+        <div>
+          <label className="block mb-1 text-sm text-gray-400">
+            Villig til å flytte?
+          </label>
+          <select
+            name="willingToRelocate"
+            value={form.willingToRelocate || ""}
+            onChange={(e) =>
+              setForm({ ...form, willingToRelocate: e.target.value })
+            }
+            className="w-full bg-neutral-800 border border-gray-700 rounded-lg px-4 py-2"
+          >
+            <option value="">Velg</option>
+            <option value="true">Ja</option>
+            <option value="false">Nei</option>
+          </select>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-2 gap-4">
+          {/* Appearance */}
+          <div>
+            <label className="block mb-1 text-sm text-gray-400">Utseende</label>
+            <select
+              name="appearance"
+              value={form.appearance || ""}
+              onChange={(e) => setForm({ ...form, appearance: e.target.value })}
+              className="w-full bg-neutral-800 border border-gray-700 rounded-lg px-4 py-2"
+            >
+              <option value="">Velg</option>
+              <option value="Average">Gjennomsnittlig</option>
+              <option value="Athletic">Atletisk</option>
+              <option value="Slim">Slank</option>
+              <option value="Curvy">Kurvet</option>
+              <option value="Muscular">Muskuløs</option>
+              <option value="Other">Annet</option>
+            </select>
+          </div>
+
+          {/* Body Type */}
+          <div>
+            <label className="block mb-1 text-sm text-gray-400">
+              Kroppstype
+            </label>
+            <select
+              name="bodyType"
+              value={form.bodyType || ""}
+              onChange={(e) => setForm({ ...form, bodyType: e.target.value })}
+              className="w-full bg-neutral-800 border border-gray-700 rounded-lg px-4 py-2"
+            >
+              <option value="">Velg</option>
+              <option value="Slim">Slank</option>
+              <option value="Average">Gjennomsnittlig</option>
+              <option value="Athletic">Atletisk</option>
+              <option value="Curvy">Kurvet</option>
+              <option value="Muscular">Muskuløs</option>
+              <option value="Plus-size">Stor</option>
+              <option value="Other">Annet</option>
+            </select>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 md:grid-cols-2 gap-4">
+          {/* Relationship Status */}
+          <div>
+            <label className="block mb-1 text-sm text-gray-400">
+              Sivilstatus
+            </label>
+            <select
+              name="relationshipStatus"
+              value={form.relationshipStatus || ""}
+              onChange={(e) =>
+                setForm({ ...form, relationshipStatus: e.target.value })
+              }
+              className="w-full bg-neutral-800 border border-gray-700 rounded-lg px-4 py-2"
+            >
+              <option value="">Velg</option>
+              <option value="Single">Singel</option>
+              <option value="In a relationship">I et forhold</option>
+              <option value="Married">Gift</option>
+              <option value="Divorced">Skilt</option>
+              <option value="Widowed">Enke/Enkemann</option>
+              <option value="It's complicated">Det er komplisert</option>
+            </select>
+          </div>
+
+          {/* Religion */}
+          <div>
+            <label className="block mb-1 text-sm text-gray-400">Religion</label>
+            <select
+              name="religion"
+              value={form.religion || ""}
+              onChange={(e) => setForm({ ...form, religion: e.target.value })}
+              className="w-full bg-neutral-800 border border-gray-700 rounded-lg px-4 py-2"
+            >
+              <option value="">Velg</option>
+              <option value="Christianity">Kristendom</option>
+              <option value="Islam">Islam</option>
+              <option value="Judaism">Jødedom</option>
+              <option value="Hinduism">Hinduisme</option>
+              <option value="Buddhism">Buddhisme</option>
+              <option value="Spiritual">Spirituell</option>
+              <option value="Agnostic">Agnostisk</option>
+              <option value="Atheist">Ateist</option>
+              <option value="Other">Annet</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Education */}
+        <input
+          type="text"
+          name="education"
+          value={form.education || ""}
+          onChange={(e) => setForm({ ...form, education: e.target.value })}
+          placeholder="Utdanning"
+          className="w-full bg-neutral-800 border border-gray-700 rounded-lg px-4 py-2"
+        />
+
+        {/* Occupation */}
+        <input
+          type="text"
+          name="occupation"
+          value={form.occupation || ""}
+          onChange={(e) => setForm({ ...form, occupation: e.target.value })}
+          placeholder="Yrke"
+          className="w-full bg-neutral-800 border border-gray-700 rounded-lg px-4 py-2"
+        />
+        {/* Location */}
+        <input
+          type="text"
+          name="location"
+          value={form.location || ""}
+          onChange={(e) => setForm({ ...form, location: e.target.value })}
+          placeholder="Sted"
+          className="w-full bg-neutral-800 border border-gray-700 rounded-lg px-4 py-2"
+        />
+
+        {/* Looking For */}
+        <textarea
+          name="lookingFor"
+          value={form.lookingFor || ""}
+          onChange={(e) => setForm({ ...form, lookingFor: e.target.value })}
+          rows={3}
+          placeholder="Hva ser du etter?"
+          className="w-full bg-neutral-800 border border-gray-700 rounded-lg px-4 py-2 resize-none"
+        />
+
+        {/* Submit */}
         <button
+          type="submit"
           onClick={handleSave}
-          className="bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded-full font-semibold"
+          className="w-full bg-pink-600 hover:bg-pink-700 text-white font-bold py-2 px-4 rounded-lg transition"
         >
-          Save Changes
+          Oppdater Profil
         </button>
       </div>
+      {showModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
+          <div className="bg-neutral-900 p-6 rounded-xl w-full max-w-md space-y-4 shadow-xl">
+            <h2 className="text-xl font-bold text-white text-center">
+              Last opp profilbilde
+            </h2>
+
+            <label className="block mb-2">Photos</label>
+            <div className="grid grid-cols-3 gap-2 mb-4">
+              {profile.images?.map((img, i) => (
+                <div key={i} className="relative group">
+                  <img
+                    src={img.url}
+                    alt="profile"
+                    className={`w-full h-32 object-cover rounded border-4 ${
+                      profile.profileImage === img.url
+                        ? "border-green-500"
+                        : "border-transparent"
+                    }`}
+                  />
+                  <button
+                    className="absolute top-1 right-1 bg-red-600 text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition"
+                    onClick={() => handleDelete(img)}
+                  >
+                    ✖
+                  </button>
+                  <button
+                    className="absolute bottom-1 left-1 bg-blue-600 text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition"
+                    onClick={() => handleSetProfileImage(img.url)}
+                  >
+                    Bruk som profilbilde
+                  </button>
+                </div>
+              ))}
+
+              {profile.images.length < 6 && (
+                <label className="flex items-center justify-center w-full h-32 bg-gray-700 rounded cursor-pointer hover:bg-gray-600 transition">
+                  <span className="text-gray-300 font-bold text-lg">
+                    ＋ Add Photo
+                  </span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleUpload}
+                  />
+                </label>
+              )}
+            </div>
+            <div className="text-center">
+              <button
+                onClick={handleSaveForImages}
+                className="bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded-full font-semibold TEXT-C"
+              >
+                Save Changes
+              </button>
+            </div>
+
+            <button
+              onClick={() => setShowModal(false)}
+              className="w-full text-sm text-gray-400 hover:text-white mt-2"
+            >
+              Lukk
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
