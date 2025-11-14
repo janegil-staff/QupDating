@@ -1,4 +1,5 @@
 "use client";
+import { redirect } from "next/navigation";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
@@ -314,14 +315,12 @@ export default function EditProfile() {
           </dic>
 
           <div>
-            <a
-              href={`/profile/${profile._id}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="bg-green-600 hover:bg-green-700 px-6 py-2 float-right rounded-full font-semibold ml-4"
+            <button
+              onClick={() => redirect(`/profile/${profile._id}`)}
+              className="bg-green-600 hover:bg-pink-700 text-white font-bold py-2 px-4 rounded-lg transition"
             >
-              Preview Public Profile
-            </a>
+              Se din profil
+            </button>
           </div>
         </div>
 

@@ -6,7 +6,6 @@ import User from "@/models/User";
 export async function POST(req) {
   try {
     const formData = await req.formData();
-    console.log("FORM DATA", formData);
     const name = formData.get("name");
     const email = formData.get("email");
     const password = formData.get("password");
