@@ -52,6 +52,7 @@ export default function PublicProfile({ userId }) {
     willingToRelocate,
     lookingFor,
     tags,
+    bio,
   } = profile;
 
   const age = birthdate
@@ -62,6 +63,7 @@ export default function PublicProfile({ userId }) {
     <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 text-white p-6">
       <div className="max-w-4xl mx-auto bg-neutral-900 rounded-xl shadow-xl p-6 space-y-6">
         {/* Header */}
+
         <div className="flex flex-col md:flex-row items-center gap-6">
           <img
             src={profileImage}
@@ -80,6 +82,13 @@ export default function PublicProfile({ userId }) {
           </div>
         </div>
 
+        {/* Bio */}
+        {bio && (
+          <div className="bg-neutral-800 p-4 rounded-lg border border-gray-700">
+            <h2 className="text-xl font-semibold text-pink-500">Om meg</h2>
+            <p className="mt-2 text-gray-300 whitespace-pre-line">{bio}</p>
+          </div>
+        )}
         {/* Gallery */}
         {/* Gallery Section */}
         <div className="w-full max-w-2xl bg-gray-800 rounded-lg shadow-lg p-6 mt-6">
