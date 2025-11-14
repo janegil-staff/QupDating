@@ -1,12 +1,16 @@
 "use client";
 import { useEffect, useState } from "react";
 import ImageCarousel from "./ImageCarousel";
+import ToggleLikeButton from "./LikeButton";
+import { useSession } from "next-auth/react";
 
 export default function PublicProfile({ userId }) {
+  const { data: session } = useSession();
   const [profile, setProfile] = useState(null);
   const [error, setError] = useState(null);
   const [open, setOpen] = useState(false);
   const [index, setIndex] = useState(0);
+
   useEffect(() => {
     async function fetchProfile() {
       try {
@@ -59,10 +63,19 @@ export default function PublicProfile({ userId }) {
     ? new Date().getFullYear() - new Date(birthdate).getFullYear()
     : null;
 
+  const isOwnProfile = session?.user?.id === profile._id;
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 text-white p-6">
-      <div className="max-w-4xl mx-auto bg-neutral-900 rounded-xl shadow-xl p-6 space-y-6">
+      <div className="max-w-4xl mx-auto bg-neutral-900 rounded-xl shadow-xl p-6 space-y-6 relative">
         {/* Header */}
+        {/* Like Button */}
+        <div className={"float-right"}>
+          <ToggleLikeButton
+            profileId={profile._id}
+            isLiked={profile.isLiked}
+            isOwnProfile={isOwnProfile}
+          />
+        </div>
 
         <div className="flex flex-col md:flex-row items-center gap-6">
           <img
@@ -89,6 +102,7 @@ export default function PublicProfile({ userId }) {
             <p className="mt-2 text-gray-300 whitespace-pre-line">{bio}</p>
           </div>
         )}
+
         {/* Gallery */}
         {/* Gallery Section */}
         <div className="w-full max-w-2xl bg-gray-800 rounded-lg shadow-lg p-6 mt-6">

@@ -7,7 +7,6 @@ export async function GET(req, { params }) {
     await connectDB();
 
     const { id } = await params;
-    console.log(id);
     const user = await User.findById(id).lean();
 
     if (!user) {

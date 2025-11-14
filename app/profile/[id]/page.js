@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import PublicProfile from "@/components/PublicProfile";
 import { useParams } from "next/navigation";
 
