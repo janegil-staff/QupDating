@@ -8,8 +8,10 @@ import MatchTabs from "@/components/MatchTabs";
 
 function formatNorwegianDate(dateString) {
   const date = new Date(dateString);
-  if (isToday(date)) return `i dag kl. ${format(date, "HH:mm", { locale: nb })}`;
-  if (isYesterday(date)) return `i går kl. ${format(date, "HH:mm", { locale: nb })}`;
+  if (isToday(date))
+    return `i dag kl. ${format(date, "HH:mm", { locale: nb })}`;
+  if (isYesterday(date))
+    return `i går kl. ${format(date, "HH:mm", { locale: nb })}`;
   return format(date, "d. MMMM 'kl.' HH:mm", { locale: nb });
 }
 
@@ -28,7 +30,6 @@ export default function DashboardPage() {
   const loaderRef = useRef(null);
   const scrollRef = useRef(null);
 
-  // Scroll to bottom whenever messages update
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
@@ -68,14 +69,22 @@ export default function DashboardPage() {
     if (loading || !hasMore) return;
     setLoading(true);
     try {
-      const res = await fetch(`/api/messages?roomId=${room}${cursor ? `&cursor=${cursor}` : ""}`);
+      const res = await fetch(
+        `/api/messages?roomId=${room}${cursor ? `&cursor=${cursor}` : ""}`
+      );
       const data = await res.json();
+      console.log("DATA", data);
+      if (data.error) {
+        setHasMore(false);
+      }
 
       if (Array.isArray(data.messages)) {
         const reversed = [...data.messages].reverse();
         setMessages((prev) => {
           const all = [...reversed, ...prev];
-          const unique = Array.from(new Map(all.map((m) => [m._id, m])).values());
+          const unique = Array.from(
+            new Map(all.map((m) => [m._id, m])).values()
+          );
           return unique;
         });
 
@@ -148,9 +157,12 @@ export default function DashboardPage() {
   }, [status, roomId]);
 
   if (status === "loading") return <p className="text-white">Laster inn...</p>;
-  if (status === "unauthenticated") return <p className="text-white">Du må logge inn</p>;
+  if (status === "unauthenticated")
+    return <p className="text-white">Du må logge inn</p>;
 
-  const uniqueMessages = Array.from(new Map(messages.map((m) => [m._id, m])).values());
+  const uniqueMessages = Array.from(
+    new Map(messages.map((m) => [m._id, m])).values()
+  );
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-gray-950 via-gray-900 to-gray-950 text-white px-6 py-10">
@@ -176,7 +188,10 @@ export default function DashboardPage() {
 
           <div className="md:col-span-2 bg-gray-900 p-4 rounded-xl shadow-lg">
             <h2 className="text-xl font-semibold mb-4">Meldinger</h2>
-            <div ref={scrollRef} className="flex flex-col max-h-[400px] overflow-y-auto space-y-4">
+            <div
+              ref={scrollRef}
+              className="flex flex-col max-h-[400px] overflow-y-auto space-y-4"
+            >
               {uniqueMessages.reverse().map((msg) => (
                 <div
                   key={msg._id}
@@ -185,7 +200,9 @@ export default function DashboardPage() {
                   <div className="flex justify-between items-center">
                     <div className="flex items-center gap-4">
                       <img
-                        src={msg.sender.profileImage || "/images/placeholder.png"}
+                        src={
+                          msg.sender.profileImage || "/images/placeholder.png"
+                        }
                         alt={msg.sender.name}
                         className="w-10 h-10 rounded-full"
                       />
@@ -208,8 +225,17 @@ export default function DashboardPage() {
                   </div>
                 </div>
               ))}
-              <div ref={loaderRef} className="h-10 flex justify-center items-center mt-6">
-                {loading && <span className="text-gray-400">Laster inn flere meldinger…</span>}
+              <div
+                ref={loaderRef}
+                className="h-10 flex justify-center items-center mt-6"
+              >
+                {loading && hasMore && (
+                  <p className="text-gray-400">Laster inn flere profiler…</p>
+                )}
+
+                {!hasMore && (
+                  <p className="text-gray-500">Ingen flere profiler å vise</p>
+                )}
               </div>
             </div>
           </div>

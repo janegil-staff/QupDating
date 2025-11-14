@@ -105,7 +105,7 @@ export default function PublicProfile({ userId }) {
 
         {/* Gallery */}
         {/* Gallery Section */}
-        <div className="w-full max-w-2xl bg-gray-800 rounded-lg shadow-lg p-6 mt-6">
+        <div className="w-full max-w-2xl bg-gray-800 rounded-lg shadow-lg p-6 mt-6 ">
           <h2 className="text-xl font-semibold mb-2">Photos</h2>
           <div className="grid grid-cols-3 gap-2">
             {profile.images?.map((img, i) => (

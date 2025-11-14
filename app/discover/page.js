@@ -1,5 +1,6 @@
 "use client";
 
+
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
@@ -29,7 +30,6 @@ export default function DiscoverPage() {
           return unique;
         });
 
-        console.log(data);
         setCursor(data.nextCursor || null);
         setHasMore(data.users.length >= 20 ? true : false);
       } else {
