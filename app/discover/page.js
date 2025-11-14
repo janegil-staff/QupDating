@@ -28,12 +28,15 @@ export default function DiscoverPage() {
           );
           return unique;
         });
+
+        console.log(data);
         setCursor(data.nextCursor || null);
-        setHasMore(data.hasMore !== false);
+        setHasMore(data.users.length >= 20 ? true : false);
       } else {
         toast.error(data.error || "Kunne ikke hente brukere");
       }
     } catch {
+       setHasMore(false);
       toast.error("Serverfeil");
     } finally {
       setLoading(false);
@@ -136,12 +139,13 @@ export default function DiscoverPage() {
         ref={loaderRef}
         className="h-10 flex justify-center items-center mt-10"
       >
-        {loading && (
-          <span className="text-gray-400">Laster inn flere profiler…</span>
-        )}
-        {!hasMore && (
-          <span className="text-gray-500">Ingen flere profiler</span>
-        )}
+     {loading && hasMore && (
+        <p className="text-gray-400">Laster inn flere profiler…</p>
+      )}
+
+      {!hasMore && (
+        <p className="text-gray-500">Ingen flere profiler å vise</p>
+      )}
       </div>
     </div>
   );

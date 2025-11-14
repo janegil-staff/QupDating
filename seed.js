@@ -35,11 +35,12 @@ async function seedUsers() {
     name: `${u.name.first} ${u.name.last}`,
     email: u.email,
     password: "abc123",
-    age: u.dob.age,
+    birthdate: new Date("1983-8-9"),
     gender: u.gender,
     bio: "This is a sample bio for testing.",
     images: [{ url: u.picture.large, public_id: null }],
     profileImage: u.picture.large,
+    
   }));
   console.log(users);
   await User.insertMany(users);
