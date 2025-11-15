@@ -749,8 +749,8 @@ export default function EditProfile() {
         <button
           type="submit"
           onClick={handleSave}
-          className="w-full bg-pink-600 hover:bg-pink-700 text-white font-bold py-2 px-4 rounded-lg transition"
-        >
+          className="w-full bg-pink-600 hover:bg-pink-700 text-white font-bold mb-6 py-2 px-4 rounded-lg transition"
+        > 
           Oppdater Profil
         </button>
       </div>
