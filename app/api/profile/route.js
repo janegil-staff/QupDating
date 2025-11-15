@@ -54,53 +54,6 @@ export async function PUT(req) {
   }
 }
 
-/*
-
-export async function PUT(req) {
-  await connectDB();
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.email) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  const body = await req.json();
-
-  try {
-    const updatedUser = await User.findOneAndUpdate(
-      { email: session.user.email },
-      {
-        $set: {
-          name: body.name,
-          birthdate: body.birthdate,
-          gender: body.gender,
-          appearance: body.appearance,
-          height: body.height,
-          bodyType: body.bodyType,
-          hasChildren: body.hasChildren,
-          wantsChildren: body.wantsChildren,
-          smoking: body.smoking,
-          drinking: body.drinking,
-          relationshipStatus: body.relationshipStatus,
-          willingToRelocate: body.willingToRelocate,
-          education: body.education,
-          religion: body.religion,
-          tags: body.tags,
-          location: body.location,
-          bio: body.bio,
-          lookingFor: body.lookingFor,
-          profileImage: body.profileImage,
-        },
-      },
-      { new: true }
-    );
-
-    return NextResponse.json({ success: true, user: updatedUser });
-  } catch (err) {
-    console.error("Profile update error:", err);
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
-  }
-}*/
-
 export async function GET() {
   const session = await getServerSession(authOptions); // ✅ App Router style
   if (!session?.user?.email) {
