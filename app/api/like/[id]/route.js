@@ -3,31 +3,26 @@ import { authOptions } from "@/lib/auth";
 import User from "@/models/User";
 import { connectDB } from "@/lib/db";
 
-export async function POST(req, { params }) {
+export async function POST(req, context) {
+  await connectDB();
+
   try {
-    const { id } = await params;
+    const { params } = context;
+    const resolvedParams = await params;
     const session = await getServerSession(authOptions);
-    if (!session?.user?.email) {
+
+    if (!session) {
       return Response.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    await connectDB();
-
-    const toUserId = id;
-    if (!toUserId) {
-      return Response.json(
-        { error: "Missing target user ID" },
-        { status: 400 }
-      );
-    }
-
-    const currentUser = await User.findOne({ email: session.user.email });
-    const targetUser = await User.findById(toUserId);
+    const currentUser = await User.findById(session.user.id);
+    const targetUser = await User.findById(resolvedParams.id);
 
     if (!currentUser || !targetUser) {
       return Response.json({ error: "User not found" }, { status: 404 });
     }
 
+    // Prevent liking your own profile
     if (currentUser._id.equals(targetUser._id)) {
       return Response.json(
         { error: "Cannot like your own profile" },
@@ -35,58 +30,31 @@ export async function POST(req, { params }) {
       );
     }
 
-    currentUser.likes ??= [];
-    currentUser.matches ??= [];
-    targetUser.likes ??= [];
-    targetUser.matches ??= [];
-
-    const currentUserId = currentUser._id;
-    const targetUserId = targetUser._id;
-
-    const alreadyLiked = currentUser.likes.some((id) =>
-      id.equals(targetUserId)
-    );
+    let action;
     let isMatch = false;
-    let action = "";
 
-    if (alreadyLiked) {
-      // ❌ Unlike
-      currentUser.likes = currentUser.likes.filter(
-        (id) => !id.equals(targetUserId)
-      );
-      currentUser.matches = currentUser.matches.filter(
-        (id) => !id.equals(targetUserId)
-      );
-      targetUser.matches = targetUser.matches.filter(
-        (id) => !id.equals(currentUserId)
+    if (currentUser.likes.includes(targetUser._id)) {
+      // Unlike
+      await User.findByIdAndUpdate(
+        currentUser._id,
+        { $pull: { likes: targetUser._id } },
+        { new: true, validateModifiedOnly: true }
       );
       action = "unliked";
     } else {
-      // ❤️ Like
-      currentUser.likes.push(targetUserId);
+      // Like
+      await User.findByIdAndUpdate(
+        currentUser._id,
+        { $addToSet: { likes: targetUser._id } },
+        { new: true, validateModifiedOnly: true }
+      );
       action = "liked";
 
-      const mutualLike = targetUser.likes.some((id) =>
-        id.equals(currentUserId)
-      );
-      if (mutualLike) {
+      // Check if target also liked current user → match
+      if (targetUser.likes.includes(currentUser._id)) {
         isMatch = true;
-        if (!currentUser.matches.some((id) => id.equals(targetUserId))) {
-          currentUser.matches.push(targetUserId);
-        }
-        if (!targetUser.matches.some((id) => id.equals(currentUserId))) {
-          targetUser.matches.push(currentUserId);
-        }
       }
     }
-
-    await currentUser.save();
-    await targetUser.save();
-
-    console.log(
-      `🔁 ${action.toUpperCase()}: ${currentUser.name} → ${targetUser.name}`
-    );
-    console.log("🤝 Match status:", isMatch);
 
     return Response.json({
       success: true,

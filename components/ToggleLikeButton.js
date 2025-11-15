@@ -7,25 +7,37 @@ export default function LikeButton({ profileId, initialLiked }) {
   const [loading, setLoading] = useState(false);
 
   const handleToggleLike = async () => {
-  const res = await fetch("/api/like", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ toUserId: profileId }),
-  });
+    if (loading) return; // prevent double taps
+    setLoading(true);
 
-  const data = await res.json();
-  if (data.success) {
-    setLiked(data.action === "liked");
+    try {
+      const res = await fetch("/api/like", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ toUserId: profileId }),
+        credentials: "include", // 👈 ensures cookies/session are sent on iPhone
+      });
 
-    // Optional: re-fetch match status or isLiked from backend
-  }
-};
+      if (!res.ok) throw new Error("Failed to toggle like");
+
+      const data = await res.json();
+      if (data.success) {
+        setLiked(data.action === "liked");
+      }
+    } catch (err) {
+      console.error("❌ Like toggle error:", err);
+      alert("Kunne ikke oppdatere like. Prøv igjen.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <button
+      type="button"
       onClick={handleToggleLike}
       disabled={loading}
-      className={`flex items-center gap-2 px-4 py-2 rounded transition ${
+      className={`flex items-center gap-2 px-4 py-2 rounded transition cursor-pointer ${
         liked
           ? "bg-gray-700 hover:bg-gray-600 text-white"
           : "bg-pink-500 hover:bg-pink-600 text-white"
