@@ -429,76 +429,7 @@ export default function EditProfile() {
           />
         </div>
 
-        {/* Children */}
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block mb-1 text-sm text-gray-400">
-              Har barn?
-            </label>
-            <select
-              name="hasChildren"
-              value={form.hasChildren || ""}
-              onChange={(e) =>
-                setForm({ ...form, hasChildren: e.target.value })
-              }
-              className="w-full bg-neutral-800 border border-gray-700 rounded-lg px-4 py-2"
-            >
-              <option value="">Velg</option>
-              <option value="true">Ja</option>
-              <option value="false">Nei</option>
-            </select>
-          </div>
-          <div>
-            <label className="block mb-1 text-sm text-gray-400">
-              Vil ha barn?
-            </label>
-            <select
-              name="wantsChildren"
-              value={form.wantsChildren || ""}
-              onChange={(e) =>
-                setForm({ ...form, wantsChildren: e.target.value })
-              }
-              className="w-full bg-neutral-800 border border-gray-700 rounded-lg px-4 py-2"
-            >
-              <option value="">Velg</option>
-              <option value="true">Ja</option>
-              <option value="false">Nei</option>
-            </select>
-          </div>
-        </div>
-
-        {/* Smoking & Drinking */}
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block mb-1 text-sm text-gray-400">Røyker?</label>
-            <select
-              name="smoking"
-              value={form.smoking || ""}
-              onChange={(e) => setForm({ ...form, smoking: e.target.value })}
-              className="w-full bg-neutral-800 border border-gray-700 rounded-lg px-4 py-2"
-            >
-              <option value="">Velg</option>
-              <option value="Yes">Ja</option>
-              <option value="No">Nei</option>
-              <option value="Occasionally">Av og til</option>
-            </select>
-          </div>
-          <div>
-            <label className="block mb-1 text-sm text-gray-400">Drikker?</label>
-            <select
-              name="drinking"
-              value={form.drinking || ""}
-              onChange={(e) => setForm({ ...form, drinking: e.target.value })}
-              className="w-full bg-neutral-800 border border-gray-700 rounded-lg px-4 py-2"
-            >
-              <option value="">Velg</option>
-              <option value="None">Aldri</option>
-              <option value="Light / social drinker">Lett / sosialt</option>
-              <option value="Heavy">Ofte</option>
-            </select>
-          </div>
-        </div>
-
+      
         {/* Tags */}
         <div>
           <label className="block mb-1 text-sm text-gray-400">
