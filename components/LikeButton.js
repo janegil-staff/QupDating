@@ -1,62 +1,60 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
-export default function ToggleLikeButton({
-  profileId,
-  isOwnProfile,
-  isLiked: initialLiked,
-}) {
-  const [liked, setLiked] = useState(initialLiked);
-  const [match, setMatch] = useState(false); // 👈 track match state
+export default function ToggleLikeButton({ currentUser, targetUser }) {
+  const [isLiked, setIsLiked] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const handleToggle = async () => {
+  // ✅ Recompute whenever props change
+  useEffect(() => {
+    if (currentUser?.likes && targetUser?._id) {
+      const liked = currentUser.likes.some(
+        like =>
+          (like._id?.toString?.() || like.toString()) ===
+          targetUser._id.toString()
+      );
+      setIsLiked(liked);
+    }
+  }, [currentUser, targetUser]);
+
+  
+  const handleToggleLike = async () => {
     setLoading(true);
+
+    console.log("TARGET USER", targetUser?._id);
     try {
-      const res = await fetch(`/api/like/${profileId}`, {
+      const endpoint = isLiked ? "/api/unlike" : `/api/like/${targetUser?._id}`;
+      const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ targetUserId: targetUser?._id }),
       });
 
-      if (!res.ok) throw new Error("Failed to toggle like");
-
-      const data = await res.json();
-      console.log(data);
-      setLiked(data.liked);
-      setMatch(data.match);
+      const result = await res.json();
+      if (result.success) {
+        setIsLiked(!isLiked);
+        console.log(isLiked ? "💔 Unliked" : "❤️ Liked");
+      } else {
+        console.warn("⚠️ Toggle failed:", result.error);
+      }
     } catch (err) {
-      console.error("❌ Like toggle error:", err);
+      console.error("❌ Toggle error:", err);
     } finally {
       setLoading(false);
     }
   };
 
-  if (isOwnProfile) return null;
-
-  const handleChat = () => {
-    // 👇 redirect to chat page for this profile
-    window.location.href = `/chat/${profileId}`;
-  };
-
   return (
-    <div className="flex gap-3">
-      <button
-        onClick={handleToggle}
-        disabled={loading}
-        className={`px-4 py-2 rounded-full font-semibold transition ${
-          liked ? "bg-pink-600 text-white" : "bg-gray-700 text-gray-300"
-        }`}
-      >
-        {liked ? "💔 Fjern like" : "💖 Lik profil"}
-      </button>
-      {match && (
-        <button
-          onClick={handleChat}
-          className="px-4 py-2 rounded-full font-semibold bg-green-600 text-white transition"
-        >
-          💬 Start chat
-        </button>
-      )}
-    </div>
+    <button
+      onClick={handleToggleLike}
+      disabled={loading}
+      className={`px-6 py-2 rounded-full font-semibold transition ${
+        isLiked
+          ? "bg-gray-700 text-pink-400 hover:bg-gray-600"
+          : "bg-pink-600 text-white hover:bg-pink-700"
+      }`}
+    >
+      {loading ? "..." : isLiked ? "💔 Fjern like" : "💖 Lik profil"}
+    </button>
   );
 }

@@ -1,10 +1,10 @@
 "use client";
 
-
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { getAgeFromDate } from "@/lib/getAgeFromDate";
+
 export default function DiscoverPage() {
   const [users, setUsers] = useState([]);
   const [cursor, setCursor] = useState(null);
@@ -12,41 +12,40 @@ export default function DiscoverPage() {
   const [hasMore, setHasMore] = useState(true);
   const loaderRef = useRef(null);
 
+  // 🔹 Fetch users with cursor pagination
   const fetchUsers = async () => {
     if (loading || !hasMore) return;
     setLoading(true);
     try {
-      const res = await fetch(
-        `/api/discover${cursor ? `?cursor=${cursor}` : ""}`
-      );
+      const res = await fetch(`/api/discover${cursor ? `?cursor=${cursor}` : ""}`);
       const data = await res.json();
 
       if (res.ok) {
         setUsers((prev) => {
           const all = [...prev, ...data.users];
-          const unique = Array.from(
-            new Map(all.map((u) => [u._id, u])).values()
-          );
+          // deduplicate by _id
+          const unique = Array.from(new Map(all.map((u) => [u._id, u])).values());
           return unique;
         });
-
         setCursor(data.nextCursor || null);
-        setHasMore(data.users.length >= 20 ? true : false);
+        setHasMore(data.users.length >= 20);
       } else {
         toast.error(data.error || "Kunne ikke hente brukere");
       }
     } catch {
-       setHasMore(false);
+      setHasMore(false);
       toast.error("Serverfeil");
     } finally {
       setLoading(false);
     }
   };
 
+  // 🔹 Initial load
   useEffect(() => {
-    fetchUsers(); // initial load
+    fetchUsers();
   }, []);
 
+  // 🔹 Infinite scroll observer
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -56,16 +55,21 @@ export default function DiscoverPage() {
       },
       { threshold: 1 }
     );
-
     if (loaderRef.current) observer.observe(loaderRef.current);
     return () => observer.disconnect();
   }, [hasMore, loading]);
 
+  // 🔹 Like handler (standardized field name)
   const handleLike = async (targetUserId) => {
+    if (!targetUserId) {
+      toast.error("Mangler bruker-ID");
+      return;
+    }
+  
     const res = await fetch("/api/like", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ toUserId: targetUserId }),
+      body: JSON.stringify({ targetUserId }), // ✅ standardized
     });
 
     const data = await res.json().catch(() => ({}));
@@ -78,11 +82,16 @@ export default function DiscoverPage() {
     setUsers((prev) => prev.filter((u) => u._id !== targetUserId));
   };
 
-  const handleDislike = async (userId) => {
+  // 🔹 Dislike handler
+  const handleDislike = async (targetUserId) => {
+    if (!targetUserId) {
+      toast.error("Mangler bruker-ID");
+      return;
+    }
     const res = await fetch("/api/dislike", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ toUserId: userId }),
+      body: JSON.stringify({ targetUserId }), // ✅ standardized
     });
 
     const data = await res.json().catch(() => ({}));
@@ -92,13 +101,14 @@ export default function DiscoverPage() {
     }
 
     toast.success("👎 Bruker mislikt");
-    setUsers((prev) => prev.filter((u) => u._id !== userId));
+    setUsers((prev) => prev.filter((u) => u._id !== targetUserId));
   };
 
   return (
     <div className="min-h-screen bg-gray-950 text-white p-6">
       <h1 className="text-3xl font-bold mb-6">Oppdag nye profiler</h1>
 
+      {/* 🔹 Grid of user cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {users.map((user) => (
           <div
@@ -117,6 +127,7 @@ export default function DiscoverPage() {
             </h2>
             <p className="text-sm text-gray-400 text-center">{user.bio}</p>
 
+            {/* 🔹 Like / Dislike buttons */}
             <div className="flex gap-4 mt-4">
               <button
                 onClick={() => handleLike(user._id)}
@@ -135,17 +146,14 @@ export default function DiscoverPage() {
         ))}
       </div>
 
-      <div
-        ref={loaderRef}
-        className="h-10 flex justify-center items-center mt-10"
-      >
-     {loading && hasMore && (
-        <p className="text-gray-400">Laster inn flere profiler…</p>
-      )}
-
-      {!hasMore && (
-        <p className="text-gray-500">Ingen flere profiler å vise</p>
-      )}
+      {/* 🔹 Loader / End message */}
+      <div ref={loaderRef} className="h-10 flex justify-center items-center mt-10">
+        {loading && hasMore && (
+          <p className="text-gray-400">Laster inn flere profiler…</p>
+        )}
+        {!hasMore && (
+          <p className="text-gray-500">Ingen flere profiler å vise</p>
+        )}
       </div>
     </div>
   );

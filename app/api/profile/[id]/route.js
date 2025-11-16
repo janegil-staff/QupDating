@@ -1,25 +1,42 @@
-import { NextResponse } from "next/server";
-import { connectDB } from "@/lib/db";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import User from "@/models/User";
+import { connectDB } from "@/lib/db";
 
-export async function GET(req, { params }) {
+export async function GET(req, context) {
+  await connectDB();
+
   try {
-    await connectDB();
+    const rawParams = await context.params;
+    const id = typeof rawParams.id === "object" ? rawParams.id.id : rawParams.id;
 
-    const { id } = await params;
-    const user = await User.findById(id).lean();
+    console.log("Final ID:", id);
 
-    if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    const session = await getServerSession(authOptions);
+    const currentUserId = session?.user?.id;
+
+    const targetUser = await User.findById(id).lean();
+    if (!targetUser) {
+      return Response.json({ error: "User not found" }, { status: 404 });
     }
 
-    // Optional: remove sensitive fields
-    delete user.password;
-    delete user.__v;
+    let isLiked = false;
 
-    return NextResponse.json({ user });
+    if (currentUserId) {
+      const currentUser = await User.findById(currentUserId).lean();
+      if (currentUser?.likes) {
+        isLiked = currentUser.likes
+          .map((likeId) => likeId.toString())
+          .includes(targetUser._id.toString());
+      }
+    }
+
+    return Response.json({
+      ...targetUser,
+      isLiked,
+    });
   } catch (err) {
-    console.error("❌ Profile fetch error:", err);
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
+    console.error("❌ Like route error:", err);
+    return Response.json({ error: "Server error" }, { status: 500 });
   }
 }

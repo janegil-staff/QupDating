@@ -3,7 +3,38 @@ import { authOptions } from "@/lib/auth";
 import User from "@/models/User";
 import { connectDB } from "@/lib/db";
 
+export async function POST(req) {
+  await connectDB();
 
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) {
+    return Response.json({ error: "Not authenticated" }, { status: 401 });
+  }
+
+  const { targetUserId } = await req.json();
+  if (!targetUserId) {
+    return Response.json({ error: "Missing target user ID" }, { status: 400 });
+  }
+
+  const currentUser = await User.findById(session.user.id);
+  if (!currentUser) {
+    return Response.json({ error: "User not found" }, { status: 404 });
+  }
+
+  const alreadyLiked = currentUser.likes.includes(targetUserId);
+
+  if (alreadyLiked) {
+    currentUser.likes.pull(targetUserId);
+  } else {
+    currentUser.likes.push(targetUserId);
+  }
+
+  await currentUser.save();
+
+  return Response.json({ success: true, liked: !alreadyLiked });
+}
+
+/*
 export async function POST(req) {
   try {
     const session = await getServerSession(authOptions);
@@ -80,3 +111,4 @@ export async function POST(req) {
     return Response.json({ error: "Server error" }, { status: 500 });
   }
 }
+*/
