@@ -8,9 +8,8 @@ export async function GET(req, context) {
 
   try {
     const rawParams = await context.params;
-    const id = typeof rawParams.id === "object" ? rawParams.id.id : rawParams.id;
-
-    console.log("Final ID:", id);
+    const id =
+      typeof rawParams.id === "object" ? rawParams.id.id : rawParams.id;
 
     const session = await getServerSession(authOptions);
     const currentUserId = session?.user?.id;
@@ -21,6 +20,7 @@ export async function GET(req, context) {
     }
 
     let isLiked = false;
+    let isMatch = false;
 
     if (currentUserId) {
       const currentUser = await User.findById(currentUserId).lean();
@@ -29,11 +29,22 @@ export async function GET(req, context) {
           .map((likeId) => likeId.toString())
           .includes(targetUser._id.toString());
       }
+
+      if (targetUser?.likes) {
+        const targetLikesCurrent = targetUser.likes
+          .map((likeId) => likeId.toString())
+          .includes(currentUser._id.toString());
+
+        if (isLiked && targetLikesCurrent) {
+          isMatch = true;
+        }
+      }
     }
 
     return Response.json({
       ...targetUser,
       isLiked,
+      isMatch,
     });
   } catch (err) {
     console.error("❌ Like route error:", err);

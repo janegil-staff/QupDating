@@ -234,7 +234,7 @@ export default function DashboardPage() {
                 )}
 
                 {!hasMore && (
-                  <p className="text-gray-500">Ingen flere profiler å vise</p>
+                  <p className="text-gray-500">Ingen flere meldinger å vise</p>
                 )}
               </div>
             </div>
