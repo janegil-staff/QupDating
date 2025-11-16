@@ -56,7 +56,7 @@ export default function EditProfile() {
     images: [],
   });
 
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   useEffect(() => {
     if (!loading && profile) {
       const birthdate = new Date(profile.birthdate);
@@ -107,6 +107,7 @@ export default function EditProfile() {
   }, []);
 
   async function handleDelete(img) {
+   
     try {
       const res = await fetch("/api/profile/image", {
         method: "DELETE",
@@ -124,7 +125,7 @@ export default function EditProfile() {
     } catch (err) {
       console.error("Delete error:", err);
       alert("Could not delete image ❌");
-    }
+    } 
   }
 
   async function handleUpload(e) {
@@ -137,7 +138,7 @@ export default function EditProfile() {
       alert("Du kan kun laste opp 6 bilder.");
       return;
     }
-
+    setLoading(true);
     try {
       const formData = new FormData();
       formData.append("file", file);
@@ -160,6 +161,8 @@ export default function EditProfile() {
     } catch (err) {
       console.error("Upload error:", err);
       alert("Could not upload image ❌");
+    } finally {
+      setLoading(false);
     }
   }
   async function handleSetProfileImage(imageUrl) {
@@ -297,7 +300,7 @@ export default function EditProfile() {
     }
   }
 
-  if (loading) return <p className="text-white">Loading...</p>;
+  //if (loading) return <p className="text-white">Loading...</p>;
 
   return (
     <div className="dark bg-gray-900 text-white min-h-screen p-6 flex flex-col items-center">
@@ -429,7 +432,6 @@ export default function EditProfile() {
           />
         </div>
 
-      
         {/* Tags */}
         <div>
           <label className="block mb-1 text-sm text-gray-400">
@@ -722,15 +724,39 @@ export default function EditProfile() {
 
               {profile.images.length < 6 && (
                 <label className="flex items-center justify-center w-full h-32 bg-gray-700 rounded cursor-pointer hover:bg-gray-600 transition">
-                  <span className="text-gray-300 font-bold text-lg">
-                    ＋ Add Photo
-                  </span>
                   <input
                     type="file"
                     accept="image/*"
                     className="hidden"
                     onChange={handleUpload}
                   />
+                  {loading ? (
+                    <>
+                      <svg
+                        className="animate-spin h-5 w-5 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 00-8 8z"
+                        ></path>
+                      </svg>
+                      <span>Laster opp…</span>
+                    </>
+                  ) : (
+                    <>＋ Add Photo</>
+                  )}
                 </label>
               )}
             </div>
