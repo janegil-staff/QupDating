@@ -1,11 +1,12 @@
 "use client";
+import ProgressBar from "@/components/ProgressBar";
+import { calculateCompletion } from "@/lib/calculateCompletion";
 import { redirect } from "next/navigation";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
 export default function EditProfile() {
   const [showModal, setShowModal] = useState(false);
-
   const [profile, setProfile] = useState({
     name: "",
     gender: "",
@@ -55,6 +56,7 @@ export default function EditProfile() {
     profileImage: "",
     images: [],
   });
+  console.log(profile);
 
   const [loading, setLoading] = useState(false);
   useEffect(() => {
@@ -107,7 +109,6 @@ export default function EditProfile() {
   }, []);
 
   async function handleDelete(img) {
-   
     try {
       const res = await fetch("/api/profile/image", {
         method: "DELETE",
@@ -125,7 +126,7 @@ export default function EditProfile() {
     } catch (err) {
       console.error("Delete error:", err);
       alert("Could not delete image ❌");
-    } 
+    }
   }
 
   async function handleUpload(e) {
@@ -299,9 +300,9 @@ export default function EditProfile() {
       toast.error("Serverfeil ❌");
     }
   }
-
+  if (!profile) return <p className="text-red-400">Ingen profil funnet ❌</p>;
   //if (loading) return <p className="text-white">Loading...</p>;
-
+  const completion = calculateCompletion(profile);
   return (
     <div className="dark bg-gray-900 text-white min-h-screen p-6 flex flex-col items-center">
       <div className="w-full bg-neutral-900 text-white p-6 rounded-xl shadow-lg max-w-3xl mx-auto space-y-6">
@@ -326,7 +327,14 @@ export default function EditProfile() {
             </button>
           </div>
         </div>
-
+        {/* 🔥 Progress bar right after completion calculation */}
+        <div className="mt-4">
+          <h3 className="text-lg font-semibold text-pink-500">
+            Profilfullføring
+          </h3>
+          <ProgressBar value={completion} />
+          <p className="text-sm text-gray-400 mt-2">{completion}% fullført</p>
+        </div>
         {/* Name */}
         <label className="block mb-1 text-sm text-gray-400">Name</label>
         <input
@@ -414,9 +422,9 @@ export default function EditProfile() {
             className="w-full bg-neutral-800 border border-gray-700 rounded-lg px-4 py-2"
           >
             <option value="">Velg kjønn</option>
-            <option value="Male">Mann</option>
-            <option value="Female">Kvinne</option>
-            <option value="Other">Annet</option>
+            <option value="male">Mann</option>
+            <option value="female">Kvinne</option>
+            <option value="other">Annet</option>
           </select>
         </div>
 
