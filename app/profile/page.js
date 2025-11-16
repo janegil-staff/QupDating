@@ -7,6 +7,8 @@ import toast from "react-hot-toast";
 
 export default function EditProfile() {
   const [showModal, setShowModal] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [loadImage, setLoadImage] = useState(false);
   const [profile, setProfile] = useState({
     name: "",
     gender: "",
@@ -58,7 +60,6 @@ export default function EditProfile() {
   });
   console.log(profile);
 
-  const [loading, setLoading] = useState(false);
   useEffect(() => {
     if (!loading && profile) {
       const birthdate = new Date(profile.birthdate);
@@ -102,7 +103,7 @@ export default function EditProfile() {
       } catch (err) {
         console.error("Error fetching profile:", err);
       } finally {
-        setLoading(false);
+        setLoadImage(false);
       }
     }
     fetchProfile();
@@ -139,7 +140,7 @@ export default function EditProfile() {
       alert("Du kan kun laste opp 6 bilder.");
       return;
     }
-    setLoading(true);
+    setLoadImage(true);
     try {
       const formData = new FormData();
       formData.append("file", file);
@@ -163,7 +164,7 @@ export default function EditProfile() {
       console.error("Upload error:", err);
       alert("Could not upload image ❌");
     } finally {
-      setLoading(false);
+      setLoadImage(false);
     }
   }
   async function handleSetProfileImage(imageUrl) {
@@ -301,7 +302,7 @@ export default function EditProfile() {
     }
   }
   if (!profile) return <p className="text-red-400">Ingen profil funnet ❌</p>;
-  //if (loading) return <p className="text-white">Loading...</p>;
+  if (loading) return <p className="text-white">Loading...</p>;
   const completion = calculateCompletion(profile);
   return (
     <div className="dark bg-gray-900 text-white min-h-screen p-6 flex flex-col items-center">
@@ -738,7 +739,7 @@ export default function EditProfile() {
                     className="hidden"
                     onChange={handleUpload}
                   />
-                  {loading ? (
+                  {loadImage ? (
                     <>
                       <svg
                         className="animate-spin h-5 w-5 text-white"
