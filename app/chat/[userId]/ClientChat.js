@@ -6,6 +6,7 @@ import { useSession } from "next-auth/react";
 import EmojiPicker from "emoji-picker-react";
 import { getAgeFromDate } from "@/lib/getAgeFromDate";
 import { redirect } from "next/navigation";
+import ImageCarousel from "@/components/ImageCarousel";
 
 const socket = io({ path: "/api/socket" });
 
@@ -22,7 +23,9 @@ export default function ChatPage({ userId }) {
   const [typing, setTyping] = useState(false);
   const [showPicker, setShowPicker] = useState(false);
   const [user, setUser] = useState();
-
+  const [open, setOpen] = useState();
+  const [currentIndex, setCurrentIndex] = useState();
+  const [index, setIndex] = useState();
   const typingTimeout = useRef(null);
   const endRef = useRef(null);
 
@@ -352,23 +355,35 @@ export default function ChatPage({ userId }) {
             </div>
           )}
 
+          {/* Gallery */}
           {user.images?.length > 0 && (
-            <div>
-              <h4 className="text-green-500 font-semibold text-sm mb-1">
-                Bilder
-              </h4>
-              <div className="grid grid-cols-2 gap-2">
+            <div className="max-w-2xl bg-gray-800 rounded-lg shadow-lg p-6 mt-6">
+              <h2 className="text-xl font-semibold mb-2">Photos</h2>
+              <div className="w-full grid grid-cols-3 gap-2">
                 {user.images.map((img, i) => (
                   <img
                     key={i}
                     src={img.url}
-                    alt={`Image ${i}`}
-                    className="w-full h-24 object-cover rounded-lg"
+                    alt="thumb"
+                    className="w-full h-32 object-cover rounded cursor-pointer"
+                    onClick={() => {
+                      setIndex(i);
+                      setOpen(true);
+                    }}
                   />
                 ))}
               </div>
             </div>
           )}
+          {open && (
+            <ImageCarousel
+              images={user.images}
+              setOpen={setOpen}
+              currentIndex={index}
+              onClose={() => setOpen(false)}
+            />
+          )}
+
           <div>
             <div className="pt-4">
               <button
