@@ -1,5 +1,6 @@
 "use client";
 import ProgressBar from "@/components/ProgressBar";
+import ProfileLocation from "@/components/ProfileLocation";
 import { calculateCompletion } from "@/lib/calculateCompletion";
 import { redirect } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -9,6 +10,7 @@ export default function EditProfile() {
   const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [loadImage, setLoadImage] = useState(false);
+
   const [profile, setProfile] = useState({
     name: "",
     gender: "",
@@ -320,7 +322,7 @@ export default function EditProfile() {
     }
   }
 
-  if (!profile) return <p className="text-red-400">Ingen profil funnet ❌</p>;
+  if (!profile) return <p className="text-red-400">No profiles found ❌</p>;
   if (loading) return <p className="text-white">Loading...</p>;
   const completion = calculateCompletion(profile);
   return (
@@ -358,6 +360,7 @@ export default function EditProfile() {
           <p className="text-sm text-gray-400 mt-2">{completion}% completed</p>
         </div>
 
+   <ProfileLocation />
         {/* Name */}
         <label className="block mb-1 text-sm text-gray-400">Name</label>
         <input
@@ -452,6 +455,8 @@ export default function EditProfile() {
             <option value="other">Other</option>
           </select>
         </div>
+
+     
 
         {/* Height */}
         <div>

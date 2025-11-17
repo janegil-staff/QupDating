@@ -6,8 +6,12 @@ const userSchema = new mongoose.Schema(
     password: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     birthdate: { type: Date, required: true },
-    gender: { type: String, enum: ["", "male", "female", "other"], required: true },
-    occupation: {type: String},
+    gender: {
+      type: String,
+      enum: ["", "male", "female", "other"],
+      required: true,
+    },
+    occupation: { type: String },
     appearance: { type: String },
     height: { type: Number },
     bodyType: { type: String },
@@ -23,7 +27,11 @@ const userSchema = new mongoose.Schema(
     education: { type: String },
     religion: { type: String },
     tags: [{ type: String }], // e.g. ["#CatLover", "#traveling"]
-    location: { type: String },
+    location: {
+      name: { type: String }, // e.g. "Bergen, Norway"
+      lat: { type: Number },
+      lng: { type: Number },
+    },
     bio: { type: String },
     lookingFor: { type: String },
     images: [{ url: String, public_id: String }],
