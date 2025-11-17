@@ -4,23 +4,27 @@ import User from "@/models/User";
 import { connectDB } from "@/lib/db";
 import { authOptions } from "@/lib/auth";
 
-export async function GET() {
+export async function GET(req) {
+  await connectDB();
+
+  // get the logged-in user from NextAuth
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+  }
+
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    // find current user and populate matches
+    const user = await User.findById(session.user.id)
+      .populate("matches", "name profileImage age location bio tags");
 
-    await connectDB();
-    const currentUser = await User.findOne({ email: session.user.email }).populate("matches");
-
-    if (!currentUser) {
+    if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    return NextResponse.json({ matches: currentUser.matches });
+    return NextResponse.json({ matches: user.matches });
   } catch (err) {
-    console.error("Matches route error:", err);
+    console.error("Error fetching matches:", err);
     return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }

@@ -4,28 +4,92 @@ import { io } from "socket.io-client";
 import toast from "react-hot-toast";
 import { useSession } from "next-auth/react";
 import EmojiPicker from "emoji-picker-react";
+import { getAgeFromDate } from "@/lib/getAgeFromDate";
+import { redirect } from "next/navigation";
 
 const socket = io({ path: "/api/socket" });
 
-export default function ClientChat({ userId }) {
+export default function ChatPage({ userId }) {
   const { data: session } = useSession();
   const sessionUserId = session?.user?.id;
-  const roomId =
-    sessionUserId && userId ? [sessionUserId, userId].sort().join("-") : null;
 
-  const [showPicker, setShowPicker] = useState(false);
-
+  // 👇 selected user state (initially from prop)
+  const [selectedUserId, setSelectedUserId] = useState(userId);
+  const [matches, setMatches] = useState([]);
+  const [matchesLoading, setMatchesLoading] = useState(true);
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [typing, setTyping] = useState(false);
-  const scrollRef = useRef(null);
-  const typingTimeout = useRef(null);
+  const [showPicker, setShowPicker] = useState(false);
+  const [user, setUser] = useState();
 
+  const typingTimeout = useRef(null);
+  const endRef = useRef(null);
+
+  // 👇 roomId depends on selectedUserId
+  const roomId =
+    sessionUserId && selectedUserId
+      ? [sessionUserId, selectedUserId].sort().join("-")
+      : null;
+
+  const pickerRef = useRef(null);
+
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (pickerRef.current && !pickerRef.current.contains(e.target)) {
+        setShowPicker(false);
+      }
+    }
+    if (showPicker) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showPicker]);
+
+  // Fetch selected user profile
+  useEffect(() => {
+    async function fetchUser() {
+      if (!selectedUserId) return;
+      const res = await fetch(`/api/profile/${selectedUserId}`);
+      if (res.ok) {
+        const data = await res.json();
+        setUser(data);
+      }
+    }
+    fetchUser();
+  }, [selectedUserId]);
+
+  // fetch current user's matches once session is available
+  useEffect(() => {
+    async function fetchMatches() {
+      if (!session?.user?.id) return;
+
+      try {
+        const res = await fetch("/api/matches");
+        if (res.ok) {
+          const data = await res.json();
+          setMatches(data.matches || []);
+        } else {
+          // fallback: use session user matches if available
+          setMatches(session?.user?.matches || []);
+        }
+      } catch {
+        toast.error("Kunne ikke hente matcher");
+        setMatches(session?.user?.matches || []);
+      } finally {
+        setMatchesLoading(false);
+      }
+    }
+    fetchMatches();
+  }, [session?.user?.id]);
+
+  // Socket setup
   useEffect(() => {
     if (!roomId) return;
 
     socket.connect();
-    console.log("✅ Connecting to socket with roomId:", roomId);
     socket.emit("join", roomId);
 
     socket.on("connect", () => {
@@ -41,12 +105,14 @@ export default function ClientChat({ userId }) {
 
     socket.on("typing", () => setTyping(true));
     socket.on("stopTyping", () => setTyping(false));
+
     return () => {
       socket.off("message");
       socket.disconnect();
     };
   }, [roomId]);
 
+  // Fetch messages for selected room
   useEffect(() => {
     if (!roomId) return;
     fetch(`/api/messages?roomId=${roomId}`)
@@ -55,9 +121,10 @@ export default function ClientChat({ userId }) {
       .catch(() => toast.error("Failed to load messages"));
   }, [roomId]);
 
+  // Auto-scroll to bottom
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    if (endRef.current) {
+      endRef.current.scrollIntoView({ behavior: "auto" });
     }
   }, [messages, typing]);
 
@@ -70,32 +137,29 @@ export default function ClientChat({ userId }) {
       if (roomId) socket.emit("stopTyping", { roomId });
     }, 1000);
   };
+
   const sendMessage = async () => {
     if (!input.trim() || !roomId || !sessionUserId) return;
 
-    const tempMessage = {
+    const msg = {
       _id: Date.now().toString(),
       content: input,
       sender: sessionUserId,
-      senderName: "You",
-      senderImage: null,
+      senderName: session?.user?.name || "You",
+      senderImage: session?.user?.image || "/default-avatar.png",
       createdAt: new Date().toISOString(),
       roomId,
     };
 
-    // ✅ Emit to socket for instant delivery
-    socket.emit("message", tempMessage);
-
-    // ✅ Update local UI immediately
-    setMessages((prev = []) => [...prev, tempMessage]);
+    socket.emit("message", msg);
+    setMessages((prev) => [...prev, msg]);
     setInput("");
 
-    // ✅ Persist full message to DB
     try {
       await fetch("/api/messages", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(tempMessage), // ✅ send full message
+        body: JSON.stringify(msg),
       });
     } catch {
       toast.error("Failed to save message");
@@ -103,97 +167,143 @@ export default function ClientChat({ userId }) {
   };
 
   return (
-    <div className="p-6 max-w-2xl mx-auto">
-      <h1 className="text-2xl font-bold mb-4">Chat</h1>
+    <div className="h-screen bg-gray-900 text-white flex overflow-hidden">
+      {/* Left Sidebar */}
 
-      <div
-        ref={scrollRef}
-        className="bg-gray-900 rounded p-4 h-[500px] overflow-y-auto mb-4 flex flex-col"
-      >
-        {typing && (
-          <p className="text-sm text-gray-400 mb-2">User is typing…</p>
+      <aside className="hidden lg:block w-64 bg-gray-800 border-r border-gray-700 overflow-y-auto">
+        <h2 className="p-4 font-bold text-pink-500">Dine matcher</h2>
+
+        {matchesLoading ? (
+          <div className="p-3 text-sm text-gray-400">Laster matcher…</div>
+        ) : (
+          <ul>
+            {matches?.map((match) =>
+              match._id !== session?.user?.id ? (
+                <li
+                  key={match._id}
+                  onClick={() => setSelectedUserId(match._id)}
+                  className={`p-3 hover:bg-gray-700 cursor-pointer ${
+                    match._id === selectedUserId ? "bg-gray-700" : ""
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <img
+                      src={match.profileImage || "/default-avatar.png"}
+                      alt={match.name}
+                      className="w-8 h-8 rounded-full object-cover"
+                    />
+                    <span>{match.name}</span>
+                  </div>
+                </li>
+              ) : null
+            )}
+            {(!matches || matches.length === 0) && (
+              <li className="p-3 text-sm text-gray-400">Ingen matcher ennå.</li>
+            )}
+          </ul>
         )}
-        {messages.map((msg) => {
-          const isSender =
-            msg.sender === sessionUserId || msg.sender?._id === sessionUserId;
+      </aside>
+      {/* Chat Section */}
+      <div className="flex-1 flex flex-col border-r border-gray-800 min-h-0">
+        {/* Header */}
+        <div className="flex items-center gap-2 p-3 bg-gray-800 border-b border-gray-700">
+          <img
+            src={user?.profileImage || "/default-avatar.png"}
+            alt={user?.name}
+            className="w-8 h-8 rounded-full object-cover"
+          />
+          <h2 className="text-sm font-semibold">{user?.name || "Chat"}</h2>
+        </div>
 
-          return (
-            <div
-              key={msg._id}
-              className={`flex items-end mb-4 ${
-                isSender ? "justify-end" : "justify-start"
-              }`}
-            >
-              {!isSender && (
-                <img
-                  src={msg.sender.profileImage || "/images/placeholder.png"}
-                  alt={msg.sender.name || "Bruker"}
-                  className="w-8 h-8 rounded-full mr-2"
-                />
-              )}
+        {/* Messages */}
+        <div className="flex-1 overflow-y-auto p-3 space-y-3 min-h-0 custom-scroll">
+          {typing && (
+            <p className="text-sm text-gray-400 mb-2">User is typing…</p>
+          )}
+          {messages.map((msg) => {
+            const isSender =
+              msg.sender === sessionUserId || msg.sender?._id === sessionUserId;
+
+            return (
               <div
-                className={`max-w-[70%] px-4 py-2 rounded-lg shadow ${
-                  isSender
-                    ? "bg-green-700 text-white self-end"
-                    : "bg-gray-700 text-white self-start"
+                key={msg._id}
+                className={`flex items-end gap-2 ${
+                  isSender ? "justify-end" : "justify-start"
                 }`}
               >
-                <p className="text-sm break-words">{msg.content}</p>
-                <p className="text-xs text-gray-300 mt-1 text-right">
-                  {new Date(msg.createdAt).toLocaleTimeString("no-NO", {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </p>
+                {!isSender && (
+                  <img
+                    src={user?.profileImage || "/default-avatar.png"}
+                    alt={user?.name || "User"}
+                    className="w-8 h-8 rounded-full object-cover"
+                  />
+                )}
+
+                <div
+                  className={`p-2 rounded-lg max-w-[70%] text-sm ${
+                    isSender
+                      ? "bg-green-700 text-white text-right"
+                      : "bg-gray-700 text-white text-left"
+                  }`}
+                >
+                  {msg.content}
+                  <div className="text-xs text-gray-300 mt-1 text-right">
+                    {new Date(msg.createdAt).toLocaleTimeString("no-NO", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </div>
+                </div>
+
+                {isSender && (
+                  <img
+                    src={session?.user?.profileImage || "/default-avatar.png"}
+                    alt="You"
+                    className="w-8 h-8 rounded-full object-cover"
+                  />
+                )}
               </div>
-              {isSender && (
-                <img
-                  src={msg.sender.profileImage || "/images/placeholder.png"}
-                  alt="Du"
-                  className="w-8 h-8 rounded-full ml-2"
-                />
-              )}
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+          <div ref={endRef} />
+        </div>
 
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          sendMessage();
-        }}
-        className="flex items-center gap-2 bg-gray-800 rounded px-3 py-2"
-      >
-        <button
-          type="button"
-          onClick={() => setShowPicker(true)}
-          className="text-xl hover:scale-110 transition"
+        {/* Input bar */}
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            sendMessage();
+          }}
+          className="px-3 py-2 bg-gray-800 flex items-center gap-2 flex-shrink-0 relative"
         >
-          😊
-        </button>
+          <button
+            type="button"
+            onClick={() => setShowPicker((prev) => !prev)}
+            className="text-xl hover:scale-110 transition"
+          >
+            😀
+          </button>
 
-        <input
-          value={input}
-          onChange={handleInputChange}
-          className="flex-1 bg-transparent text-white placeholder-gray-400 outline-none"
-          placeholder="Skriv en melding…"
-        />
-        <button
-          type="submit"
-          className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded transition"
-        >
-          Send
-        </button>
-        {showPicker && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-            <div className="bg-gray-900 rounded-lg shadow-lg p-4 max-w-sm w-full relative">
-              <button
-                onClick={() => setShowPicker(false)}
-                className="absolute top-2 right-2 text-white text-xl hover:text-pink-400"
-              >
-                ×
-              </button>
+          <input
+            type="text"
+            value={input}
+            onChange={handleInputChange}
+            placeholder="Skriv en melding…"
+            className="flex-1 bg-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none"
+          />
+
+          <button
+            type="submit"
+            className="bg-green-600 hover:bg-green-700 px-3 py-2 rounded-lg text-sm"
+          >
+            Send
+          </button>
+
+          {showPicker && (
+            <div
+              ref={pickerRef}
+              className="absolute bottom-full left-0 mb-2 z-50"
+            >
               <EmojiPicker
                 theme="dark"
                 onEmojiClick={(emojiData) => {
@@ -202,9 +312,77 @@ export default function ClientChat({ userId }) {
                 }}
               />
             </div>
+          )}
+        </form>
+      </div>
+      {/* Right Sidebar */}
+      {user && (
+        <aside className="hidden lg:block w-80 bg-gray-800 p-6 space-y-4 overflow-y-auto">
+          <img
+            src={user.profileImage || "/default-avatar.png"}
+            alt={user.name}
+            className="w-24 h-24 rounded-full object-cover mx-auto border-2 border-green-600"
+          />
+
+          <h3 className="text-lg font-bold text-center">{user.name}</h3>
+
+          <p className="text-gray-400 text-center text-sm">
+            {getAgeFromDate(user.birthdate)} år • {user.location}
+          </p>
+
+          <p className="text-gray-300 mt-1 text-sm text-center">
+            {user.bio || "Ingen bio ennå."}
+          </p>
+
+          {user.tags?.length > 0 && (
+            <div>
+              <h4 className="text-green-500 font-semibold text-sm mb-1">
+                Hashtags
+              </h4>
+              <div className="flex flex-wrap gap-1">
+                {user.tags.map((tag, i) => (
+                  <span
+                    key={i}
+                    className="bg-green-700 text-white px-2 py-1 rounded-full text-xs"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {user.images?.length > 0 && (
+            <div>
+              <h4 className="text-green-500 font-semibold text-sm mb-1">
+                Bilder
+              </h4>
+              <div className="grid grid-cols-2 gap-2">
+                {user.images.map((img, i) => (
+                  <img
+                    key={i}
+                    src={img.url}
+                    alt={`Image ${i}`}
+                    className="w-full h-24 object-cover rounded-lg"
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+          <div>
+            <div className="pt-4">
+              <button
+                onClick={() => redirect(`/profile/${user._id}`)}
+                className="w-full bg-green-600 hover:bg-green-700 
+               text-white font-semibold py-2 px-4 rounded-md 
+               transition-colors"
+              >
+                View {user.name}'s Profile
+              </button>
+            </div>
           </div>
-        )}
-      </form>
+        </aside>
+      )}
     </div>
   );
 }

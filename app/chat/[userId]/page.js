@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import ClientChat from "./ClientChat";
 import { authOptions } from "@/lib/auth";
 
+
 export default async function ChatPage({ params }) {
   const { userId } = await params;
 
@@ -16,6 +17,11 @@ export default async function ChatPage({ params }) {
   if (!matched) {
     redirect("/discover");
   }
+
+  const roomId =
+    session.user.id && userId
+      ? [session.user.id, userId].sort().join("-")
+      : null;
 
   return <ClientChat userId={userId} />;
 }

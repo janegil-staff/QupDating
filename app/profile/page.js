@@ -91,6 +91,20 @@ export default function EditProfile() {
     }
   }, [loading, profile]);
 
+  useEffect(() => {
+    if (profile?.birthdate) {
+      const bd = new Date(profile.birthdate);
+      setForm((prev) => ({
+        ...prev,
+        birthdate: bd.toISOString(),
+        birthDay: bd.getDate().toString(),
+        birthMonth: (bd.getMonth() + 1).toString(),
+        birthYear: bd.getFullYear().toString(),
+        // …other fields
+      }));
+    }
+  }, [profile.birthdate]);
+
   // Fetch current profile
   useEffect(() => {
     async function fetchProfile() {
@@ -249,13 +263,16 @@ export default function EditProfile() {
     // Then construct the date from updated values
     const { birthYear, birthMonth, birthDay } = updatedForm;
     if (birthYear && birthMonth && birthDay) {
-      const bd = new Date(`${birthYear}-${birthMonth}-${birthDay}`);
+      const bd = new Date(
+        `${birthYear}-${birthMonth}-${birthDay}`
+      ).toISOString();
+      updatedForm.birthdate = bd;
 
       try {
         const res = await fetch("/api/profile", {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ birthdate: bd }),
+          body: JSON.stringify({ birthdate: bd }), // ✅ bd is defined here
         });
 
         if (res.ok) {
@@ -269,14 +286,15 @@ export default function EditProfile() {
       }
     }
   }
+
   async function handleSave() {
-    const birthdate = new Date(
+    const bd = new Date(
       `${form.birthYear}-${form.birthMonth}-${form.birthDay}`
-    );
+    ).toISOString();
 
     const payload = {
       ...form,
-      birthdate,
+      birthdate: bd, // ✅ always included
       height: parseInt(form.height) || null,
       hasChildren: form.hasChildren === "true",
       wantsChildren: form.wantsChildren === "true",
@@ -301,6 +319,7 @@ export default function EditProfile() {
       toast.error("Serverfeil ❌");
     }
   }
+
   if (!profile) return <p className="text-red-400">Ingen profil funnet ❌</p>;
   if (loading) return <p className="text-white">Loading...</p>;
   const completion = calculateCompletion(profile);

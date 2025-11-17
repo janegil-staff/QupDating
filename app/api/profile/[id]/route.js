@@ -14,7 +14,7 @@ export async function GET(req, context) {
     const session = await getServerSession(authOptions);
     const currentUserId = session?.user?.id;
 
-    const targetUser = await User.findById(id).lean();
+    const targetUser = await User.findById(id).populate("matches").lean();
     if (!targetUser) {
       return Response.json({ error: "User not found" }, { status: 404 });
     }
