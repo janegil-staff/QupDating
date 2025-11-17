@@ -13,6 +13,7 @@ export default function RegisterPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
+
     // Upload images first
     const formData = new FormData();
     localImages.forEach((img) => formData.append("images", img.file));
@@ -39,6 +40,7 @@ export default function RegisterPage() {
       password: form.get("password"),
       redirect: false,
     });
+
     setIsLoading(false);
 
     if (result.ok) {
@@ -56,13 +58,13 @@ export default function RegisterPage() {
         className="w-full max-w-md bg-neutral-900 p-6 rounded-xl shadow-xl space-y-5"
       >
         <h2 className="text-3xl font-bold text-pink-500 text-center">
-          Opprett profil
+          Create Profile
         </h2>
 
         <input
           type="text"
           name="name"
-          placeholder="Navn"
+          placeholder="Name"
           required
           className="w-full px-4 py-2 rounded-lg bg-neutral-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pink-500"
         />
@@ -70,7 +72,7 @@ export default function RegisterPage() {
         <input
           type="email"
           name="email"
-          placeholder="E-post"
+          placeholder="Email"
           required
           className="w-full px-4 py-2 rounded-lg bg-neutral-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pink-500"
         />
@@ -78,7 +80,7 @@ export default function RegisterPage() {
         <input
           type="password"
           name="password"
-          placeholder="Passord"
+          placeholder="Password"
           required
           className="w-full px-4 py-2 rounded-lg bg-neutral-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pink-500"
         />
@@ -86,7 +88,7 @@ export default function RegisterPage() {
         {/* Birthdate */}
         <div>
           <label className="block mb-2 text-sm font-medium text-gray-300">
-            Fødselsdato
+            Birthdate
           </label>
           <div className="grid grid-cols-3 gap-2">
             {/* Day */}
@@ -95,7 +97,7 @@ export default function RegisterPage() {
               required
               className="bg-neutral-800 text-white px-4 py-2 rounded-lg border border-gray-700"
             >
-              <option value="">Dag</option>
+              <option value="">Day</option>
               {[...Array(31)].map((_, i) => (
                 <option key={i + 1} value={i + 1}>
                   {i + 1}
@@ -109,20 +111,20 @@ export default function RegisterPage() {
               required
               className="bg-neutral-800 text-white px-4 py-2 rounded-lg border border-gray-700"
             >
-              <option value="">Måned</option>
+              <option value="">Month</option>
               {[
-                "Januar",
-                "Februar",
-                "Mars",
+                "January",
+                "February",
+                "March",
                 "April",
-                "Mai",
-                "Juni",
-                "Juli",
+                "May",
+                "June",
+                "July",
                 "August",
                 "September",
-                "Oktober",
+                "October",
                 "November",
-                "Desember",
+                "December",
               ].map((month, i) => (
                 <option key={month} value={i + 1}>
                   {month}
@@ -136,7 +138,7 @@ export default function RegisterPage() {
               required
               className="bg-neutral-800 text-white px-4 py-2 rounded-lg border border-gray-700"
             >
-              <option value="">År</option>
+              <option value="">Year</option>
               {[...Array(82)].map((_, i) => {
                 const year = new Date().getFullYear() - i - 18;
                 return (
@@ -154,10 +156,10 @@ export default function RegisterPage() {
           required
           className="w-full px-4 py-2 rounded-lg bg-neutral-800 text-white focus:outline-none focus:ring-2 focus:ring-pink-500"
         >
-          <option value="">Velg kjønn</option>
-          <option value="male">Mann</option>
-          <option value="female">Kvinne</option>
-          <option value="other">Annet</option>
+          <option value="">Select gender</option>
+          <option value="male">Male</option>
+          <option value="female">Female</option>
+          <option value="other">Other</option>
         </select>
 
         <ImageUploader onImagesChange={setLocalImages} />
@@ -187,17 +189,17 @@ export default function RegisterPage() {
                   d="M4 12a8 8 0 018-8v8z"
                 />
               </svg>
-              Oppretter bruker...
+              Creating account...
             </div>
           ) : (
-            "Registrer"
+            "Register"
           )}
         </button>
 
         <p className="mt-4 text-sm text-center text-gray-400">
-          Allerede medlem?{" "}
+          Already a member?{" "}
           <a href="/login" className="text-pink-500 hover:underline">
-            Logg inn her
+            Log in here
           </a>
         </p>
       </form>

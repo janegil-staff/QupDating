@@ -5,63 +5,59 @@ export default function AboutPage() {
     <main className="min-h-screen bg-gray-950 text-white px-6 py-12">
       <div className="max-w-screen-lg mx-auto space-y-12">
         <BackButton />
+        
         {/* Hero */}
         <section className="text-center">
-          <h1 className="text-4xl font-bold text-white mb-4">Om QupDating</h1>
+          <h1 className="text-4xl font-bold text-white mb-4">About QupDating</h1>
           <p className="text-gray-400 text-lg">
-            En norsk datingopplevelse som handler om ekte forbindelser, vakre
-            øyeblikk og lokal stolthet.
+            A modern dating experience built around real connections, beautiful moments, and genuine pride.
           </p>
         </section>
 
         {/* Story */}
         <section className="bg-gray-900 p-6 rounded-xl shadow-lg">
-          <h2 className="text-2xl font-semibold mb-4">Hvorfor QupDating?</h2>
+          <h2 className="text-2xl font-semibold mb-4">Why QupDating?</h2>
           <p className="text-gray-300 leading-relaxed">
-            QupDating ble skapt for å gjøre dating mer meningsfullt. I en verden
-            av raske sveip og tomme meldinger, ønsket vi å bygge noe som føles
-            ekte. Med norsk design, lokal tilhørighet og en plattform som setter
-            følelser først, gir vi deg muligheten til å møte mennesker du
-            faktisk vil bli kjent med.
+            QupDating was created to make dating more meaningful. In a world of endless swipes and empty messages, 
+            we wanted to build something that feels real. With thoughtful design, a sense of belonging, and a platform 
+            that puts emotions first, we give you the chance to meet people you truly want to get to know.
           </p>
         </section>
 
         {/* Features */}
         <section className="bg-gray-900 p-6 rounded-xl shadow-lg">
-          <h2 className="text-2xl font-semibold mb-4">Hva gjør oss unike?</h2>
+          <h2 className="text-2xl font-semibold mb-4">What Makes Us Unique?</h2>
           <ul className="space-y-4">
             <li className="bg-gray-800 p-4 rounded-lg shadow">
               <h3 className="text-lg font-semibold text-rose-400">
-                🇳🇴 Norsk design og språk
+                🌍 Designed for You
               </h3>
               <p className="text-gray-300">
-                Alt er tilpasset norske brukere – fra tidssone til uttrykk og
-                bilder.
+                Everything is tailored to feel natural — from time zones to expressions and imagery.
               </p>
             </li>
             <li className="bg-gray-800 p-4 rounded-lg shadow">
               <h3 className="text-lg font-semibold text-rose-400">
-                💬 Direktemeldinger med emojis og bilder
+                💬 Real-time Messaging with Emojis & Images
               </h3>
               <p className="text-gray-300">
-                Send meldinger i sanntid med støtte for bilder og følelser.
+                Send messages instantly with support for images, reactions, and emotions.
               </p>
             </li>
             <li className="bg-gray-800 p-4 rounded-lg shadow">
               <h3 className="text-lg font-semibold text-rose-400">
-                🖼️ Vakre profiler med galleri og bio
+                🖼️ Beautiful Profiles with Gallery & Bio
               </h3>
               <p className="text-gray-300">
-                Vis hvem du er med store bilder, personlig tekst og lokal sjarm.
+                Show who you are with large photos, personal text, and authentic charm.
               </p>
             </li>
             <li className="bg-gray-800 p-4 rounded-lg shadow">
               <h3 className="text-lg font-semibold text-rose-400">
-                🎯 Oppdag og match med ekte mennesker
+                🎯 Discover & Match with Real People
               </h3>
               <p className="text-gray-300">
-                Vårt system viser deg profiler du faktisk har noe til felles
-                med.
+                Our system highlights profiles you genuinely share something in common with.
               </p>
             </li>
           </ul>
@@ -70,16 +66,16 @@ export default function AboutPage() {
         {/* Call to Action */}
         <section className="text-center">
           <h2 className="text-2xl font-semibold mb-4">
-            Klar for å finne noen?
+            Ready to Meet Someone?
           </h2>
           <p className="text-gray-400 mb-6">
-            Opprett en profil og bli en del av QupDating i dag.
+            Create your profile and join QupDating today.
           </p>
           <a
             href="/register"
             className="inline-block bg-rose-500 hover:bg-rose-600 text-white font-semibold px-6 py-3 rounded-full transition"
           >
-            Kom i gang
+            Get Started
           </a>
         </section>
       </div>

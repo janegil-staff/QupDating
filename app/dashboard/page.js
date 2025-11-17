@@ -167,16 +167,18 @@ export default function DashboardPage() {
   return (
     <main className="min-h-screen bg-gradient-to-b from-gray-950 via-gray-900 to-gray-950 text-white px-6 py-10">
       <div className="max-w-screen-xl mx-auto space-y-8">
+        {/* Header */}
         <header className="text-center">
-          <h1 className="text-4xl font-bold">Hei {session.user.name} 👋</h1>
+          <h1 className="text-4xl font-bold">Hi {session.user.name} 👋</h1>
           <p className="text-gray-400 mt-2">
-            Velkommen tilbake til Qup – finn kjærligheten i Bergen
+            Welcome back to Qup — find real connections near you
           </p>
         </header>
 
         <section className="grid md:grid-cols-3 gap-6">
+          {/* Matches */}
           <div className="md:col-span-1 bg-gray-900 p-4 rounded-xl shadow-lg max-h-[400px] overflow-y-auto">
-            <h2 className="text-xl font-semibold mb-4">Dine matcher</h2>
+            <h2 className="text-xl font-semibold mb-4">Your Matches</h2>
             <MatchTabs
               matches={matches}
               activeMatchId={activeMatchId}
@@ -186,8 +188,9 @@ export default function DashboardPage() {
             />
           </div>
 
+          {/* Messages */}
           <div className="md:col-span-2 bg-gray-900 p-4 rounded-xl shadow-lg">
-            <h2 className="text-xl font-semibold mb-4">Meldinger</h2>
+            <h2 className="text-xl font-semibold mb-4">Messages</h2>
             <div
               ref={scrollRef}
               className="flex flex-col max-h-[400px] overflow-y-auto space-y-4"
@@ -225,16 +228,18 @@ export default function DashboardPage() {
                   </div>
                 </div>
               ))}
+
+              {/* Loader */}
               <div
                 ref={loaderRef}
                 className="h-10 flex justify-center items-center mt-6"
               >
                 {loading && hasMore && (
-                  <p className="text-gray-400">Laster inn flere profiler…</p>
+                  <p className="text-gray-400">Loading more messages…</p>
                 )}
 
                 {!hasMore && (
-                  <p className="text-gray-500">Ingen flere meldinger å vise</p>
+                  <p className="text-gray-500">No more messages to show</p>
                 )}
               </div>
             </div>

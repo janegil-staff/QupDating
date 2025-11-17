@@ -1,13 +1,12 @@
-import { getAgeFromDate } from "@/lib/getAgeFromDate";
 import { format, isToday, isYesterday } from "date-fns";
-import { nb } from "date-fns/locale";
+import { enUS } from "date-fns/locale";
 
-// Format preview date nicely in Norwegian
+// Format preview date nicely in English
 function formatPreviewDate(dateString) {
   const date = new Date(dateString);
-  if (isToday(date)) return format(date, "HH:mm", { locale: nb });
-  if (isYesterday(date)) return "i går";
-  return format(date, "d. MMM", { locale: nb });
+  if (isToday(date)) return format(date, "HH:mm", { locale: enUS });
+  if (isYesterday(date)) return "yesterday";
+  return format(date, "MMM d", { locale: enUS });
 }
 
 // Helper: get last message for a match
@@ -28,7 +27,7 @@ export default function MatchTabs({
     <div className="flex overflow-x-auto gap-4 py-2 px-1 md:flex-col md:overflow-y-auto max-h-[300px] overflow-y-auto">
       {matches.map((match) => {
         const lastMsg = getLastMessageForMatch(match._id, sessionUserId, lastMessages);
-        console.log(match);
+
         return (
           <button
             key={match._id}
@@ -41,7 +40,7 @@ export default function MatchTabs({
           >
             {/* Avatar */}
             <img
-              src={match.profileImage || "/images/placeholder.png"}
+              src={match.images?.[0]?.url || "/images/placeholder.png"}
               alt={match.name}
               className="w-10 h-10 rounded-full object-cover border border-white"
             />
@@ -49,7 +48,7 @@ export default function MatchTabs({
             {/* Text content */}
             <div className="text-left w-full">
               <p className="font-semibold">
-                {match.name}, {getAgeFromDate(match.birthdate)}
+                {match.name}, {match.age}
               </p>
 
               {/* Last message preview */}
@@ -58,7 +57,7 @@ export default function MatchTabs({
                   activeMatchId === match._id ? "text-pink-100" : "text-gray-400"
                 }`}
               >
-                {lastMsg?.content || "Ingen meldinger ennå"}
+                {lastMsg?.content || "No messages yet"}
               </p>
 
               {/* Date */}

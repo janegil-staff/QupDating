@@ -40,7 +40,7 @@ export default function LoginPage() {
         <input
           type="email"
           name="email"
-          placeholder="E-post"
+          placeholder="Email"
           value={form.email}
           onChange={handleChange}
           className="w-full p-2 rounded bg-neutral-800 text-white"
@@ -50,7 +50,7 @@ export default function LoginPage() {
         <input
           type="password"
           name="password"
-          placeholder="Passord"
+          placeholder="Password"
           value={form.password}
           onChange={handleChange}
           className="w-full p-2 rounded bg-neutral-800 text-white"

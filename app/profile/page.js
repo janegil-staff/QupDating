@@ -326,35 +326,38 @@ export default function EditProfile() {
   return (
     <div className="dark bg-gray-900 text-white min-h-screen p-6 flex flex-col items-center">
       <div className="w-full bg-neutral-900 text-white p-6 rounded-xl shadow-lg max-w-3xl mx-auto space-y-6">
-        <h2 className="text-2xl font-bold text-center">Din Profil</h2>
+        <h2 className="text-2xl font-bold text-center">Your Profile</h2>
 
+        {/* Actions */}
         <div className="flex justify-between">
-          <dic>
+          <div>
             <button
               onClick={() => setShowModal(true)}
               className="bg-pink-600 hover:bg-pink-700 text-white font-bold py-2 px-4 rounded-lg transition"
             >
-              Last opp bilde
+              Upload Photo
             </button>
-          </dic>
+          </div>
 
           <div>
             <button
               onClick={() => redirect(`/profile/${profile._id}`)}
-              className="bg-green-600 hover:bg-pink-700 text-white font-bold py-2 px-4 rounded-lg transition"
+              className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition"
             >
-              Se din profil
+              View Your Profile
             </button>
           </div>
         </div>
-        {/* 🔥 Progress bar right after completion calculation */}
+
+        {/* Profile completion */}
         <div className="mt-4">
           <h3 className="text-lg font-semibold text-pink-500">
-            Profilfullføring
+            Profile Completion
           </h3>
           <ProgressBar value={completion} />
-          <p className="text-sm text-gray-400 mt-2">{completion}% fullført</p>
+          <p className="text-sm text-gray-400 mt-2">{completion}% completed</p>
         </div>
+
         {/* Name */}
         <label className="block mb-1 text-sm text-gray-400">Name</label>
         <input
@@ -363,48 +366,49 @@ export default function EditProfile() {
           onChange={(e) => setForm({ ...form, name: e.target.value })}
           className="w-full bg-neutral-800 border border-gray-700 rounded-lg px-4 py-2"
         />
+
         {/* Birthdate */}
         <div>
-          <label className="block mb-1 text-sm text-gray-400">
-            Fødselsdato
-          </label>
+          <label className="block mb-1 text-sm text-gray-400">Birthdate</label>
           <div className="grid grid-cols-3 gap-2">
             {/* Day */}
             <select
               name="birthDay"
               onChange={handleChange}
-              value={form.birthDay}
+              value={form.birthDay || ""}
               required
               className="bg-neutral-800 text-white px-4 py-2 rounded-lg border border-gray-700"
             >
-              <option value="">Dag</option>
+              <option value="">Day</option>
               {[...Array(31)].map((_, i) => (
                 <option key={i + 1} value={i + 1}>
                   {i + 1}
                 </option>
               ))}
             </select>
+
+            {/* Month */}
             <select
               name="birthMonth"
-              value={form.birthMonth}
+              value={form.birthMonth || ""}
               onChange={handleChange}
               required
               className="bg-neutral-800 text-white px-4 py-2 rounded-lg border border-gray-700"
             >
-              <option value="">Måned</option>
+              <option value="">Month</option>
               {[
-                "Januar",
-                "Februar",
-                "Mars",
+                "January",
+                "February",
+                "March",
                 "April",
-                "Mai",
-                "Juni",
-                "Juli",
+                "May",
+                "June",
+                "July",
                 "August",
                 "September",
-                "Oktober",
+                "October",
                 "November",
-                "Desember",
+                "December",
               ].map((month, i) => (
                 <option key={i + 1} value={i + 1}>
                   {month}
@@ -412,14 +416,15 @@ export default function EditProfile() {
               ))}
             </select>
 
+            {/* Year */}
             <select
               name="birthYear"
-              value={form.birthYear}
-              onChange={handleChange} // ✅ controlled value
+              value={form.birthYear || ""}
+              onChange={handleChange}
               required
               className="bg-neutral-800 text-white px-4 py-2 rounded-lg border border-gray-700"
             >
-              <option value="">År</option>
+              <option value="">Year</option>
               {[...Array(82)].map((_, i) => {
                 const year = new Date().getFullYear() - i - 18;
                 return (
@@ -434,23 +439,25 @@ export default function EditProfile() {
 
         {/* Gender */}
         <div>
-          <label className="block mb-1 text-sm text-gray-400">Kjønn</label>
+          <label className="block mb-1 text-sm text-gray-400">Gender</label>
           <select
             name="gender"
             value={form.gender || ""}
             onChange={(e) => setForm({ ...form, gender: e.target.value })}
             className="w-full bg-neutral-800 border border-gray-700 rounded-lg px-4 py-2"
           >
-            <option value="">Velg kjønn</option>
-            <option value="male">Mann</option>
-            <option value="female">Kvinne</option>
-            <option value="other">Annet</option>
+            <option value="">Select gender</option>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+            <option value="other">Other</option>
           </select>
         </div>
 
         {/* Height */}
         <div>
-          <label className="block mb-1 text-sm text-gray-400">Høyde (cm)</label>
+          <label className="block mb-1 text-sm text-gray-400">
+            Height (cm)
+          </label>
           <input
             type="number"
             name="height"
@@ -463,21 +470,21 @@ export default function EditProfile() {
         {/* Tags */}
         <div>
           <label className="block mb-1 text-sm text-gray-400">
-            Merk deg selv med hashtags
+            Tag yourself with hashtags
           </label>
           <input
             type="text"
             name="tags"
-            value={form.tags || []}
+            value={form.tags || ""}
             onChange={(e) => setForm({ ...form, tags: e.target.value })}
-            placeholder="#CatLover #fjelltur #pizza"
+            placeholder="#CatLover #Hiking #Pizza"
             className="w-full bg-neutral-800 border border-gray-700 rounded-lg px-4 py-2"
           />
         </div>
 
         {/* Bio */}
         <div>
-          <label className="block mb-1 text-sm text-gray-400">Om deg</label>
+          <label className="block mb-1 text-sm text-gray-400">About you</label>
           <textarea
             name="bio"
             value={form.bio || ""}
@@ -487,43 +494,46 @@ export default function EditProfile() {
           />
         </div>
 
+        {/* Lifestyle */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {/* Smoking */}
           <div>
-            <label className="block mb-1 text-sm text-gray-400">Røyker?</label>
+            <label className="block mb-1 text-sm text-gray-400">Smoking?</label>
             <select
               name="smoking"
               value={form.smoking || ""}
               onChange={(e) => setForm({ ...form, smoking: e.target.value })}
               className="w-full bg-neutral-800 border border-gray-700 rounded-lg px-4 py-2"
             >
-              <option value="">Velg</option>
-              <option value="Yes">Ja</option>
-              <option value="No">Nei</option>
-              <option value="Occasionally">Av og til</option>
+              <option value="">Select</option>
+              <option value="Yes">Yes</option>
+              <option value="No">No</option>
+              <option value="Occasionally">Occasionally</option>
             </select>
           </div>
 
           {/* Drinking */}
           <div>
-            <label className="block mb-1 text-sm text-gray-400">Drikker?</label>
+            <label className="block mb-1 text-sm text-gray-400">
+              Drinking?
+            </label>
             <select
               name="drinking"
               value={form.drinking || ""}
               onChange={(e) => setForm({ ...form, drinking: e.target.value })}
               className="w-full bg-neutral-800 border border-gray-700 rounded-lg px-4 py-2"
             >
-              <option value="">Velg</option>
-              <option value="None">Aldri</option>
-              <option value="Light / social drinker">Lett / sosialt</option>
-              <option value="Heavy">Ofte</option>
+              <option value="">Select</option>
+              <option value="None">Never</option>
+              <option value="Light / social drinker">Light / social</option>
+              <option value="Heavy">Often</option>
             </select>
           </div>
 
-          {/* Has Children */}
+          {/* Has children */}
           <div>
             <label className="block mb-1 text-sm text-gray-400">
-              Har barn?
+              Has children?
             </label>
             <select
               name="hasChildren"
@@ -533,16 +543,16 @@ export default function EditProfile() {
               }
               className="w-full bg-neutral-800 border border-gray-700 rounded-lg px-4 py-2"
             >
-              <option value="">Velg</option>
-              <option value="true">Ja</option>
-              <option value="false">Nei</option>
+              <option value="">Select</option>
+              <option value="true">Yes</option>
+              <option value="false">No</option>
             </select>
           </div>
 
-          {/* Wants Children */}
+          {/* Wants children */}
           <div>
             <label className="block mb-1 text-sm text-gray-400">
-              Vil ha barn?
+              Wants children?
             </label>
             <select
               name="wantsChildren"
@@ -552,17 +562,17 @@ export default function EditProfile() {
               }
               className="w-full bg-neutral-800 border border-gray-700 rounded-lg px-4 py-2"
             >
-              <option value="">Velg</option>
-              <option value="true">Ja</option>
-              <option value="false">Nei</option>
+              <option value="">Select</option>
+              <option value="true">Yes</option>
+              <option value="false">No</option>
             </select>
           </div>
         </div>
 
-        {/* Willing to Relocate */}
+        {/* Willing to relocate */}
         <div>
           <label className="block mb-1 text-sm text-gray-400">
-            Villig til å flytte?
+            Willing to relocate?
           </label>
           <select
             name="willingToRelocate"
@@ -572,35 +582,39 @@ export default function EditProfile() {
             }
             className="w-full bg-neutral-800 border border-gray-700 rounded-lg px-4 py-2"
           >
-            <option value="">Velg</option>
-            <option value="true">Ja</option>
-            <option value="false">Nei</option>
+            <option value="">Select</option>
+            <option value="true">Yes</option>
+            <option value="false">No</option>
           </select>
         </div>
+
+        {/* Appearance and body type */}
         <div className="grid grid-cols-2 md:grid-cols-2 gap-4">
           {/* Appearance */}
           <div>
-            <label className="block mb-1 text-sm text-gray-400">Utseende</label>
+            <label className="block mb-1 text-sm text-gray-400">
+              Appearance
+            </label>
             <select
               name="appearance"
               value={form.appearance || ""}
               onChange={(e) => setForm({ ...form, appearance: e.target.value })}
               className="w-full bg-neutral-800 border border-gray-700 rounded-lg px-4 py-2"
             >
-              <option value="">Velg</option>
-              <option value="Average">Gjennomsnittlig</option>
-              <option value="Athletic">Atletisk</option>
-              <option value="Slim">Slank</option>
-              <option value="Curvy">Kurvet</option>
-              <option value="Muscular">Muskuløs</option>
-              <option value="Other">Annet</option>
+              <option value="">Select</option>
+              <option value="Average">Average</option>
+              <option value="Athletic">Athletic</option>
+              <option value="Slim">Slim</option>
+              <option value="Curvy">Curvy</option>
+              <option value="Muscular">Muscular</option>
+              <option value="Other">Other</option>
             </select>
           </div>
 
-          {/* Body Type */}
+          {/* Body type */}
           <div>
             <label className="block mb-1 text-sm text-gray-400">
-              Kroppstype
+              Body type
             </label>
             <select
               name="bodyType"
@@ -608,23 +622,24 @@ export default function EditProfile() {
               onChange={(e) => setForm({ ...form, bodyType: e.target.value })}
               className="w-full bg-neutral-800 border border-gray-700 rounded-lg px-4 py-2"
             >
-              <option value="">Velg</option>
-              <option value="Slim">Slank</option>
-              <option value="Average">Gjennomsnittlig</option>
-              <option value="Athletic">Atletisk</option>
-              <option value="Curvy">Kurvet</option>
-              <option value="Muscular">Muskuløs</option>
-              <option value="Plus-size">Stor</option>
-              <option value="Other">Annet</option>
+              <option value="">Select</option>
+              <option value="Slim">Slim</option>
+              <option value="Average">Average</option>
+              <option value="Athletic">Athletic</option>
+              <option value="Curvy">Curvy</option>
+              <option value="Muscular">Muscular</option>
+              <option value="Plus-size">Plus-size</option>
+              <option value="Other">Other</option>
             </select>
           </div>
         </div>
 
+        {/* Relationship status and religion */}
         <div className="grid grid-cols-2 md:grid-cols-2 gap-4">
-          {/* Relationship Status */}
+          {/* Relationship status */}
           <div>
             <label className="block mb-1 text-sm text-gray-400">
-              Sivilstatus
+              Relationship status
             </label>
             <select
               name="relationshipStatus"
@@ -634,13 +649,13 @@ export default function EditProfile() {
               }
               className="w-full bg-neutral-800 border border-gray-700 rounded-lg px-4 py-2"
             >
-              <option value="">Velg</option>
-              <option value="Single">Singel</option>
-              <option value="In a relationship">I et forhold</option>
-              <option value="Married">Gift</option>
-              <option value="Divorced">Skilt</option>
-              <option value="Widowed">Enke/Enkemann</option>
-              <option value="It's complicated">Det er komplisert</option>
+              <option value="">Select</option>
+              <option value="Single">Single</option>
+              <option value="In a relationship">In a relationship</option>
+              <option value="Married">Married</option>
+              <option value="Divorced">Divorced</option>
+              <option value="Widowed">Widowed</option>
+              <option value="It's complicated">It's complicated</option>
             </select>
           </div>
 
@@ -653,16 +668,16 @@ export default function EditProfile() {
               onChange={(e) => setForm({ ...form, religion: e.target.value })}
               className="w-full bg-neutral-800 border border-gray-700 rounded-lg px-4 py-2"
             >
-              <option value="">Velg</option>
-              <option value="Christianity">Kristendom</option>
+              <option value="">Select</option>
+              <option value="Christianity">Christianity</option>
               <option value="Islam">Islam</option>
-              <option value="Judaism">Jødedom</option>
-              <option value="Hinduism">Hinduisme</option>
-              <option value="Buddhism">Buddhisme</option>
-              <option value="Spiritual">Spirituell</option>
-              <option value="Agnostic">Agnostisk</option>
-              <option value="Atheist">Ateist</option>
-              <option value="Other">Annet</option>
+              <option value="Judaism">Judaism</option>
+              <option value="Hinduism">Hinduism</option>
+              <option value="Buddhism">Buddhism</option>
+              <option value="Spiritual">Spiritual</option>
+              <option value="Agnostic">Agnostic</option>
+              <option value="Atheist">Atheist</option>
+              <option value="Other">Other</option>
             </select>
           </div>
         </div>
@@ -673,7 +688,7 @@ export default function EditProfile() {
           name="education"
           value={form.education || ""}
           onChange={(e) => setForm({ ...form, education: e.target.value })}
-          placeholder="Utdanning"
+          placeholder="Education"
           className="w-full bg-neutral-800 border border-gray-700 rounded-lg px-4 py-2"
         />
 
@@ -683,26 +698,27 @@ export default function EditProfile() {
           name="occupation"
           value={form.occupation || ""}
           onChange={(e) => setForm({ ...form, occupation: e.target.value })}
-          placeholder="Yrke"
+          placeholder="Occupation"
           className="w-full bg-neutral-800 border border-gray-700 rounded-lg px-4 py-2"
         />
+
         {/* Location */}
         <input
           type="text"
           name="location"
           value={form.location || ""}
           onChange={(e) => setForm({ ...form, location: e.target.value })}
-          placeholder="Sted"
+          placeholder="Location"
           className="w-full bg-neutral-800 border border-gray-700 rounded-lg px-4 py-2"
         />
 
-        {/* Looking For */}
+        {/* Looking for */}
         <textarea
           name="lookingFor"
           value={form.lookingFor || ""}
           onChange={(e) => setForm({ ...form, lookingFor: e.target.value })}
           rows={3}
-          placeholder="Hva ser du etter?"
+          placeholder="What are you looking for?"
           className="w-full bg-neutral-800 border border-gray-700 rounded-lg px-4 py-2 resize-none"
         />
 
@@ -712,14 +728,16 @@ export default function EditProfile() {
           onClick={handleSave}
           className="w-full bg-pink-600 hover:bg-pink-700 text-white font-bold mb-6 py-2 px-4 rounded-lg transition"
         >
-          Oppdater Profil
+          Update Profile
         </button>
       </div>
+
+      {/* Photo upload modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
           <div className="bg-neutral-900 p-6 rounded-xl w-full max-w-md space-y-4 shadow-xl">
             <h2 className="text-xl font-bold text-white text-center">
-              Last opp profilbilde
+              Upload Profile Photo
             </h2>
 
             <label className="block mb-2">Photos</label>
@@ -745,7 +763,7 @@ export default function EditProfile() {
                     className="absolute bottom-1 left-1 bg-blue-600 text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition"
                     onClick={() => handleSetProfileImage(img.url)}
                   >
-                    Bruk som profilbilde
+                    Set as Profile Photo
                   </button>
                 </div>
               ))}
@@ -780,7 +798,7 @@ export default function EditProfile() {
                           d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 00-8 8z"
                         ></path>
                       </svg>
-                      <span>Laster opp…</span>
+                      <span>Uploading…</span>
                     </>
                   ) : (
                     <>＋ Add Photo</>
@@ -788,10 +806,11 @@ export default function EditProfile() {
                 </label>
               )}
             </div>
+
             <div className="text-center">
               <button
                 onClick={handleSaveForImages}
-                className="bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded-full font-semibold TEXT-C"
+                className="bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded-full font-semibold"
               >
                 Save Changes
               </button>
@@ -801,7 +820,7 @@ export default function EditProfile() {
               onClick={() => setShowModal(false)}
               className="w-full text-sm text-gray-400 hover:text-white mt-2"
             >
-              Lukk
+              Close
             </button>
           </div>
         </div>

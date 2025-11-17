@@ -78,7 +78,7 @@ export default function DiscoverPage() {
       return;
     }
 
-    toast.success(data.match ? "🎉 Det er en match!" : "👍 Likt bruker");
+    toast.success(data.match ? "🎉 It is a mathc!" : "👍 Liked user");
     setUsers((prev) => prev.filter((u) => u._id !== targetUserId));
   };
 
@@ -106,7 +106,7 @@ export default function DiscoverPage() {
 
   return (
     <div className="min-h-screen bg-gray-950 text-white p-6">
-      <h1 className="text-3xl font-bold mb-6">Oppdag nye profiler</h1>
+      <h1 className="text-3xl font-bold mb-6">Discover new profiles</h1>
 
       {/* 🔹 Grid of user cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">

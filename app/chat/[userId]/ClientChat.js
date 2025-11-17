@@ -175,10 +175,10 @@ export default function ChatPage({ userId }) {
       {/* Left Sidebar */}
 
       <aside className="hidden lg:block w-64 bg-gray-800 border-r border-gray-700 overflow-y-auto">
-        <h2 className="p-4 font-bold text-pink-500">Dine matcher</h2>
+        <h2 className="p-4 font-bold text-pink-500">Your matches</h2>
 
         {matchesLoading ? (
-          <div className="p-3 text-sm text-gray-400">Laster matcher…</div>
+          <div className="p-3 text-sm text-gray-400">Loading matcher…</div>
         ) : (
           <ul>
             {matches?.map((match) =>
@@ -292,7 +292,7 @@ export default function ChatPage({ userId }) {
             type="text"
             value={input}
             onChange={handleInputChange}
-            placeholder="Skriv en melding…"
+            placeholder="Write a message…"
             className="flex-1 bg-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none"
           />
 
@@ -335,7 +335,7 @@ export default function ChatPage({ userId }) {
           </p>
 
           <p className="text-gray-300 mt-1 text-sm text-center">
-            {user.bio || "Ingen bio ennå."}
+            {user.bio || "No bio yet."}
           </p>
 
           {user.tags?.length > 0 && (

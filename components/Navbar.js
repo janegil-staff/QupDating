@@ -5,10 +5,10 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const navItems = [
-  { href: "/dashboard", label: "Hjem", icon: "🏠" },
-  { href: "/matches", label: "Matcher", icon: "💖" },
-  { href: "/discover", label: "Utforsk", icon: "🔍" },
-  { href: "/profile", label: "Profil", icon: "👤" },
+  { href: "/dashboard", label: "Home", icon: "🏠" },
+  { href: "/matches", label: "Matches", icon: "💖" },
+  { href: "/discover", label: "Discover", icon: "🔍" },
+  { href: "/profile", label: "Profile", icon: "👤" },
 ];
 
 export default function Navbar() {
@@ -16,7 +16,6 @@ export default function Navbar() {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
 
-    
   if (status !== "authenticated") return null;
 
   const isActive = (href) => pathname === href;
@@ -45,12 +44,12 @@ export default function Navbar() {
           </div>
 
           <div className="flex items-center gap-4 text-sm">
-            <span className="text-gray-300">Hei, {session.user.name}</span>
+            <span className="text-gray-300">Hi, {session.user.name}</span>
             <button
               onClick={() => signOut({ callbackUrl: "/" })}
               className="bg-pink-600 hover:bg-pink-700 px-3 py-1 rounded text-white"
             >
-              Logg ut
+              Log out
             </button>
           </div>
         </div>
@@ -76,7 +75,7 @@ export default function Navbar() {
             className="flex flex-col items-center text-xs text-gray-400 hover:text-red-500"
           >
             <span className="text-lg">🚪</span>
-            <span>Logg ut</span>
+            <span>Log out</span>
           </button>
         </div>
       </nav>
