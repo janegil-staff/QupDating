@@ -108,13 +108,13 @@ export default function PublicProfile(profileId) {
         {profile.images?.length > 0 && (
           <div className="w-full bg-gray-800 rounded-lg shadow-lg p-6 mt-6">
             <h2 className="text-xl font-semibold mb-2">Photos</h2>
-            <div className="w-full grid grid-cols-3 gap-4">
+            <div className="w-full grid grid-cols-3  md:grid-cols-6 gap-4">
               {profile.images.map((img, i) => (
                 <img
                   key={i}
                   src={img.url}
                   alt="Gallery photo"
-                  className="w-full h-24 sm:h-40 md:h-56 lg:h-72 object-cover rounded cursor-pointer"
+                  className="w-full h-16 sm:h-40 md:h-32 lg:h-42 object-cover rounded cursor-pointer"
                   onClick={() => {
                     setIndex(i);
                     setOpen(true);
@@ -133,33 +133,52 @@ export default function PublicProfile(profileId) {
           />
         )}
 
-        {/* Details */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Detail label="Religion" value={profile.religion} />
-          <Detail label="Occupation" value={profile.occupation} />
-          <Detail label="Education" value={profile.education} />
-          <Detail label="Appearance" value={profile.appearance} />
-          <Detail label="Body Type" value={profile.bodyType} />
-          <Detail
-            label="Height"
-            value={profile.height ? `${profile.height} cm` : ""}
+        <div className="mt-10 grid grid-cols-1 lg:grid-cols-2 gap-12">
+          <SimpleSection
+            title="Appearance"
+            items={[
+              { label: "Appearance", value: profile.appearance },
+              { label: "Body Type", value: profile.bodyType },
+              {
+                label: "Height",
+                value: profile.height ? `${profile.height} cm` : null,
+              },
+            ]}
           />
-          <Detail
-            label="Has Children"
-            value={profile.hasChildren ? "Yes" : "No"}
+
+          <SimpleSection
+            title="Lifestyle"
+            items={[
+              { label: "Smoking", value: profile.smoking },
+              { label: "Drinking", value: profile.drinking },
+              {
+                label: "Has Children",
+                value: profile.hasChildren ? "Yes" : "No",
+              },
+              {
+                label: "Wants Children",
+                value: profile.wantsChildren ? "Yes" : "No",
+              },
+              {
+                label: "Willing to Relocate",
+                value: profile.willingToRelocate ? "Yes" : "No",
+              },
+            ]}
           />
-          <Detail
-            label="Wants Children"
-            value={profile.wantsChildren ? "Yes" : "No"}
-          />
-          <Detail label="Smoking" value={profile.smoking} />
-          <Detail label="Drinking" value={profile.drinking} />
-          <Detail
-            label="Willing to Relocate"
-            value={profile.willingToRelocate ? "Yes" : "No"}
+
+          <SimpleSection
+            title="Personal Info"
+            items={[
+              { label: "Religion", value: profile.religion },
+              { label: "Occupation", value: profile.occupation },
+              { label: "Education", value: profile.education },
+              {
+                label: "Relationship Status",
+                value: profile.relationshipStatus,
+              },
+            ]}
           />
         </div>
-
         {/* Looking For */}
         <div>
           <h2 className="text-xl font-semibold text-pink-500">
@@ -191,12 +210,27 @@ export default function PublicProfile(profileId) {
   );
 }
 
-function Detail({ label, value }) {
-  if (!value) return null;
+function SimpleSection({ title, items }) {
+  const valid = items.filter((i) => i.value);
+  if (valid.length === 0) return null;
+
   return (
-    <div className="bg-neutral-800 p-4 rounded-lg shadow-sm border border-gray-700">
-      <p className="text-sm text-gray-400">{label}</p>
-      <p className="text-lg font-semibold text-white">{value}</p>
+    <div className="space-y-3">
+      <h3 className="text-xl font-semibold text-white">{title}</h3>
+      <div className="space-y-2">
+        {valid.map((item, i) => (
+          <SimpleRow key={i} label={item.label} value={item.value} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function SimpleRow({ label, value }) {
+  return (
+    <div className="grid grid-cols-[140px_1fr] text-sm text-gray-300">
+      <span className="text-gray-400">{label}</span>
+      <span className="font-medium text-white">{value}</span>
     </div>
   );
 }
