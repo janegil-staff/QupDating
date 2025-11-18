@@ -10,8 +10,8 @@ export async function POST(req) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { toUserId } = await req.json();
-  if (!toUserId) {
+  const { targetUserId } = await req.json();
+  if (!targetUserId) {
     return NextResponse.json({ error: "Missing toUserId" }, { status: 400 });
   }
 
@@ -21,7 +21,7 @@ export async function POST(req) {
   // You can store dislikes in a separate array on the user
   await User.updateOne(
     { _id: fromUser._id },
-    { $addToSet: { dislikes: toUserId } }
+    { $addToSet: { dislikes: targetUserId } }
   );
 
   return NextResponse.json({ success: true });
