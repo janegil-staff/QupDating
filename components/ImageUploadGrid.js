@@ -66,14 +66,14 @@ function ImageUploadGrid({
               <button
                 type="button"
                 onClick={() => setProfileImage(images[i].url)}
-                className="absolute bottom-2 right-2 bg-pink-600 text-white text-xs px-2 py-1 rounded shadow hover:bg-pink-700"
+                className="absolute top-2 left-2 bg-pink-600 text-white text-xs px-2 py-1 rounded shadow hover:bg-pink-700"
               >
                 Set Profile
               </button>
               <button
                 type="button"
                 onClick={() => removeImage(i)}
-                className="bg-red-500 text-white text-xs px-2 py-1 rounded absolute bottom-2 left-2"
+                className="bg-red-500 text-white text-xs px-2 py-1 rounded absolute bottom-2  right-2"
               >
                 Delete
               </button>
