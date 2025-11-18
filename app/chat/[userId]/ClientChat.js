@@ -331,7 +331,7 @@ export default function ChatPage({ userId }) {
           <h3 className="text-lg font-bold text-center">{user.name}</h3>
 
           <p className="text-gray-400 text-center text-sm">
-            {getAgeFromDate(user.birthdate)} år • {user.location}
+            {getAgeFromDate(user.birthdate)} år • {user.location.name}
           </p>
 
           <p className="text-gray-300 mt-1 text-sm text-center">
