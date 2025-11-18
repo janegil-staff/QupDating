@@ -12,7 +12,9 @@ export default function Navbar() {
     { href: "/matches", label: "Matches", icon: "💖" },
     { href: "/discover", label: "Discover", icon: "🔍" },
     { href: "/profile/edit", label: "Edit", icon: "👤" },
-    { href: `/profile/${session.user.id}`, label: "Profile", icon: "👤" },
+    ...(session?.user?.id
+      ? [{ href: `/profile/${session.user.id}`, label: "Profile", icon: "👤" }]
+      : []),
   ];
 
   const pathname = usePathname();

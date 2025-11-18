@@ -227,8 +227,8 @@ export default function EditProfilePage() {
   if (!mounted) return null;
 
   return (
-    <div className="min-h-screen bg-gray-50 py-10 px-4">
-      <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow p-8 text-gray-700">
+<div className="min-h-screen bg-neutral-900 py-10 px-4 text-gray-100">
+  <div className="max-w-4xl mx-auto bg-neutral-800 rounded-2xl shadow p-8">
         <div className="mb-6 w-full">
           <div className="flex items-center justify-between mb-2">
             <h2 className="text-lg font-semibold">{STEPS[step]}</h2>
@@ -262,7 +262,7 @@ export default function EditProfilePage() {
             {step === 0 && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">
+                  <label className="block text-sm font-medium text-gray-300">
                     Name
                   </label>
                   <input
@@ -272,7 +272,7 @@ export default function EditProfilePage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">
+                  <label className="block text-sm font-medium text-gray-300">
                     Birthdate
                   </label>
                   <input
@@ -283,7 +283,7 @@ export default function EditProfilePage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">
+                  <label className="block text-sm font-medium text-gray-300">
                     Gender
                   </label>
                   <select
@@ -298,7 +298,7 @@ export default function EditProfilePage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">
+                  <label className="block text-sm font-medium text-gray-300">
                     Occupation
                   </label>
                   <input
@@ -313,7 +313,7 @@ export default function EditProfilePage() {
             {step === 1 && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">
+                  <label className="block text-sm font-medium text-gray-300">
                     Height (cm)
                   </label>
                   <input
@@ -324,7 +324,7 @@ export default function EditProfilePage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">
+                  <label className="block text-sm font-medium text-gray-300">
                     Appearance
                   </label>
                   <select
@@ -341,7 +341,7 @@ export default function EditProfilePage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">
+                  <label className="block text-sm font-medium text-gray-300">
                     Body Type
                   </label>
                   <select
@@ -363,7 +363,7 @@ export default function EditProfilePage() {
             {step === 2 && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">
+                  <label className="block text-sm font-medium text-gray-300">
                     Smoking
                   </label>
                   <select
@@ -378,7 +378,7 @@ export default function EditProfilePage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">
+                  <label className="block text-sm font-medium text-gray-300">
                     Drinking
                   </label>
                   <select
@@ -395,7 +395,7 @@ export default function EditProfilePage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">
+                  <label className="block text-sm font-medium text-gray-300">
                     Relationship Status
                   </label>
                   <select
@@ -412,7 +412,7 @@ export default function EditProfilePage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">
+                  <label className="block text-sm font-medium text-gray-300">
                     Has Children
                   </label>
                   <select
@@ -428,7 +428,7 @@ export default function EditProfilePage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">
+                  <label className="block text-sm font-medium text-gray-300">
                     Wants Children
                   </label>
                   <select
@@ -444,7 +444,7 @@ export default function EditProfilePage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">
+                  <label className="block text-sm font-medium text-gray-300">
                     Willing to Relocate
                   </label>
                   <select
@@ -465,7 +465,7 @@ export default function EditProfilePage() {
             {step === 3 && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">
+                  <label  className="block text-sm font-medium text-gray-300">
                     Education
                   </label>
                   <input
@@ -475,7 +475,7 @@ export default function EditProfilePage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">
+                  <label className="block text-sm font-medium text-gray-300">
                     Religion
                   </label>
                   <select
@@ -492,7 +492,7 @@ export default function EditProfilePage() {
                   </select>
                 </div>
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700">
+                  <label className="block text-sm font-medium text-gray-300">
                     Tags
                   </label>
                   <input
@@ -503,7 +503,7 @@ export default function EditProfilePage() {
                   />
                 </div>
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700">
+                  <label className="block text-sm font-medium text-gray-300">
                     Bio
                   </label>
                   <textarea
@@ -514,7 +514,7 @@ export default function EditProfilePage() {
                   />
                 </div>
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700">
+                  <label className="block text-sm font-medium text-gray-300">
                     Looking for
                   </label>
                   <select
@@ -532,7 +532,7 @@ export default function EditProfilePage() {
 
             {step === 4 && (
               <div>
-                <label className="block text-sm font-medium text-gray-700">
+                <label className="block text-sm font-medium text-gray-300">
                   Location Name
                 </label>
 
