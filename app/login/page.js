@@ -23,7 +23,7 @@ export default function LoginPage() {
     });
 
     if (res.ok && !res.error) {
-      router.push("/profile");
+      router.push("/profile/edit");
     } else {
       setError("Feil e-post eller passord.");
     }

@@ -227,8 +227,8 @@ export default function EditProfilePage() {
   if (!mounted) return null;
 
   return (
-<div className="min-h-screen bg-neutral-900 py-10 px-4 text-gray-100">
-  <div className="max-w-4xl mx-auto bg-neutral-800 rounded-2xl shadow p-8">
+    <div className="min-h-screen bg-neutral-900 py-10 px-4 text-gray-100">
+      <div className="max-w-4xl mx-auto bg-neutral-800 rounded-2xl shadow p-8">
         <div className="mb-6 w-full">
           <div className="flex items-center justify-between mb-2">
             <h2 className="text-lg font-semibold">{STEPS[step]}</h2>
@@ -333,11 +333,12 @@ export default function EditProfilePage() {
                     className="mt-1 pt-3 block w-full border rounded px-3 py-2"
                   >
                     <option value="">Choose...</option>
-                    <option value="Slim">Slim</option>
-                    <option value="Average">Average</option>
-                    <option value="Athletic">Athletic</option>
-                    <option value="Curvy">Curvy</option>
-                    <option value="Muscular">Muscular</option>
+                    <option value="Normal">Normal</option>
+                    <option value="Pretty">Pretty</option>
+                    <option value="Cute">Cute</option>
+                    <option value="Handsome">Handsome</option>
+                    <option value="Stylish">Stylish</option>
+                    <option value="Unique">Unique</option>
                   </select>
                 </div>
                 <div>
@@ -465,7 +466,7 @@ export default function EditProfilePage() {
             {step === 3 && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label  className="block text-sm font-medium text-gray-300">
+                  <label className="block text-sm font-medium text-gray-300">
                     Education
                   </label>
                   <input
@@ -488,7 +489,12 @@ export default function EditProfilePage() {
                     <option value="Islam">Islam</option>
                     <option value="Hinduism">Hinduism</option>
                     <option value="Buddhism">Buddhism</option>
-                    <option value="Other">Other</option>
+                    <option value="Judaism">Judaism</option>
+                    <option value="Sikhism">Sikhism</option>
+                    <option value="Spiritual">Spiritual</option>
+                    <option value="Agnostic">Agnostic</option>
+                    <option value="Atheist">Atheist</option>
+                    <option value="None">Prefer not to say</option>
                   </select>
                 </div>
                 <div className="md:col-span-2">

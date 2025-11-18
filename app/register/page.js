@@ -44,7 +44,7 @@ export default function RegisterPage() {
     setIsLoading(false);
 
     if (result.ok) {
-      router.push("/profile");
+      router.push("/profile/edit");
     } else {
       console.error("Login failed:", result.error);
       // Optionally show error to user
