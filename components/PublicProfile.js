@@ -114,7 +114,7 @@ export default function PublicProfile(profileId) {
                   key={i}
                   src={img.url}
                   alt="Gallery photo"
-                  className="w-full h-64 object-cover rounded cursor-pointer"
+                  className="w-full h-24 sm:h-40 md:h-56 lg:h-72 object-cover rounded cursor-pointer"
                   onClick={() => {
                     setIndex(i);
                     setOpen(true);
