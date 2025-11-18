@@ -531,6 +531,12 @@ export default function EditProfilePage() {
                     <option value="">Choose...</option>
                     <option value="Friendship">Friendship</option>
                     <option value="Relationship">Relationship</option>
+                    <option value="Dating">Dating</option>
+                    <option value="Marriage">Marriage</option>
+                    <option value="Casual">Casual</option>
+                    <option value="Networking">Networking</option>
+                    <option value="Activity Partner">Activity Partner</option>
+                    <option value="Open to see where it goes">Open to see where it goes</option>
                   </select>
                 </div>
               </div>

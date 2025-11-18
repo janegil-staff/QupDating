@@ -106,15 +106,15 @@ export default function PublicProfile(profileId) {
 
         {/* Gallery */}
         {profile.images?.length > 0 && (
-          <div className="max-w-2xl bg-gray-800 rounded-lg shadow-lg p-6 mt-6">
+          <div className="w-full bg-gray-800 rounded-lg shadow-lg p-6 mt-6">
             <h2 className="text-xl font-semibold mb-2">Photos</h2>
-            <div className="w-full grid grid-cols-3 gap-2">
+            <div className="w-full grid grid-cols-3 gap-4">
               {profile.images.map((img, i) => (
                 <img
                   key={i}
                   src={img.url}
                   alt="Gallery photo"
-                  className="w-full h-32 object-cover rounded cursor-pointer"
+                  className="w-full h-64 object-cover rounded cursor-pointer"
                   onClick={() => {
                     setIndex(i);
                     setOpen(true);
