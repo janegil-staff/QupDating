@@ -1,9 +1,22 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
+import dynamic from "next/dynamic";
+import LocationAutocomplete from "@/components/LocationAutoComplete";
+import LocationPreview from "@/components/LocationPreview";
 import ProfileLocation from "@/components/ProfileLocation";
-import toast from "react-hot-toast";
-import ImageUploadGrid from "@/components/ImageUploadGrid";
+
+const MapContainer = dynamic(
+  () => import("react-leaflet").then((m) => m.MapContainer),
+  { ssr: false }
+);
+const TileLayer = dynamic(
+  () => import("react-leaflet").then((m) => m.TileLayer),
+  { ssr: false }
+);
+const Marker = dynamic(() => import("react-leaflet").then((m) => m.Marker), {
+  ssr: false,
+});
 
 const STEPS = [
   "Basic Info",
@@ -20,7 +33,6 @@ export default function EditProfilePage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const fileRef = useRef(null);
-  const [uploading, setUploading] = useState(Array(6).fill(false));
 
   const emptyForm = {
     name: "",
@@ -144,6 +156,7 @@ export default function EditProfilePage() {
         location: form.location,
       };
 
+   
       const res = await fetch("/api/profile", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -171,7 +184,6 @@ export default function EditProfilePage() {
       lng: parseFloat(place.lon),
     });
   };
-
   function handleLocationSelected(loc) {
     let l = {
       lat: loc.coords.lat,
@@ -184,51 +196,11 @@ export default function EditProfilePage() {
       location: l, // { name, lat, lng }
     }));
   }
-  async function handleUpload(e, index) {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    setUploading((prev) => {
-      const copy = [...prev];
-      copy[index] = true; // start spinner
-      return copy;
-    });
-
-    const formData = new FormData();
-    formData.append("file", file);
-
-    try {
-      const res = await fetch("/api/profile/upload", {
-        method: "POST",
-        body: formData,
-      });
-      const data = await res.json();
-
-      if (res.ok) {
-        setForm((prev) => {
-          const newImages = [...prev.images];
-          newImages[index] = { url: data.url, public_id: data.public_id };
-          return { ...prev, images: newImages };
-        });
-      } else {
-        console.error("Upload failed:", data.error);
-      }
-    } catch (err) {
-      console.error("Error uploading:", err);
-    } finally {
-      setUploading((prev) => {
-        const copy = [...prev];
-        copy[index] = false; // stop spinner
-        return copy;
-      });
-    }
-  }
-
   if (!mounted) return null;
 
   return (
     <div className="min-h-screen bg-gray-50 py-10 px-4">
-      <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow p-8 text-gray-700">
+      <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow p-8">
         <div className="mb-6 w-full">
           <div className="flex items-center justify-between mb-2">
             <h2 className="text-lg font-semibold">{STEPS[step]}</h2>
@@ -537,23 +509,82 @@ export default function EditProfilePage() {
                 </label>
 
                 <ProfileLocation
-                  handleLocationSelected={handleLocationSelected}
-                  location={form.location}
+                  handleLocationSelected={handleLocationSelected} location={form.location}
                 />
               </div>
             )}
 
             {step === 5 && (
               <div>
-                <ImageUploadGrid
-                  images={form.images}
-                  setImages={(imgs) => setForm({ ...form, images: imgs })}
-                  removeImage={removeImage}
-                  profileImage={form.profileImage}
-                  setProfileImage={(url) =>
-                    setForm({ ...form, profileImage: url })
-                  }
+                <label className="block text-sm font-medium text-gray-700">
+                  Upload Images (max 6)
+                </label>
+                <input
+                  ref={fileRef}
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={onFiles}
+                  className="mt-1"
                 />
+
+                <div className="grid grid-cols-3 gap-4 mt-6">
+                  {Array.from({ length: 6 }).map((_, i) => (
+                    <div
+                      key={i}
+                      className="relative w-full h-32 bg-neutral-700 rounded-lg flex items-center justify-center cursor-pointer hover:bg-pink-600 transition"
+                    >
+                      {form.images[i] ? (
+                        <img
+                          src={form.images[i].url}
+                          alt={`upload-${i}`}
+                          className="w-full h-full object-cover rounded-lg shadow-md"
+                        />
+                      ) : (
+                        <label className="w-full h-full flex items-center justify-center text-gray-300">
+                          ＋ Add Photo
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(e) => handleUpload(e, i)}
+                          />
+                        </label>
+                      )}
+                    </div>
+                  ))}
+                </div>
+
+                <div className="grid grid-cols-3 gap-3 mt-3">
+                  {form.images.map((img, i) => (
+                    <div
+                      key={i}
+                      className="relative group border rounded overflow-hidden"
+                    >
+                      <img
+                        src={img.url}
+                        alt={`img-${i}`}
+                        className="w-full h-28 object-cover"
+                      />
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 flex items-end p-2 justify-between opacity-0 group-hover:opacity-100 transition">
+                        <button
+                          type="button"
+                          onClick={() => setAsProfile(i)}
+                          className="bg-blue-500 text-white text-xs px-2 py-1 rounded"
+                        >
+                          Set profile
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => removeImage(i)}
+                          className="bg-red-500 text-white text-xs px-2 py-1 rounded"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
 
@@ -570,7 +601,7 @@ export default function EditProfilePage() {
                   <button
                     type="button"
                     onClick={prev}
-                    className="mr-2 px-4 py-2 text-gray-700 rounded bg-gray-200"
+                    className="mr-2 px-4 py-2 rounded bg-gray-200"
                   >
                     Back
                   </button>

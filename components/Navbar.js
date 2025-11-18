@@ -4,17 +4,18 @@ import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-const navItems = [
-  { href: "/dashboard", label: "Home", icon: "🏠" },
-  { href: "/matches", label: "Matches", icon: "💖" },
-  { href: "/discover", label: "Discover", icon: "🔍" },
-  { href: "/profile", label: "Profile", icon: "👤" },
-];
-
 export default function Navbar() {
   const { data: session, status } = useSession();
+
+  const navItems = [
+    { href: "/dashboard", label: "Home", icon: "🏠" },
+    { href: "/matches", label: "Matches", icon: "💖" },
+    { href: "/discover", label: "Discover", icon: "🔍" },
+    { href: "/profile/edit", label: "Edit", icon: "👤" },
+    { href: `/profile/${session.user.id}`, label: "Profile", icon: "👤" },
+  ];
+
   const pathname = usePathname();
-  const [menuOpen, setMenuOpen] = useState(false);
 
   if (status !== "authenticated") return null;
 

@@ -48,7 +48,12 @@ export default function PublicProfile(profileId) {
     : null;
 
   const isOwnProfile = session?.user?.id === profile._id;
+console.log(location);
 
+// GOOD: use the prop/state you passed in
+
+console.log(profile.location); 
+ 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 text-white p-6">
       <div className="max-w-4xl mx-auto bg-neutral-900 rounded-xl shadow-xl p-6 space-y-6 relative">

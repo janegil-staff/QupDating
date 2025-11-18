@@ -40,7 +40,7 @@ export default function LocationAutocomplete({ onLocationSelected }) {
         value={query}
         onChange={handleSearch}
         placeholder="Type a city or address..."
-        className="w-full px-4 py-2 rounded-lg bg-neutral-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pink-500"
+        className="w-full px-4 py-2 rounded-sm bg-white text-gray-700 border placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pink-500"
       />
       {results.length > 0 && (
         <ul className="absolute z-10 bg-neutral-900 border border-gray-700 rounded-lg mt-2 w-full max-h-60 overflow-y-auto">
