@@ -6,7 +6,7 @@ import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 
 const markerIcon = new L.Icon({
-  iconUrl: "/images/marker-icon.png", // put marker icon in public/images
+  iconUrl: "/images/cursor-icon.png", // put marker icon in public/images
   iconSize: [25, 41],
   iconAnchor: [12, 41],
 });

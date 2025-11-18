@@ -360,7 +360,6 @@ export default function EditProfile() {
           <p className="text-sm text-gray-400 mt-2">{completion}% completed</p>
         </div>
 
-   <ProfileLocation />
         {/* Name */}
         <label className="block mb-1 text-sm text-gray-400">Name</label>
         <input
@@ -456,8 +455,7 @@ export default function EditProfile() {
           </select>
         </div>
 
-     
-
+        <ProfileLocation />
         {/* Height */}
         <div>
           <label className="block mb-1 text-sm text-gray-400">
@@ -739,7 +737,7 @@ export default function EditProfile() {
 
       {/* Photo upload modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
+        <div className="fixed inset-0 z-10 bg-black bg-opacity-70 flex items-center justify-center z-50">
           <div className="bg-neutral-900 p-6 rounded-xl w-full max-w-md space-y-4 shadow-xl">
             <h2 className="text-xl font-bold text-white text-center">
               Upload Profile Photo
