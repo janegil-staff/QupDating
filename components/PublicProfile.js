@@ -174,7 +174,7 @@ export default function PublicProfile(profileId) {
         {profile.tags?.length > 0 && (
           <div>
             <h2 className="text-xl font-semibold text-pink-500">My Hashtags</h2>
-            <div className="flex flex-wrap gap-2 mt-2">
+            <div className="flex flex-wrap gap-2 mt-2 mb-10">
               {profile.tags.map((tag, i) => (
                 <span
                   key={i}
