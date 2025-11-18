@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import LocationPreview from "@/components/LocationPreview";
 import LocationAutocomplete from "./LocationAutoComplete";
-import LocationPicker from "./LocationPicker.";
+//import LocationPicker from "./LocationPicker.";
 import toast from "react-hot-toast";
 
 export default function ProfileLocation() {
@@ -39,10 +39,10 @@ export default function ProfileLocation() {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-xl font-semibold">Select Your Location</h2>
+      <label className="block mb-1 text-sm text-gray-400">Location</label>
 
       {/* Map picker */}
-      <LocationPicker onLocationSelected={handleLocationSelected} />
+      {/*<LocationPicker onLocationSelected={handleLocationSelected} /> */}
 
       {/* Autocomplete input */}
       <LocationAutocomplete onLocationSelected={handleLocationSelected} />

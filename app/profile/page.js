@@ -456,6 +456,7 @@ export default function EditProfile() {
         </div>
 
         <ProfileLocation />
+        
         {/* Height */}
         <div>
           <label className="block mb-1 text-sm text-gray-400">
