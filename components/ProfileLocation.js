@@ -1,7 +1,7 @@
 "use client";
 
 import LocationPreview from "@/components/LocationPreview";
-import LocationAutocomplete from "./LocationAutocomplete";
+import LocationAutocomplete from "./LocationAutoComplete";
 
 export default function ProfileLocation({ handleLocationSelected, location }) {
   return (
