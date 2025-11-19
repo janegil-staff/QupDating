@@ -11,7 +11,7 @@ export default function Navbar() {
     { href: "/dashboard", label: "Home", icon: "🏠" },
     { href: "/matches", label: "Matches", icon: "💖" },
     { href: "/discover", label: "Discover", icon: "🔍" },
-    { href: "/profile/edit", label: "Edit", icon: "👤" },
+    { href: "/profile/edit", label: "Edit", icon: "✏️" },
     ...(session?.user?.id
       ? [{ href: `/profile/${session.user.id}`, label: "Profile", icon: "👤" }]
       : []),
