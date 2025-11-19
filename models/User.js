@@ -42,7 +42,7 @@ const userSchema = new mongoose.Schema(
     likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     dislikes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     matches: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
-    isAdmin: { type: Boolean, default: false}
+    isAdmin: { type: Boolean, default: true}
   },
   { timestamps: true }
 );

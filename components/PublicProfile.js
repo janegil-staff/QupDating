@@ -48,7 +48,7 @@ export default function PublicProfile(profileId) {
     : null;
 
   const isOwnProfile = session?.user?.id === profile._id;
-
+console.log(session?.user);
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 text-white p-6">
       <div className="max-w-4xl mx-auto bg-neutral-900 rounded-xl shadow-xl p-6 space-y-6 relative">
@@ -90,7 +90,7 @@ export default function PublicProfile(profileId) {
             <p className="text-gray-400">
               {age} years • {profile.gender}
             </p>
-            <p className="text-sm text-gray-500">{profile.location.name}</p>
+            <p className="text-sm text-gray-500">{profile.location?.name}</p>
           </div>
         </div>
 

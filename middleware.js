@@ -5,7 +5,7 @@ import { NextResponse } from "next/server";
 const PUBLIC_ROUTES = ["/", "/login", "/register"];
 
 export async function middleware(req) {
-  const token = await getToken({ req });
+  const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
   const { pathname } = req.nextUrl;
 
   // Allow public routes
@@ -23,9 +23,22 @@ export async function middleware(req) {
     return NextResponse.redirect(new URL("/", req.url));
   }
 
+  // 🔒 Admin-only guard
+  if (pathname.startsWith("/admin")) {
+    if (!token.isAdmin) {
+      return NextResponse.redirect(new URL("/unauthorized", req.url));
+    }
+  }
+
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/discover/:path*", "/profile/:path*", "/matches/:path*"],
+  matcher: [
+    "/dashboard/:path*",
+    "/discover/:path*",
+    "/profile/:path*",
+    "/matches/:path*",
+    "/admin/:path*", // 👈 protect admin routes
+  ],
 };
