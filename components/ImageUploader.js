@@ -40,7 +40,7 @@ export default function ImageUploader({ onImagesChange }) {
         onDragOver={(e) => e.preventDefault()}
         className="w-full p-4 border-2 border-dashed border-pink-500 rounded bg-neutral-900 text-center text-gray-400 cursor-pointer"
       >
-        Dra og slipp bilder her, eller bruk knappen under
+       Pull and drop images here, or use the button under
       </div>
 
       <input
