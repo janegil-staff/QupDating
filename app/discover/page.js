@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { getAgeFromDate } from "@/lib/getAgeFromDate";
+import MatchCongrats from "@/components/MatchCongrats";
 
 export default function DiscoverPage() {
   const [users, setUsers] = useState([]);
@@ -11,7 +12,7 @@ export default function DiscoverPage() {
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const loaderRef = useRef(null);
-
+const [showCongrats, setShowCongrats] = useState(false);
   // 🔹 Fetch users with cursor pagination
   const fetchUsers = async () => {
     if (loading || !hasMore) return;
@@ -74,11 +75,12 @@ export default function DiscoverPage() {
 
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {
+  
       toast.error(data.error || "Like feilet");
       return;
     }
-
-    toast.success(data.match ? "🎉 It is a mathc!" : "👍 Liked user");
+    setShowCongrats(true);
+    //toast.success(data.match ? "🎉 It is a mathc!" : "👍 Liked user");
     setUsers((prev) => prev.filter((u) => u._id !== targetUserId));
   };
 
@@ -155,6 +157,7 @@ export default function DiscoverPage() {
           <p className="text-gray-500">Ingen flere profiler å vise</p>
         )}
       </div>
+      {showCongrats && <MatchCongrats onClose={() => setShowCongrats(false)} />}
     </div>
   );
 }
