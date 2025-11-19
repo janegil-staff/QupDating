@@ -1,5 +1,4 @@
 "use client";
-
 import { useState } from "react";
 
 export default function LocationAutocomplete({ onLocationSelected }) {
@@ -16,9 +15,7 @@ export default function LocationAutocomplete({ onLocationSelected }) {
     }
 
     const res = await fetch(
-      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
-        value
-      )}`
+      `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&q=${encodeURIComponent(value)}`
     );
     const data = await res.json();
     setResults(data);
@@ -28,8 +25,10 @@ export default function LocationAutocomplete({ onLocationSelected }) {
     setQuery(place.display_name);
     setResults([]);
     onLocationSelected({
-      coords: { lat: place.lat, lng: place.lon },
-      locationName: place.display_name,
+      lat: parseFloat(place.lat),
+      lng: parseFloat(place.lon),
+      name: place.display_name,
+      country: place.address?.country || "", // ✅ include country
     });
   };
 

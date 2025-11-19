@@ -44,6 +44,7 @@ export default function EditProfilePage() {
     lookingFor: "",
     images: [],
     profileImage: "",
+    searchScope: "Worldwide",
   };
 
   const [form, setForm] = useState(emptyForm);
@@ -78,6 +79,7 @@ export default function EditProfilePage() {
           drinking: user.drinking || "",
           relationshipStatus: user.relationshipStatus || "",
           willingToRelocate: user.willingToRelocate ?? null,
+          searchScope: user.searchScope || "Worldwide",
           education: user.education || "",
           religion: user.religion || "",
           tags: Array.isArray(user.tags)
@@ -141,7 +143,13 @@ export default function EditProfilePage() {
         ...form,
         tags: (form.tags || "").split(/[,\s]+/).filter(Boolean),
         height: form.height ? parseInt(form.height, 10) : undefined,
-        location: form.location,
+        location: {
+          name: form.location?.name,
+          lat: form.location?.lat,
+          lng: form.location?.lng,
+          country: form.location?.country, // ✅ include country
+        },
+        searchScope: form.searchScope || "Worldwide",
       };
 
       const res = await fetch("/api/profile", {
@@ -177,6 +185,7 @@ export default function EditProfilePage() {
       lat: loc.coords.lat,
       lng: loc.coords.lng,
       name: loc.locationName,
+      country: loc.country,
     };
 
     setForm((prev) => ({
@@ -222,6 +231,17 @@ export default function EditProfilePage() {
         return copy;
       });
     }
+  }
+  function handleLocationSelected(loc) {
+    setForm((prev) => ({
+      ...prev,
+      location: {
+        lat: loc.lat,
+        lng: loc.lng,
+        name: loc.name,
+        country: loc.country, // ✅ keep country
+      },
+    }));
   }
 
   if (!mounted) return null;
@@ -536,23 +556,53 @@ export default function EditProfilePage() {
                     <option value="Casual">Casual</option>
                     <option value="Networking">Networking</option>
                     <option value="Activity Partner">Activity Partner</option>
-                    <option value="Open to see where it goes">Open to see where it goes</option>
+                    <option value="Open to see where it goes">
+                      Open to see where it goes
+                    </option>
                   </select>
                 </div>
               </div>
             )}
 
             {step === 4 && (
-              <div>
-                <label className="block text-sm font-medium text-gray-300">
-                  Location Name
-                </label>
+              <>
+                <div>
+                  <label className="block text-sm font-medium text-gray-300">
+                    Location Name
+                  </label>
 
-                <ProfileLocation
-                  handleLocationSelected={handleLocationSelected}
-                  location={form.location}
-                />
-              </div>
+                  <ProfileLocation
+                    handleLocationSelected={handleLocationSelected}
+                    location={form.location}
+                  />
+                </div>
+
+                <div className="mt-6 flex items-center gap-4">
+                  <button
+                    type="button"
+                    onClick={() => setField("searchScope", "Nearby")}
+                    className={`px-4 py-2 rounded ${
+                      form.searchScope === "Nearby"
+                        ? "bg-pink-600 text-white"
+                        : "bg-gray-700 text-gray-300"
+                    }`}
+                  >
+                    🏠 Nearby
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setField("searchScope", "Worldwide")}
+                    className={`px-4 py-2 rounded ${
+                      form.searchScope === "Worldwide"
+                        ? "bg-pink-600 text-white"
+                        : "bg-gray-700 text-gray-300"
+                    }`}
+                  >
+                    🌍 Worldwide
+                  </button>
+                </div>
+              </>
             )}
 
             {step === 5 && (

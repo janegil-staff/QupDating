@@ -1,5 +1,12 @@
 import mongoose from "mongoose";
 
+const locationSchema = new mongoose.Schema({
+  name: { type: String, required: false }, // e.g. "Bergen, Vestland, Norway"
+  lat: { type: Number, required: false },
+  lng: { type: Number, required: false },
+  country: { type: String, required: false }, // ✅ new field
+});
+
 const userSchema = new mongoose.Schema(
   {
     name: { type: String, required: true },
@@ -27,10 +34,11 @@ const userSchema = new mongoose.Schema(
     education: { type: String },
     religion: { type: String },
     tags: [{ type: String }], // e.g. ["#CatLover", "#traveling"]
-    location: {
-      name: { type: String }, // e.g. "Bergen, Norway"
-      lat: { type: Number },
-      lng: { type: Number },
+    location: locationSchema,
+    searchScope: {
+      type: String,
+      enum: ["Nearby", "Regional", "National", "Worldwide"],
+      default: "Worldwide",
     },
     bio: { type: String },
     lookingFor: { type: String },
@@ -42,9 +50,10 @@ const userSchema = new mongoose.Schema(
     likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     dislikes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     matches: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
-    isAdmin: { type: Boolean, default: true },
+    isAdmin: { type: Boolean, default: false },
     resetPasswordToken: { type: String },
     resetPasswordExpires: { type: Date },
+    isBanned: { type: Boolean, default: false },
   },
   { timestamps: true }
 );
