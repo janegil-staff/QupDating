@@ -79,8 +79,8 @@ const [showCongrats, setShowCongrats] = useState(false);
       toast.error(data.error || "Like feilet");
       return;
     }
-    setShowCongrats(true);
-    //toast.success(data.match ? "🎉 It is a mathc!" : "👍 Liked user");
+   // setShowCongrats(true);
+    toast.success(data.match ? "🎉 It is a mathc!" : "👍 Liked user");
     setUsers((prev) => prev.filter((u) => u._id !== targetUserId));
   };
 

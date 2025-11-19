@@ -32,7 +32,7 @@ export default function ImageUploader({ onImagesChange }) {
 
   return (
     <div className="space-y-2">
-      <label className="text-sm text-gray-400">Last opp bilder</label>
+      <label className="text-sm text-gray-400">Upload images</label>
 
       <div
         ref={dropRef}
@@ -64,7 +64,7 @@ export default function ImageUploader({ onImagesChange }) {
                 onClick={() => handleDelete(i)}
                 className="absolute top-1 right-1 bg-red-600 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition"
               >
-                Fjern
+                Remove
               </button>
             </div>
           ))}
