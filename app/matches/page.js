@@ -28,9 +28,8 @@ export default function MatchesPage() {
   useEffect(() => {
     fetchMatches();
   }, []);
-
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 text-gray-100 p-8">
+    <div className="p-6 h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 text-white">
       <h1 className="text-2xl font-bold mb-4">Your Matches</h1>
       {matches.length === 0 ? (
         <p className="text-gray-400">No matches yet. Keep swiping!</p>

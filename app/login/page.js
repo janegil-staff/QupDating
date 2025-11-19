@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 export default function LoginPage() {
- 
   const [form, setForm] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -23,7 +22,7 @@ export default function LoginPage() {
     });
 
     if (res.ok && !res.error) {
-      router.push("/profile/edit");
+      router.push("/profile");
     } else {
       setError("Feil e-post eller passord.");
     }
@@ -83,6 +82,15 @@ export default function LoginPage() {
             style={{ color: "#0070f3", fontWeight: "bold" }}
           >
             Register here
+          </Link>
+        </p>
+        <p>
+          Forgot your password?{" "}
+          <Link
+            href="/forgot-password"
+            className="text-pink-500 hover:underline"
+          >
+            Reset it here
           </Link>
         </p>
       </form>

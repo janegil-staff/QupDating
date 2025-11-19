@@ -5,7 +5,7 @@ const userSchema = new mongoose.Schema(
     name: { type: String, required: true },
     password: { type: String, required: true },
     email: { type: String, required: true, unique: true },
-    birthdate: { type: Date, required: true },
+    birthdate: { type: Date },
     gender: {
       type: String,
       enum: ["", "male", "female", "other"],
@@ -42,7 +42,9 @@ const userSchema = new mongoose.Schema(
     likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     dislikes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     matches: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
-    isAdmin: { type: Boolean, default: true}
+    isAdmin: { type: Boolean, default: true },
+    resetPasswordToken: { type: String },
+    resetPasswordExpires: { type: Date },
   },
   { timestamps: true }
 );
