@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import ImageUploader from "@/components/ImageUploader";
 import { signIn } from "next-auth/react";
+import toast from "react-hot-toast";
 
 export default function RegisterPage() {
   const [localImages, setLocalImages] = useState([]);
@@ -13,41 +14,49 @@ export default function RegisterPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
+    try {
+      // Upload images first
+      const formData = new FormData();
+      localImages.forEach((img) => formData.append("images", img.file));
 
-    // Upload images first
-    const formData = new FormData();
-    localImages.forEach((img) => formData.append("images", img.file));
+      const uploadRes = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
 
-    const uploadRes = await fetch("/api/upload", {
-      method: "POST",
-      body: formData,
-    });
+      const { images } = await uploadRes.json();
 
-    const { images } = await uploadRes.json();
+      // Submit registration
+      const form = new FormData(e.target);
+      form.append("images", JSON.stringify(images));
 
-    // Submit registration
-    const form = new FormData(e.target);
-    form.append("images", JSON.stringify(images));
+      const res = await fetch("/api/register", {
+        method: "POST",
+        body: form,
+      });
 
-    const res = await fetch("/api/register", {
-      method: "POST",
-      body: form,
-    });
+      const data = await res.json();
 
-    const data = await res.json();
-    const result = await signIn("credentials", {
-      email: form.get("email"),
-      password: form.get("password"),
-      redirect: false,
-    });
+      if (data.error) {
+        toast.error(data.error);
+        return;
+      }
 
-    setIsLoading(false);
+      const result = await signIn("credentials", {
+        email: form.get("email"),
+        password: form.get("password"),
+        redirect: false,
+      });
 
-    if (result.ok) {
-      router.push("/profile/edit");
-    } else {
-      console.error("Login failed:", result.error);
-      // Optionally show error to user
+      if (result.ok) {
+        toast.success("User created successfully");
+        router.push("/profile/edit");
+      }
+    } catch (error) {
+      console.error("Register failed:", result.error);
+      toast.error("Register failed:", result.error);
+    } finally {
+      setIsLoading(false);
     }
   };
 

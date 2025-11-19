@@ -12,20 +12,24 @@ export default function DiscoverPage() {
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const loaderRef = useRef(null);
-const [showCongrats, setShowCongrats] = useState(false);
+  const [showCongrats, setShowCongrats] = useState(false);
   // 🔹 Fetch users with cursor pagination
   const fetchUsers = async () => {
     if (loading || !hasMore) return;
     setLoading(true);
     try {
-      const res = await fetch(`/api/discover${cursor ? `?cursor=${cursor}` : ""}`);
+      const res = await fetch(
+        `/api/discover${cursor ? `?cursor=${cursor}` : ""}`
+      );
       const data = await res.json();
 
       if (res.ok) {
         setUsers((prev) => {
           const all = [...prev, ...data.users];
           // deduplicate by _id
-          const unique = Array.from(new Map(all.map((u) => [u._id, u])).values());
+          const unique = Array.from(
+            new Map(all.map((u) => [u._id, u])).values()
+          );
           return unique;
         });
         setCursor(data.nextCursor || null);
@@ -66,7 +70,7 @@ const [showCongrats, setShowCongrats] = useState(false);
       toast.error("Mangler bruker-ID");
       return;
     }
-  
+
     const res = await fetch("/api/like", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -75,11 +79,13 @@ const [showCongrats, setShowCongrats] = useState(false);
 
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {
-  
       toast.error(data.error || "Like feilet");
       return;
     }
-   // setShowCongrats(true);
+    if (data.match) {
+      setShowCongrats(true);
+    }
+
     toast.success(data.match ? "🎉 It is a mathc!" : "👍 Liked user");
     setUsers((prev) => prev.filter((u) => u._id !== targetUserId));
   };
@@ -149,7 +155,10 @@ const [showCongrats, setShowCongrats] = useState(false);
       </div>
 
       {/* 🔹 Loader / End message */}
-      <div ref={loaderRef} className="h-10 flex justify-center items-center mt-10">
+      <div
+        ref={loaderRef}
+        className="h-10 flex justify-center items-center mt-10"
+      >
         {loading && hasMore && (
           <p className="text-gray-400">Laster inn flere profiler…</p>
         )}

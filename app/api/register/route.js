@@ -7,7 +7,9 @@ export async function POST(req) {
   try {
     const formData = await req.formData();
     const name = formData.get("name");
-    const email = formData.get("email");
+    const rawEmail = formData.get("email");
+    const email = rawEmail.toLowerCase().trim(); // ✅ normalize
+
     const password = formData.get("password");
     const birthDay = parseInt(formData.get("birthDay"));
     const birthMonth = parseInt(formData.get("birthMonth"));
@@ -22,10 +24,15 @@ export async function POST(req) {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     await connectDB();
-    console.log(
-      "Profile image:",
-      images.length > 0 ? images[0].url : "/images/placeholder.png"
-    );
+
+    const existingUser = await User.findOne({ email });
+
+    if (existingUser) {
+      return NextResponse.json(
+        { error: "User already registered" },
+        { status: 400 }
+      );
+    }
 
     const user = await User.create({
       name,
@@ -38,12 +45,6 @@ export async function POST(req) {
         images.length > 0 ? images[0].url : "/images/placeholder.png",
     });
 
-    console.log(
-      "Profile image:",
-      images.length > 0 ? images[0].url : "/images/placeholder.png"
-    );
-
-    console.log("User created:", user);
     return NextResponse.json({ success: true, user });
   } catch (err) {
     console.error("Register error:", err);
