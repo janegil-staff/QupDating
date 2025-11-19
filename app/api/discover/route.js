@@ -23,10 +23,11 @@ export async function GET(req) {
 
     const oppositeGender = currentUser.gender === "male" ? "female" : "male";
 
+    // Base query
     const query = {
       _id: {
         $ne: currentUser._id,
-        ...(cursor && { $lt: new mongoose.Types.ObjectId(cursor) }), // ✅ use $lt for descending
+        ...(cursor && { $lt: new mongoose.Types.ObjectId(cursor) }),
       },
       gender: oppositeGender,
       $nor: [
@@ -36,8 +37,18 @@ export async function GET(req) {
       ],
     };
 
+    // ✅ Apply searchScope filter
+    if (currentUser.searchScope === "Nearby") {
+      query["location.country"] = currentUser.location.country;
+    } else if (currentUser.searchScope === "National") {
+      query["location.country"] = currentUser.location.country;
+      // could expand to include region/state later
+    } else if (currentUser.searchScope === "Worldwide") {
+      // no restriction
+    }
+
     const users = await User.find(query)
-      .sort({ _id: -1 }) // ✅ sort newest first by _id
+      .sort({ _id: -1 })
       .limit(20)
       .lean();
 

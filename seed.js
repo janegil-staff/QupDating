@@ -40,6 +40,13 @@ async function seedUsers() {
     bio: "This is a sample bio for testing.",
     images: [{ url: u.picture.large, public_id: null }],
     profileImage: u.picture.large,
+    location: {
+      lat: 60.3943055,
+      lng: 5.3259192,
+      name: "Bergen, Vestland, Norway",
+      country: "Norway"
+    },
+    searchScope: "Worldwide"
     
   }));
   console.log(users);

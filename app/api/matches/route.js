@@ -1,56 +1,30 @@
 import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
 import User from "@/models/User";
 import { connectDB } from "@/lib/db";
+import { authOptions } from "@/lib/auth";
 
-// GET /api/matches?userId=123
 export async function GET(req) {
+  await connectDB();
+
+  // get the logged-in user from NextAuth
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+  }
+
   try {
-    await connectDB();
+    // find current user and populate matches
+    const user = await User.findById(session.user.id)
+      .populate("matches", "name profileImage age location bio tags");
 
-    const { searchParams } = new URL(req.url);
-    const userId = searchParams.get("userId");
-
-    const currentUser = await User.findById(userId);
-    if (!currentUser) {
+    if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    const scope = currentUser.searchScope || "Worldwide";
-    const location = currentUser.location;
-
-    let query = {};
-
-    if (scope === "Nearby") {
-      // Entire country filter (requires storing country in profile)
-      query["location.country"] = location.country;
-    } else if (scope === "Regional") {
-      // Radius ~200km
-      query.location = {
-        $near: {
-          $geometry: {
-            type: "Point",
-            coordinates: [location.lng, location.lat],
-          },
-          $maxDistance: 200000, // 200 km
-        },
-      };
-    } else if (scope === "National") {
-      // Same country filter
-      query["location.country"] = location.country;
-    } else if (scope === "Worldwide") {
-      // No location filter → all users
-    }
-
-    // Exclude self
-    query._id = { $ne: currentUser._id };
-
-    const matches = await User.find(query).limit(50); // limit for performance
-    return NextResponse.json({ matches });
+    return NextResponse.json({ matches: user.matches });
   } catch (err) {
-    console.error("Match query error:", err);
-    return NextResponse.json(
-      { error: "Internal Server Error" },
-      { status: 500 }
-    );
+    console.error("Error fetching matches:", err);
+    return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }
