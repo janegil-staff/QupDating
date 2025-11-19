@@ -107,7 +107,7 @@ const [showCongrats, setShowCongrats] = useState(false);
   };
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white p-6">
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 text-white p-6">
       <h1 className="text-3xl font-bold mb-6">Discover new profiles</h1>
 
       {/* 🔹 Grid of user cards */}

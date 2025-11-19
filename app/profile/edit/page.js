@@ -227,8 +227,8 @@ export default function EditProfilePage() {
   if (!mounted) return null;
 
   return (
-    <div className="min-h-screen bg-neutral-900 py-10 px-4 text-gray-100">
-      <div className="max-w-4xl mx-auto bg-neutral-800 rounded-2xl shadow p-8">
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 py-10 px-4 text-gray-100">
+      <div className="max-w-4xl mx-auto  bg-neutral-900 rounded-2xl shadow p-8">
         <div className="mb-6 w-full">
           <div className="flex items-center justify-between mb-2">
             <h2 className="text-lg font-semibold">{STEPS[step]}</h2>

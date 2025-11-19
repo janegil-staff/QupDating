@@ -6,7 +6,7 @@ export default function MatchCongrats({ onClose }) {
   useEffect(() => {
     const timer = setTimeout(() => {
       onClose();
-    }, 3000); // auto-close after 3 seconds
+    }, 2000); // auto-close after 3 seconds
     return () => clearTimeout(timer);
   }, [onClose]);
 
