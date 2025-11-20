@@ -14,6 +14,24 @@ export default function PublicProfile(profileId) {
   const [open, setOpen] = useState(false);
   const [index, setIndex] = useState(0);
   const [isMatch, setIsMatch] = useState(0);
+  const [isVerified, setIsVerified] = useState(false);
+
+  useEffect(() => {
+    const fetchVerification = async () => {
+      try {
+        const res = await fetch("/api/me");
+        const user = await res.json();
+        console.log("USER --->", user);
+        setIsVerified(user?.isVerified || false);
+      } catch (err) {
+        console.error("Failed to fetch verification status:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchVerification();
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -49,11 +67,13 @@ export default function PublicProfile(profileId) {
     : null;
 
   const isOwnProfile = session?.user?.id === profile._id;
-  console.log(session.user);
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 text-white p-6">
       <div className="max-w-4xl mx-auto bg-neutral-900 rounded-xl shadow-xl p-6 space-y-6 relative">
-        {isOwnProfile && !session.user.isVerified && <VerifyBanner user={session.user} />}
+        {isOwnProfile && !isVerified && (
+          <VerifyBanner user={session.user} />
+        )}
 
         {/* Like Button */}
         {!isOwnProfile && (
