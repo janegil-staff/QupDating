@@ -1,5 +1,6 @@
 "use client";
 
+import VerifiedRedirect from "@/components/VerifiedRedirect";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -24,6 +25,7 @@ export default function VerifyClient() {
     <div className="text-white">
       {status === "loading" && <p>Verifying your profile…</p>}
       {status === "success" && <p>✅ Your profile is now verified!</p>}
+      {status === "success" && <VerifiedRedirect />}
       {status === "error" && <p>❌ Invalid or expired token.</p>}
       {status === "missing" && <p>⚠️ No token provided.</p>}
     </div>

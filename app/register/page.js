@@ -49,7 +49,7 @@ export default function RegisterPage() {
       });
 
       if (result.ok) {
-        toast.success(`User created successfully, an email has been sendt to you. If you cant see it, look in the garbage mail`);
+        toast.success(`User created successfully, an email has been sendt to ${form.get("email")}. If you cant see it, look in the garbage mail`);
         router.push("/profile/edit");
       }
     } catch (error) {
