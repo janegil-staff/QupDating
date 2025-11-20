@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { getAgeFromDate } from "@/lib/getAgeFromDate";
 import MatchCongrats from "@/components/MatchCongrats";
+import VerifiedBadge from "@/components/VerifiedBadge";
 
 export default function DiscoverPage() {
   const [users, setUsers] = useState([]);
@@ -124,6 +125,8 @@ export default function DiscoverPage() {
             className="bg-gray-900 p-4 rounded-xl shadow flex flex-col items-center"
           >
             <Link href={`/profile/${user._id}`} className="w-full">
+              {user.isVerified && <VerifiedBadge className="ml-2" />}
+
               <img
                 src={user.profileImage || "/placeholder.jpg"}
                 alt={user.name}

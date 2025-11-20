@@ -7,6 +7,7 @@ import EmojiPicker from "emoji-picker-react";
 import { getAgeFromDate } from "@/lib/getAgeFromDate";
 import { redirect } from "next/navigation";
 import ImageCarousel from "@/components/ImageCarousel";
+import VerifiedBadge from "@/components/VerifiedBadge";
 
 const socket = io({ path: "/api/socket" });
 
@@ -170,8 +171,7 @@ export default function ChatPage({ userId }) {
   };
 
   return (
-  <div className="h-screen flex bg-gray-900 text-white overflow-hidden">
-
+    <div className="h-screen flex bg-gray-900 text-white overflow-hidden">
       {/* Left Sidebar */}
 
       <aside className="hidden lg:block w-64 bg-gray-800 border-r border-gray-700 overflow-y-auto">
@@ -322,6 +322,12 @@ export default function ChatPage({ userId }) {
       {/* Right Sidebar */}
       {user && (
         <aside className="hidden lg:block w-80 bg-gray-800 p-6 space-y-4 overflow-y-auto">
+          {user.isVerified && (
+            <div className="text-center">
+              <VerifiedBadge />
+            </div>
+          )}
+
           <img
             src={user.profileImage || "/default-avatar.png"}
             alt={user.name}
@@ -331,7 +337,7 @@ export default function ChatPage({ userId }) {
           <h3 className="text-lg font-bold text-center">{user.name}</h3>
 
           <p className="text-gray-400 text-center text-sm">
-            {getAgeFromDate(user.birthdate)} år • {user.location.name}
+            {getAgeFromDate(user.birthdate)} år • {user.location?.name}
           </p>
 
           <p className="text-gray-300 mt-1 text-sm text-center">
