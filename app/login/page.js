@@ -4,7 +4,7 @@ import LoginClient from "./LoginClient";
 
 export default function LoginPage() {
   return (
-    <div className="p-6 max-w-md mx-auto text-white">
+    <div className="p-6 mx-auto  bg-neutral-950 text-white">
       <Suspense fallback={null}>
         <LoginClient />
       </Suspense>
