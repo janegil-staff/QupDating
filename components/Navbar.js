@@ -74,7 +74,7 @@ export default function Navbar() {
             </Link>
           ))}
           <button
-            onClick={() => signOut({ callbackUrl: "/" })}
+            onClick={() => signOut({ callbackUrl: "https://qup.dating" })}
             className="flex flex-col items-center text-xs text-gray-400 hover:text-red-500"
           >
             <span className="text-lg">🚪</span>
