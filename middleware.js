@@ -39,6 +39,7 @@ export const config = {
     "/discover/:path*",
     "/profile/:path*",
     "/matches/:path*",
+    "/events/:path*",
     "/admin/:path*", // 👈 protect admin routes
   ],
 };
