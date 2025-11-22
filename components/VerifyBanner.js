@@ -35,6 +35,7 @@ export default function VerifyBanner({ user }) {
       <div>
         Your profile isn’t verified yet.  
         <span className="text-yellow-300 font-semibold ml-1">Verify to earn a badge and boost trust.</span>
+        <span> (check in your spam folder)</span>
       </div>
       <button
         onClick={handleResend}
