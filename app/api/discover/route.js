@@ -13,6 +13,8 @@ export async function GET(req) {
     }
 
     await connectDB();
+
+
     const { searchParams } = new URL(req.url);
     const cursor = searchParams.get("cursor");
 
@@ -23,19 +25,46 @@ export async function GET(req) {
 
     const oppositeGender = currentUser.gender === "male" ? "female" : "male";
 
-    // Base query
-    const query = {
-      _id: {
-        $ne: currentUser._id,
-        ...(cursor && { $lt: new mongoose.Types.ObjectId(cursor) }),
+    const now = new Date();
+
+const query = {
+  _id: {
+    $ne: currentUser._id,
+    ...(cursor && { $lt: new mongoose.Types.ObjectId(cursor) }),
+  },
+  gender: oppositeGender,
+  $nor: [
+    { _id: { $in: currentUser.likes } },
+    { _id: { $in: currentUser.dislikes } },
+    { _id: { $in: currentUser.matches } },
+  ],
+  $expr: {
+    $and: [
+      {
+        $gte: [
+          {
+            $divide: [
+              { $subtract: [now, "$birthdate"] },
+              1000 * 60 * 60 * 24 * 365,
+            ],
+          },
+          currentUser.preferredAgeMin || 18,
+        ],
       },
-      gender: oppositeGender,
-      $nor: [
-        { _id: { $in: currentUser.likes } },
-        { _id: { $in: currentUser.dislikes } },
-        { _id: { $in: currentUser.matches } },
-      ],
-    };
+      {
+        $lte: [
+          {
+            $divide: [
+              { $subtract: [now, "$birthdate"] },
+              1000 * 60 * 60 * 24 * 365,
+            ],
+          },
+          currentUser.preferredAgeMax || 99,
+        ],
+      },
+    ],
+  },
+};
 
     // ✅ Apply searchScope filter
     if (currentUser.searchScope === "Nearby") {
@@ -47,10 +76,7 @@ export async function GET(req) {
       // no restriction
     }
 
-    const users = await User.find(query)
-      .sort({ _id: -1 })
-      .limit(20)
-      .lean();
+    const users = await User.find(query).sort({ _id: -1 }).limit(20).lean();
 
     const nextCursor =
       users.length > 0 ? users[users.length - 1]._id.toString() : null;

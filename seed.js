@@ -46,8 +46,9 @@ async function seedUsers() {
       name: "Bergen, Vestland, Norway",
       country: "Norway"
     },
-    searchScope: "Worldwide"
-    
+    searchScope: "Worldwide",
+    isBanned: false,
+    isVerified: true
   }));
   console.log(users);
   await User.insertMany(users);

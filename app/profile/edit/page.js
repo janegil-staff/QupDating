@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import ProfileLocation from "@/components/ProfileLocation";
 import toast from "react-hot-toast";
 import ImageUploadGrid from "@/components/ImageUploadGrid";
+import AgeRangeSlider from "@/components/AgeRangeSlider";
 
 const STEPS = [
   "Basic Info",
@@ -21,6 +22,14 @@ export default function EditProfilePage() {
   const [saving, setSaving] = useState(false);
   const fileRef = useRef(null);
   const [uploading, setUploading] = useState(Array(6).fill(false));
+
+  const [preferredAgeMin, setPreferredAgeMin] = useState(25);
+  const [preferredAgeMax, setPreferredAgeMax] = useState(40);
+
+  const handleAgeChange = ([min, max]) => {
+    setPreferredAgeMin(min);
+    setPreferredAgeMax(max);
+  };
 
   const emptyForm = {
     name: "",
@@ -45,6 +54,8 @@ export default function EditProfilePage() {
     images: [],
     profileImage: "",
     searchScope: "Worldwide",
+    preferredAgeMin: 18,
+    preferredAgeMax: 99,
   };
 
   const [form, setForm] = useState(emptyForm);
@@ -96,6 +107,8 @@ export default function EditProfilePage() {
             (Array.isArray(user.images) && user.images[0]
               ? user.images[0].url
               : ""),
+          preferredAgeMin: user.preferredAgeMin || 25,
+          preferredAgeMax: user.preferredAgeMax || 40,
         });
       } catch (err) {
         console.error(err);
@@ -150,6 +163,8 @@ export default function EditProfilePage() {
           country: form.location?.country, // ✅ include country
         },
         searchScope: form.searchScope || "Worldwide",
+        preferredAgeMin: form.preferredAgeMin || 18,
+        preferredAgeMax: form.preferredAgeMax || 99,
       };
 
       const res = await fetch("/api/profile", {
@@ -560,6 +575,21 @@ export default function EditProfilePage() {
                       Open to see where it goes
                     </option>
                   </select>
+                </div>
+
+                <div>
+                  <AgeRangeSlider
+                    min={18}
+                    max={99}
+                    value={[form.preferredAgeMin, form.preferredAgeMax]}
+                    onChange={([min, max]) =>
+                      setForm((prev) => ({
+                        ...prev,
+                        preferredAgeMin: min,
+                        preferredAgeMax: max,
+                      }))
+                    }
+                  />
                 </div>
               </div>
             )}

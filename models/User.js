@@ -63,6 +63,8 @@ const userSchema = new mongoose.Schema(
     isVerified: { type: Boolean, default: false },
     verifyToken: { type: String },
     verifyExpires: { type: Date },
+    preferredAgeMin: { type: Number, default: 18 },
+    preferredAgeMax: { type: Number, default: 99 },
   },
 
   { timestamps: true }

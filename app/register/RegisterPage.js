@@ -49,11 +49,7 @@ export default function RegisterPage() {
       });
 
       if (result.ok) {
-        toast.success(
-          `User created successfully. An email has been sent to ${form.get(
-            "email"
-          )}. Check spam if you don’t see it.`
-        );
+        toast.success(`Please check your email to verify your profile.`);
         router.push("/profile/edit");
       }
     } catch (error) {
@@ -103,26 +99,56 @@ export default function RegisterPage() {
           Birthdate
         </label>
         <div className="grid grid-cols-3 gap-2">
-          <select name="birthDay" required className="bg-neutral-800 text-white px-4 py-2 rounded-lg">
+          <select
+            name="birthDay"
+            required
+            className="bg-neutral-800 text-white px-4 py-2 rounded-lg"
+          >
             <option value="">Day</option>
             {[...Array(31)].map((_, i) => (
-              <option key={i + 1} value={i + 1}>{i + 1}</option>
+              <option key={i + 1} value={i + 1}>
+                {i + 1}
+              </option>
             ))}
           </select>
-          <select name="birthMonth" required className="bg-neutral-800 text-white px-4 py-2 rounded-lg">
+          <select
+            name="birthMonth"
+            required
+            className="bg-neutral-800 text-white px-4 py-2 rounded-lg"
+          >
             <option value="">Month</option>
             {[
-              "January","February","March","April","May","June",
-              "July","August","September","October","November","December"
+              "January",
+              "February",
+              "March",
+              "April",
+              "May",
+              "June",
+              "July",
+              "August",
+              "September",
+              "October",
+              "November",
+              "December",
             ].map((month, i) => (
-              <option key={month} value={i + 1}>{month}</option>
+              <option key={month} value={i + 1}>
+                {month}
+              </option>
             ))}
           </select>
-          <select name="birthYear" required className="bg-neutral-800 text-white px-4 py-2 rounded-lg">
+          <select
+            name="birthYear"
+            required
+            className="bg-neutral-800 text-white px-4 py-2 rounded-lg"
+          >
             <option value="">Year</option>
             {[...Array(82)].map((_, i) => {
               const year = new Date().getFullYear() - i - 18;
-              return <option key={year} value={year}>{year}</option>;
+              return (
+                <option key={year} value={year}>
+                  {year}
+                </option>
+              );
             })}
           </select>
         </div>
