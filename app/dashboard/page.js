@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Flame, Heart, Users, MessageCircle } from "lucide-react";
 import SwipeCard from "@/components/SwipeCard";
+import ProfileCompletion from "@/components/ProfileCompletion";
+
 export default function Dashboard() {
   const [stats, setStats] = useState({
     profileViews: 0,
@@ -13,8 +15,24 @@ export default function Dashboard() {
   });
   const [cards, setCards] = useState([]);
   const [swipedCards, setSwipedCards] = useState([]);
+  const [user, setUser] = useState(null);
 
-  // Fetch stats
+  useEffect(() => {
+    async function fetchUser() {
+      try {
+        const res = await fetch("/api/me");
+        if (!res.ok) throw new Error("Failed to fetch user");
+        const data = await res.json();
+
+        setUser(data); // assuming your API returns { user: {...} }
+      } catch (err) {
+        console.error("Error fetching current user:", err);
+      }
+    }
+
+    fetchUser();
+  }, []);
+
   useEffect(() => {
     async function fetchStats() {
       const res = await fetch("/api/stats");
@@ -28,11 +46,9 @@ export default function Dashboard() {
 
   useEffect(() => {
     async function fetchCards() {
-      console.log("GET USERS");
       try {
         const res = await fetch("/api/users");
         const data = await res.json();
-        console.log("DATA --->", data);
         setCards(data);
       } catch (error) {
         console.error(error);
@@ -128,13 +144,7 @@ export default function Dashboard() {
       </section>
 
       {/* Profile Completion */}
-      <div className="bg-gray-800 rounded-2xl p-5 shadow-xl mb-8 w-full max-w-4xl">
-        <h2 className="text-xl font-semibold mb-3">Profile Completion</h2>
-        <div className="w-full bg-gray-700 rounded-full h-3 overflow-hidden">
-          <div className="h-full w-[72%] bg-gradient-to-r from-pink-600 to-purple-500 rounded-full" />
-        </div>
-        <p className="text-sm text-gray-400 mt-2">72% completed</p>
-      </div>
+      <ProfileCompletion user={user} />
 
       {/* Suggestions */}
       <div className="bg-gray-800 rounded-2xl p-5 shadow-xl mb-8 w-full max-w-4xl">
