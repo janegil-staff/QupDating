@@ -7,8 +7,16 @@ export async function POST(req) {
   await connectDB();
   const body = await req.json();
   console.log("ENTERING", body);
-  const { roomId, content, sender, senderName, senderImage, createdAt, _id } =
-    body;
+  const {
+    roomId,
+    content,
+    sender,
+    receiver,
+    senderName,
+    senderImage,
+    createdAt,
+    _id,
+  } = body;
 
   if (!roomId || !content || !sender || !_id || !createdAt) {
     return NextResponse.json(
@@ -16,11 +24,12 @@ export async function POST(req) {
       { status: 400 }
     );
   }
-const senderId = mongoose.Types.ObjectId.createFromHexString(sender);
+  const senderId = mongoose.Types.ObjectId.createFromHexString(sender);
   try {
     const message = await Message.create({
       roomId,
       content,
+      receiver,
       sender: senderId,
       senderName,
       senderImage,

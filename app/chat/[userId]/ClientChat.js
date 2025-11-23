@@ -149,6 +149,7 @@ export default function ChatPage({ userId }) {
       _id: Date.now().toString(),
       content: input,
       sender: sessionUserId,
+      receiver: selectedUserId,
       senderName: session?.user?.name || "You",
       senderImage: session?.user?.image || "/default-avatar.png",
       createdAt: new Date().toISOString(),

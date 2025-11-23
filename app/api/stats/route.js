@@ -39,7 +39,7 @@ export async function GET(req) {
     ]);
 
     const profileViews = viewsByUser.length > 0 ? viewsByUser[0].count : 0;
-    console.log(profileViews);
+ 
     return new Response(
       JSON.stringify({
         profileViews,
