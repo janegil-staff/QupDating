@@ -5,7 +5,7 @@ import { connectDB } from "@/lib/db";
 
 export async function GET(req, context) {
   await connectDB();
-
+  console.log("Connecting to MongoDB:", process.env.MONGODB_URI);
   try {
     const rawParams = await context.params;
     const id =

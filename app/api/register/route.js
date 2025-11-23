@@ -7,6 +7,7 @@ import sendEmail from "@/lib/sendEmail"; // 🔹 You'll need to implement this
 import verifyEmailTemplate from "@/lib/emailTemplates/verifyEmail";
 
 export async function POST(req) {
+
   try {
     const formData = await req.formData();
     const name = formData.get("name");

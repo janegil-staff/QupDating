@@ -43,7 +43,7 @@ export default function LikeButton({ profileId, initialLiked }) {
           : "bg-pink-500 hover:bg-pink-600 text-white"
       }`}
     >
-      {liked ? "Fjern like" : "Lik"}
+      {liked ? "Remove like" : "Like"}
       <span className="text-xl">{liked ? "💔" : "❤️"}</span>
     </button>
   );

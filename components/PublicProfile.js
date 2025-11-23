@@ -75,7 +75,7 @@ export default function PublicProfile(profileId) {
           <VerifyBanner user={session.user} />
         )}
 
-        {/* Like Button */}
+        <div className="flex justify-center">
         {!isOwnProfile && (
           <div className="float-right">
             <ToggleLikeButton
@@ -97,6 +97,9 @@ export default function PublicProfile(profileId) {
             </a>
           </div>
         )}
+        </div>
+        {/* Like Button */}
+
 
         {/* Header */}
         <div className="flex flex-col md:flex-row items-center gap-6">

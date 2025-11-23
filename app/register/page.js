@@ -10,6 +10,7 @@ export default async function Register() {
   if (session) {
     redirect("/profile/edit"); // or wherever you want them to land
   }
+console.log("Connecting to MongoDB:", process.env.MONGODB_URI);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 text-white flex items-center justify-center">
