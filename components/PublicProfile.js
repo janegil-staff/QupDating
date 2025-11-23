@@ -75,7 +75,7 @@ export default function PublicProfile(profileId) {
           <VerifyBanner user={session.user} />
         )}
 
-        <div className="flex justify-center">
+        <div className="flex justify-end">
         {!isOwnProfile && (
           <div className="float-right">
             <ToggleLikeButton
@@ -93,7 +93,7 @@ export default function PublicProfile(profileId) {
              text-white font-medium px-5 py-2 shadow-md transition-transform 
              transform hover:scale-105 mx-6 px-6 py-2 rounded-full font-semibold"
             >
-              💬 Send Message
+              Message
             </a>
           </div>
         )}

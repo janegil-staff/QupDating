@@ -54,7 +54,7 @@ export default function ToggleLikeButton({ currentUser, targetUser }) {
           : "bg-pink-600 text-white hover:bg-pink-700"
       }`}
     >
-      {loading ? "..." : isLiked ? "💔 Remove like" : "💖 Like profil"}
+      {loading ? "..." : isLiked ? "💔 unlike" : "💖 Like profil"}
     </button>
   );
 }
