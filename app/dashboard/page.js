@@ -1,251 +1,159 @@
 "use client";
-import { useSession } from "next-auth/react";
-import { useEffect, useRef, useState } from "react";
-import { format, isToday, isYesterday } from "date-fns";
-import { nb } from "date-fns/locale";
-import { io } from "socket.io-client";
-import MatchTabs from "@/components/MatchTabs";
 
-function formatNorwegianDate(dateString) {
-  const date = new Date(dateString);
-  if (isToday(date))
-    return `i dag kl. ${format(date, "HH:mm", { locale: nb })}`;
-  if (isYesterday(date))
-    return `i går kl. ${format(date, "HH:mm", { locale: nb })}`;
-  return format(date, "d. MMMM 'kl.' HH:mm", { locale: nb });
-}
+import { useEffect, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { Flame, Heart, Users, MessageCircle } from "lucide-react";
+import SwipeCard from "@/components/SwipeCard";
+export default function Dashboard() {
+  const [stats, setStats] = useState({
+    profileViews: 0,
+    newLikes: 0,
+    newMatches: 0,
+    newMessages: 0,
+  });
+  const [cards, setCards] = useState([]);
+  const [swipedCards, setSwipedCards] = useState([]);
 
-const socket = io({ path: "/api/socket" });
-
-export default function DashboardPage() {
-  const { data: session, status } = useSession();
-  const [matches, setMatches] = useState([]);
-  const [activeMatchId, setActiveMatchId] = useState(null);
-  const [roomId, setRoomId] = useState("");
-  const [messages, setMessages] = useState([]);
-  const [lastMessages, setLastMessages] = useState({});
-  const [cursor, setCursor] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [hasMore, setHasMore] = useState(true);
-  const loaderRef = useRef(null);
-  const scrollRef = useRef(null);
-
+  // Fetch stats
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    async function fetchStats() {
+      const res = await fetch("/api/stats");
+      if (res.ok) {
+        const data = await res.json();
+        setStats(data);
+      }
     }
-  }, [messages]);
+    fetchStats();
+  }, []);
 
   useEffect(() => {
-    if (status !== "authenticated") return;
-
-    const userId = session.user.id;
-
-    const fetchDashboardData = async () => {
-      const userRes = await fetch(`/api/users/${userId}`);
-      const userData = await userRes.json();
-      const matchUsers = userData.matches || [];
-
-      setMatches(matchUsers);
-      if (matchUsers.length > 0) {
-        setActiveMatchId(matchUsers[0]._id);
+    async function fetchCards() {
+      console.log("GET USERS");
+      try {
+        const res = await fetch("/api/users");
+        const data = await res.json();
+        console.log("DATA --->", data);
+        setCards(data);
+      } catch (error) {
+        console.error(error);
+        setCards([]);
       }
-    };
+    }
+    fetchCards();
+  }, []);
 
-    fetchDashboardData();
-  }, [status, session]);
-
-  useEffect(() => {
-    if (!session?.user?.id || !activeMatchId) return;
-    const generatedRoomId = [session.user.id, activeMatchId].sort().join("-");
-    setRoomId(generatedRoomId);
-    setMessages([]);
-    setCursor(null);
-    setHasMore(true);
-    fetchMessages(generatedRoomId);
-  }, [activeMatchId]);
-
-  const fetchMessages = async (room = roomId) => {
-    if (loading || !hasMore) return;
-    setLoading(true);
-    try {
-      const res = await fetch(
-        `/api/messages?roomId=${room}${cursor ? `&cursor=${cursor}` : ""}`
-      );
-      const data = await res.json();
-      console.log("DATA", data);
-      if (data.error) {
-        setHasMore(false);
-      }
-
-      if (Array.isArray(data.messages)) {
-        const reversed = [...data.messages].reverse();
-        setMessages((prev) => {
-          const all = [...reversed, ...prev];
-          const unique = Array.from(
-            new Map(all.map((m) => [m._id, m])).values()
-          );
-          return unique;
+  const handleSwipe = async (direction, card) => {
+    if (direction === "right") {
+      console.log(`Liked user: ${card.name} (${card._id})`);
+      // Call your API to register a like
+      try {
+        await fetch("/api/like", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ targetUserId: card._id }),
         });
-
-        const latest = data.messages[data.messages.length - 1];
-        if (latest) {
-          setLastMessages((prev) => ({
-            ...prev,
-            [latest.roomId]: latest,
-          }));
-        }
-
-        setCursor(data.nextCursor || null);
-        setHasMore(data.hasMore !== false);
+      } catch (err) {
+        console.error("Failed to like user:", err);
       }
-    } catch (err) {
-      console.error("Message fetch failed:", err);
-    } finally {
-      setLoading(false);
+    } else if (direction === "left") {
+      console.log(`Passed user: ${card.name} (${card._id})`);
+      // Optional: register pass
+      try {
+        await fetch("/api/dislike", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ targetUserId: card._id }),
+        });
+      } catch (err) {
+        console.error("Failed to pass user:", err);
+      }
     }
+
+    // Remove the swiped card from the UI
+    setCards((prev) => prev.filter((c) => c._id !== card._id));
   };
 
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting && hasMore && !loading) {
-          fetchMessages();
-        }
-      },
-      { threshold: 1 }
-    );
-
-    if (loaderRef.current) observer.observe(loaderRef.current);
-    return () => observer.disconnect();
-  }, [hasMore, loading]);
-
-  // Socket listener for real-time updates
-  useEffect(() => {
-    if (status !== "authenticated") return;
-
-    socket.connect();
-    socket.on("connect", () => {
-      console.log("🔌 Dashboard socket connected:", socket.id);
-    });
-
-    socket.on("message", (msg) => {
-      setLastMessages((prev) => ({
-        ...prev,
-        [msg.roomId]: msg,
-      }));
-
-      if (msg.roomId === roomId) {
-        setMessages((prev) => {
-          if (prev.some((m) => m._id === msg._id)) return prev;
-          return [...prev, msg];
-        });
-
-        // Scroll to bottom after DOM updates
-        setTimeout(() => {
-          if (scrollRef.current) {
-            scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-          }
-        }, 100);
-      }
-    });
-
-    return () => {
-      socket.off("message");
-      socket.disconnect();
-    };
-  }, [status, roomId]);
-
-  if (status === "loading") return <p className="text-white">Laster inn...</p>;
-  if (status === "unauthenticated")
-    return <p className="text-white">Du må logge inn</p>;
-
-  const uniqueMessages = Array.from(
-    new Map(messages.map((m) => [m._id, m])).values()
-  );
-
   return (
-    <main className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 text-white px-6 py-10">
-      <div className="max-w-screen-xl mx-auto space-y-8">
-        {/* Header */}
-        <header className="text-center">
-          <h1 className="text-4xl font-bold">Hi {session.user.name} 👋</h1>
-          <p className="text-gray-400 mt-2">
-            Welcome back to Qup — find real connections near you
-          </p>
-        </header>
-
-        <section className="grid md:grid-cols-3 gap-6">
-          {/* Matches */}
-          <div className="md:col-span-1 bg-gray-900 p-4 rounded-xl shadow-lg max-h-[400px] overflow-y-auto">
-            <h2 className="text-xl font-semibold mb-4">Your Matches</h2>
-            <MatchTabs
-              matches={matches}
-              activeMatchId={activeMatchId}
-              onSelect={(id) => setActiveMatchId(id)}
-              lastMessages={lastMessages}
-              sessionUserId={session.user.id}
-            />
-          </div>
-
-          {/* Messages */}
-          <div className="md:col-span-2 bg-gray-900 p-4 rounded-xl shadow-lg">
-            <h2 className="text-xl font-semibold mb-4">Messages</h2>
-            <div
-              ref={scrollRef}
-              className="flex flex-col max-h-[400px] overflow-y-auto space-y-4"
-            >
-              {uniqueMessages.reverse().map((msg) => (
-                <div
-                  key={msg._id}
-                  className="bg-gray-800 p-4 rounded-lg shadow hover:shadow-md transition"
-                >
-                  <div className="flex justify-between items-center">
-                    <div className="flex items-center gap-4">
-                      <img
-                        src={
-                          msg.sender.profileImage || "/images/placeholder.png"
-                        }
-                        alt={msg.sender.name}
-                        className="w-10 h-10 rounded-full"
-                      />
-                      <div>
-                        <p
-                          className={`font-medium ${
-                            msg.sender._id === session.user.id
-                              ? "text-blue-400"
-                              : "text-pink-500"
-                          }`}
-                        >
-                          {msg.sender.name}
-                        </p>
-                        <p className="text-gray-200">{msg.content}</p>
-                      </div>
-                    </div>
-                    <span className="text-sm text-gray-400">
-                      {formatNorwegianDate(msg.createdAt)}
-                    </span>
-                  </div>
-                </div>
-              ))}
-
-              {/* Loader */}
-              <div
-                ref={loaderRef}
-                className="h-10 flex justify-center items-center mt-6"
-              >
-                {loading && hasMore && (
-                  <p className="text-gray-400">Loading more messages…</p>
-                )}
-
-                {!hasMore && (
-                  <p className="text-gray-500">No more messages to show</p>
-                )}
-              </div>
-            </div>
-          </div>
-        </section>
+    <div className="min-h-screen bg-gray-900 text-white p-6 flex flex-col items-center">
+      {/* Header */}
+      <div className="mb-6 text-center">
+        <h1 className="text-3xl font-extrabold">Welcome back 👋</h1>
+        <p className="text-gray-400">Here’s what’s happening on your profile</p>
       </div>
-    </main>
+
+      {/* Stats */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 w-full max-w-4xl">
+        <div className="p-4 rounded-xl bg-gradient-to-br from-pink-600 to-purple-600 shadow-lg flex flex-col items-start">
+          <Flame className="w-8 h-8 mb-2" />
+          <p className="text-3xl font-bold">{stats.profileViews}</p>
+          <span className="text-sm text-white/80">Profile Views</span>
+        </div>
+        <div className="p-4 rounded-xl bg-gradient-to-br from-red-600 to-orange-500 shadow-lg flex flex-col items-start">
+          <Heart className="w-8 h-8 mb-2" />
+          <p className="text-3xl font-bold">{stats.newLikes}</p>
+          <span className="text-sm text-white/80">New Likes</span>
+        </div>
+        <div className="p-4 rounded-xl bg-gradient-to-br from-indigo-600 to-blue-500 shadow-lg flex flex-col items-start">
+          <Users className="w-8 h-8 mb-2" />
+          <p className="text-3xl font-bold">{stats.newMatches}</p>
+          <span className="text-sm text-white/80">New Matches</span>
+        </div>
+        <div className="p-4 rounded-xl bg-gradient-to-br from-emerald-600 to-green-500 shadow-lg flex flex-col items-start">
+          <MessageCircle className="w-8 h-8 mb-2" />
+          <p className="text-3xl font-bold">{stats.newMessages}</p>
+          <span className="text-sm text-white/80">New Messages</span>
+        </div>
+      </div>
+
+      {/* Swipeable Cards */}
+      <section className="relative w-full max-w-sm h-[500px] mb-8">
+        <AnimatePresence>
+          {(Array.isArray(cards) ? cards : []).map((card, index) => {
+            const isTop = index === cards.length - 1;
+            return (
+              <SwipeCard
+                key={card._id}
+                card={card}
+                draggable={isTop}
+                onSwipe={handleSwipe}
+              />
+            );
+          })}
+          {cards.length === 0 && (
+            <div className="absolute w-full h-full flex items-center justify-center text-gray-400 text-center p-4">
+              No more profiles to swipe.
+            </div>
+          )}
+        </AnimatePresence>
+      </section>
+
+      {/* Profile Completion */}
+      <div className="bg-gray-800 rounded-2xl p-5 shadow-xl mb-8 w-full max-w-4xl">
+        <h2 className="text-xl font-semibold mb-3">Profile Completion</h2>
+        <div className="w-full bg-gray-700 rounded-full h-3 overflow-hidden">
+          <div className="h-full w-[72%] bg-gradient-to-r from-pink-600 to-purple-500 rounded-full" />
+        </div>
+        <p className="text-sm text-gray-400 mt-2">72% completed</p>
+      </div>
+
+      {/* Suggestions */}
+      <div className="bg-gray-800 rounded-2xl p-5 shadow-xl mb-8 w-full max-w-4xl">
+        <h2 className="text-xl font-semibold mb-3">Suggestions</h2>
+        <ul className="space-y-3 text-gray-300">
+          <li className="flex items-center gap-2">
+            <span className="text-pink-500">•</span> Add more photos to get 3×
+            more matches
+          </li>
+          <li className="flex items-center gap-2">
+            <span className="text-pink-500">•</span> Write a short bio to
+            improve your profile
+          </li>
+          <li className="flex items-center gap-2">
+            <span className="text-pink-500">•</span> Enable location for better
+            matches
+          </li>
+        </ul>
+      </div>
+    </div>
   );
 }

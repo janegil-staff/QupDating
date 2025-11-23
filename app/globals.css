@@ -46,3 +46,13 @@ body {
 .leaflet-container {
   cursor: crosshair; /* or pointer, grab, etc. */
 }
+
+@keyframes pulse-gradient {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+.bg-gradient-animated {
+  background-size: 200% 200%;
+  animation: pulse-gradient 3s ease infinite;
+}

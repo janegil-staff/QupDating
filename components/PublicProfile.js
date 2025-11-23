@@ -21,7 +21,7 @@ export default function PublicProfile(profileId) {
       try {
         const res = await fetch("/api/me");
         const user = await res.json();
-        console.log("USER --->", user);
+
         setIsVerified(user?.isVerified || false);
       } catch (err) {
         console.error("Failed to fetch verification status:", err);

@@ -1,9 +1,19 @@
-"use client";
+// app/profile/[id]/page.js
 import PublicProfile from "@/components/PublicProfile";
-import { useParams } from "next/navigation";
+import TrackProfileView from "@/components/TrackProfileView";
+import { connectDB } from "@/lib/db";
+import User from "@/models/User";
 
-export default function ProfilePage({ params }) {
-  const { id } = useParams();
+export default async function ProfilePage({ params }) {
+  await connectDB();
+  const {id} = await params;
 
-  return <PublicProfile userId={id} />;
+  const user = await User.findById(id).lean();
+
+  return (
+    <>
+      <TrackProfileView viewedUserId={user._id.toString()} />
+      <PublicProfile userId={user._id} />
+    </>
+  );
 }
