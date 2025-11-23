@@ -6,7 +6,7 @@ export async function POST(req) {
   const { viewerId, viewedUserId } = await req.json();
 
   try {
-    await ProfileView.updateOne(
+    const pfv = await ProfileView.updateOne(
       { viewer: viewerId, viewedUser: viewedUserId },
       { $setOnInsert: { createdAt: new Date() } },
       { upsert: true }

@@ -4,6 +4,7 @@ import User from "@/models/User";
 import Message from "@/models/Message";
 import { connectDB } from "@/lib/db";
 import ProfileView from "@/models/ProfileView";
+import mongoose from "mongoose";
 
 export async function GET(req) {
   try {
@@ -23,26 +24,28 @@ export async function GET(req) {
 
     // Fetch stats
     const newMatches = await User.findById(userId).select("matches");
-    console.log(newMatches)
+
     const newLikes = await User.countDocuments({
       likes: userId,
     });
 
-    const newMessages = await Message.countDocuments({
+    const totalMessages = await Message.countDocuments({
       $or: [{ sender: userId }, { receiver: userId }],
     });
 
     const viewsByUser = await ProfileView.aggregate([
-      { $group: { _id: userId, count: { $sum: 1 } } },
+      { $match: { viewedUser: new mongoose.Types.ObjectId(userId) } },
+      { $count: "count" },
     ]);
 
-    console.log(viewsByUser);
+    const profileViews = viewsByUser.length > 0 ? viewsByUser[0].count : 0;
+    console.log(profileViews);
     return new Response(
       JSON.stringify({
-        profileViews: viewsByUser.length,
+        profileViews,
         newLikes,
         newMatches: newMatches.matches.length,
-        newMessages,
+        newMessages: totalMessages,
       }),
       { status: 200, headers: { "Content-Type": "application/json" } }
     );
