@@ -56,3 +56,7 @@ body {
   background-size: 200% 200%;
   animation: pulse-gradient 3s ease infinite;
 }
+
+.hideScrollbar {
+  overflow-y: hidden !important;
+}

@@ -27,7 +27,7 @@ async function seedUsers() {
   await connectDB();
 
   const res = await fetch(
-    "https://randomuser.me/api/?results=50&inc=name,gender,email,picture,dob"
+    "https://randomuser.me/api/?results=10&inc=name,gender,email,picture,dob"
   );
   const data = await res.json();
 

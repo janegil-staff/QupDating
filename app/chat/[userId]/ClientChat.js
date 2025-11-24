@@ -172,7 +172,7 @@ export default function ChatPage({ userId }) {
   };
 
   return (
-    <div className="h-screen flex bg-gray-900 text-white overflow-hidden">
+    <div className="h-screen flex bg-gray-900 text-white">
       {/* Left Sidebar */}
 
       <aside className="hidden lg:block w-64 bg-gray-800 border-r border-gray-700 overflow-y-auto">
@@ -303,22 +303,21 @@ export default function ChatPage({ userId }) {
           >
             Send
           </button>
-
-          {showPicker && (
-            <div
-              ref={pickerRef}
-              className="absolute bottom-full left-0 mb-2 z-50"
-            >
-              <EmojiPicker
-                theme="dark"
-                onEmojiClick={(emojiData) => {
-                  setInput((prev) => prev + emojiData.emoji);
-                  setShowPicker(false);
-                }}
-              />
-            </div>
-          )}
         </form>
+        {showPicker && (
+          <div
+            ref={pickerRef}
+            className="absolute bottom-[5rem] left-3 z-[9999]"
+          >
+            <EmojiPicker
+              theme="dark"
+              onEmojiClick={(emojiData) => {
+                setInput((prev) => prev + emojiData.emoji);
+                setShowPicker(false);
+              }}
+            />
+          </div>
+        )}
       </div>
       {/* Right Sidebar */}
       {user && (
