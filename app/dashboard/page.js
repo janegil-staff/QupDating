@@ -90,7 +90,7 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white p-6 flex flex-col items-center mb-6">
+    <div className="min-h-screen bg-gray-900 text-white p-6 flex flex-col items-center">
       {/* Header */}
       <div className="mb-6 text-center">
         <h1 className="text-3xl font-extrabold">Welcome back 👋</h1>

@@ -172,7 +172,7 @@ export default function ChatPage({ userId }) {
   };
 
   return (
-    <div className="h-screen flex bg-gray-900 text-white">
+    <div className="h-screen flex bg-gray-900 text-white pb-6">
       {/* Left Sidebar */}
 
       <aside className="hidden lg:block w-64 bg-gray-800 border-r border-gray-700 overflow-y-auto">

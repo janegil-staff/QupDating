@@ -23,7 +23,6 @@ export default async function ChatPage({ params }) {
       ? [session.user.id, userId].sort().join("-")
       : null;
 
-  return <div className="overflow-hidden">
-    <ClientChat userId={userId} />;
-    </div>
+  return <ClientChat userId={userId} />;
+
 }
