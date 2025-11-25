@@ -6,19 +6,20 @@ import { NextResponse } from "next/server";
 export async function POST(req) {
   await connectDB();
   const body = await req.json();
-  console.log("ENTERING", body);
+
   const {
     roomId,
     content,
     sender,
     receiver,
+    images,
     senderName,
     senderImage,
     createdAt,
     _id,
   } = body;
 
-  if (!roomId || !content || !sender || !_id || !createdAt) {
+  if (!roomId || !sender || !_id) {
     return NextResponse.json(
       { error: "Missing required fields" },
       { status: 400 }
@@ -31,6 +32,7 @@ export async function POST(req) {
       content,
       receiver,
       sender: senderId,
+      images,
       senderName,
       senderImage,
       createdAt,
@@ -42,6 +44,7 @@ export async function POST(req) {
     return NextResponse.json({ error: "Database error" }, { status: 500 });
   }
 }
+
 export async function GET(req) {
   await connectDB();
   const { searchParams } = new URL(req.url);
@@ -56,16 +59,19 @@ export async function GET(req) {
     ...(cursor && { _id: { $lt: new mongoose.Types.ObjectId(cursor) } }),
   };
 
-  const messages = await Message.find(query)
-    .sort({ _id: 1 })
-    .populate("sender")
+  let messages = await Message.find(query)
+    .sort({ _id: -1 }) // fetch newest first
     .limit(20)
+    .populate("sender")
     .lean();
 
   const nextCursor =
     messages.length === 20
       ? messages[messages.length - 1]._id.toString()
       : null;
+
+  // reverse so UI sees oldest → newest
+  messages = messages.reverse();
 
   return NextResponse.json({
     messages,
