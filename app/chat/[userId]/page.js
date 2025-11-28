@@ -1,8 +1,8 @@
 import { getServerSession } from "next-auth";
 import { isMatched } from "@/lib/checkMatch";
 import { redirect } from "next/navigation";
-import ClientChat from "./ClientChat";
 import { authOptions } from "@/lib/auth";
+import ClientChat from "./ClientChat";
 
 
 export default async function ChatPage({ params }) {

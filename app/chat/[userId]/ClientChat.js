@@ -27,6 +27,7 @@ export default function ChatPage({ userId }) {
   const typingTimeout = useRef(null);
   const endRef = useRef(null);
   const pickerRef = useRef(null);
+  const [previewImage, setPreviewImage] = useState(null);
 
   const [selectedImages, setSelectedImages] = useState([]);
 
@@ -152,7 +153,6 @@ export default function ChatPage({ userId }) {
 
     setMessages((prev) => [...prev, msg]);
 
-  
     await fetch("/api/messages", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -164,7 +164,6 @@ export default function ChatPage({ userId }) {
     setUploadingImages(false);
   };
 
- 
   const handleImageChange = (e) => {
     if (!e.target.files) return;
     const filesArray = Array.from(e.target.files).map((file) => ({
@@ -172,7 +171,7 @@ export default function ChatPage({ userId }) {
       preview: URL.createObjectURL(file),
     }));
     setSelectedImages(filesArray);
-    e.target.value = ""; 
+    e.target.value = "";
   };
 
   const removeImage = (index) => {
@@ -268,7 +267,8 @@ export default function ChatPage({ userId }) {
                           key={i}
                           src={img.url}
                           alt="uploaded"
-                          className="max-w-[200px] rounded-md"
+                          className="max-w-[200px] rounded-md cursor-pointer hover:opacity-80 transition"
+                          onClick={() => setPreviewImage(img.url)}
                         />
                       ))}
                     </div>
@@ -413,6 +413,18 @@ export default function ChatPage({ userId }) {
             Visit Profile
           </a>
         </aside>
+      )}
+      {previewImage && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-[99999]"
+          onClick={() => setPreviewImage(null)}
+        >
+          <img
+            src={previewImage}
+            className="max-w-[90%] max-h-[90%] rounded-lg shadow-lg"
+            alt="preview"
+          />
+        </div>
       )}
     </div>
   );

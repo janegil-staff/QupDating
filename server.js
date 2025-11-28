@@ -1,6 +1,6 @@
-import { createServer } from "http";
-import next from "next";
-import { Server } from "socket.io";
+const { createServer } = require("http");
+const next = require("next");
+const { startSocketServer } = require("./socket-server");
 
 const dev = process.env.NODE_ENV !== "production";
 const app = next({ dev });
@@ -11,31 +11,10 @@ app.prepare().then(() => {
     handle(req, res);
   });
 
-  const io = new Server(server, {
-    cors: {
-      origin: "*",
-      methods: ["GET", "POST"],
-    },
-  });
+  startSocketServer(server);
 
-  io.on("connection", (socket) => {
-    console.log("🟢 Socket connected:", socket.id);
-
-    socket.on("join", (roomId) => {
-      socket.join(roomId);
-      console.log(`Socket ${socket.id} joined room ${roomId}`);
-    });
-
-    socket.on("message", (msg) => {
-      io.to(msg.roomId).emit("message", msg);
-    });
-
-    socket.on("disconnect", () => {
-      console.log("🔴 Socket disconnected:", socket.id);
-    });
-  });
-
-  server.listen(3000, () => {
-    console.log("🚀 Server running on http://localhost:3000");
+  const PORT = 4000;
+  server.listen(PORT, () => {
+    console.log("🚀 Ready on http://localhost:" + PORT);
   });
 });

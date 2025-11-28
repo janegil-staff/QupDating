@@ -6,44 +6,30 @@ import { NextResponse } from "next/server";
 export async function POST(req) {
   await connectDB();
   const body = await req.json();
+console.log(body)
+  const { roomId, content, sender, receiver, images } = body;
 
-  const {
-    roomId,
-    content,
-    sender,
-    receiver,
-    images,
-    senderName,
-    senderImage,
-    createdAt,
-    _id,
-  } = body;
-
-  if (!roomId || !sender || !_id) {
-    return NextResponse.json(
-      { error: "Missing required fields" },
-      { status: 400 }
-    );
+  if (!roomId || !sender || !receiver) {
+    return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
   }
-  const senderId = mongoose.Types.ObjectId.createFromHexString(sender);
+
   try {
     const message = await Message.create({
       roomId,
       content,
+      sender,
       receiver,
-      sender: senderId,
       images,
-      senderName,
-      senderImage,
-      createdAt,
+      createdAt: new Date(),
     });
 
     return NextResponse.json({ success: true, message }, { status: 201 });
-  } catch (error) {
-    console.error("❌ Failed to save message:", error);
+  } catch (err) {
+    console.error(err);
     return NextResponse.json({ error: "Database error" }, { status: 500 });
   }
 }
+
 
 export async function GET(req) {
   await connectDB();
