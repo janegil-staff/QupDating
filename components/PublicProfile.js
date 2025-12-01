@@ -1,14 +1,14 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
-import ToggleLikeButton from "./LikeButton";
+import ToggleLikeButton from "./ToggleLikeButton";
 import ImageCarousel from "./ImageCarousel";
 import VerifyBanner from "./VerifyBanner";
 import DeleteProfileButton from "./DeleteProfileButton";
 
 export default function PublicProfile({ userId }) {
   const { data: session } = useSession();
-  console.log(userId);
+
   const [profile, setProfile] = useState(null);
   const [loggedInUser, setLoggedInUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -80,6 +80,7 @@ export default function PublicProfile({ userId }) {
             <div className="float-right">
               <ToggleLikeButton
                 currentUser={loggedInUser}
+                profileId={profile._id}
                 targetUser={profile}
                 initialLiked={profile.isLiked}
               />
@@ -98,7 +99,6 @@ export default function PublicProfile({ userId }) {
             </div>
           )}
         </div>
-        {/* Like Button */}
 
         {/* Header */}
         <div className="flex flex-col md:flex-row items-center gap-6">
