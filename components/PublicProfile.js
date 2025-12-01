@@ -233,10 +233,13 @@ export default function PublicProfile({ userId }) {
             </div>
           </div>
         )}
-        <hr className="text-red-500"/>
-        <div className="text-right">
-          <DeleteProfileButton userId={userId.toString()} />
-        </div>
+
+        {isOwnProfile && (
+          <div className="text-right">
+            <hr className="text-red-500 pb-6" />
+            <DeleteProfileButton userId={userId} />
+          </div>
+        )}
       </div>
     </div>
   );

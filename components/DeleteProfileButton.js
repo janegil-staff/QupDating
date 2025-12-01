@@ -18,8 +18,7 @@ export default function DeleteProfileButton({ userId }) {
 
       if (!res.ok) throw new Error(json.error || "Failed to delete profile");
 
-      // ✅ After deletion, log out and redirect to landing page
-      console.log(" After deletion, log out and redirect to landing page");
+
       await signOut({ callbackUrl: "/" });
     } catch (err) {
       setError(err.message);
