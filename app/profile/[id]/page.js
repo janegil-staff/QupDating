@@ -1,4 +1,5 @@
 // app/profile/[id]/page.js
+import DeleteProfileButton from "@/components/DeleteProfileButton";
 import PublicProfile from "@/components/PublicProfile";
 import TrackProfileView from "@/components/TrackProfileView";
 import { connectDB } from "@/lib/db";
@@ -13,7 +14,8 @@ export default async function ProfilePage({ params }) {
   return (
     <>
       <TrackProfileView viewedUserId={user._id.toString()} />
-      <PublicProfile userId={user._id} />
+      <PublicProfile userId={user._id.toString()} />
+      
     </>
   );
 }

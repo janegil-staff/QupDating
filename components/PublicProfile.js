@@ -4,9 +4,11 @@ import { useSession } from "next-auth/react";
 import ToggleLikeButton from "./LikeButton";
 import ImageCarousel from "./ImageCarousel";
 import VerifyBanner from "./VerifyBanner";
+import DeleteProfileButton from "./DeleteProfileButton";
 
-export default function PublicProfile(profileId) {
+export default function PublicProfile({ userId }) {
   const { data: session } = useSession();
+  console.log(userId);
   const [profile, setProfile] = useState(null);
   const [loggedInUser, setLoggedInUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -36,7 +38,7 @@ export default function PublicProfile(profileId) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const profileRes = await fetch(`/api/profile/${profileId.userId}`);
+        const profileRes = await fetch(`/api/profile/${userId}`);
         const profileData = await profileRes.json();
 
         const userRes = await fetch("/api/me");
@@ -53,8 +55,8 @@ export default function PublicProfile(profileId) {
       }
     };
 
-    if (profileId) fetchData();
-  }, [profileId]);
+    if (userId) fetchData();
+  }, [userId]);
 
   if (loading)
     return <p className="text-center text-gray-400 mt-20">Laster profil…</p>;
@@ -71,35 +73,32 @@ export default function PublicProfile(profileId) {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 text-white p-6">
       <div className="max-w-4xl mx-auto bg-neutral-900 rounded-xl shadow-xl p-6 space-y-6 relative">
-        {isOwnProfile && !isVerified && (
-          <VerifyBanner user={session.user} />
-        )}
+        {isOwnProfile && !isVerified && <VerifyBanner user={session.user} />}
 
         <div className="flex justify-end">
-        {!isOwnProfile && (
-          <div className="float-right">
-            <ToggleLikeButton
-              currentUser={loggedInUser}
-              targetUser={profile}
-              initialLiked={profile.isLiked}
-            />
-          </div>
-        )}
-        {isMatch && (
-          <div className="float-right">
-            <a
-              href={`/chat/${profile._id}`}
-              className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 
+          {!isOwnProfile && (
+            <div className="float-right">
+              <ToggleLikeButton
+                currentUser={loggedInUser}
+                targetUser={profile}
+                initialLiked={profile.isLiked}
+              />
+            </div>
+          )}
+          {isMatch && (
+            <div className="float-right">
+              <a
+                href={`/chat/${profile._id}`}
+                className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 
              text-white font-medium px-5 py-2 shadow-md transition-transform 
              transform hover:scale-105 mx-6 px-6 py-2 rounded-full font-semibold"
-            >
-              Message
-            </a>
-          </div>
-        )}
+              >
+                Message
+              </a>
+            </div>
+          )}
         </div>
         {/* Like Button */}
-
 
         {/* Header */}
         <div className="flex flex-col md:flex-row items-center gap-6">
@@ -170,6 +169,7 @@ export default function PublicProfile(profileId) {
                 value: profile.height ? `${profile.height} cm` : null,
               },
             ]}
+            userId={userId}
           />
 
           <SimpleSection
@@ -190,6 +190,7 @@ export default function PublicProfile(profileId) {
                 value: profile.willingToRelocate ? "Yes" : "No",
               },
             ]}
+            userId={userId}
           />
 
           <SimpleSection
@@ -203,6 +204,7 @@ export default function PublicProfile(profileId) {
                 value: profile.relationshipStatus,
               },
             ]}
+            userId={userId}
           />
         </div>
         {/* Looking For */}
@@ -231,12 +233,16 @@ export default function PublicProfile(profileId) {
             </div>
           </div>
         )}
+        <hr className="text-red-500"/>
+        <div className="text-right">
+          <DeleteProfileButton userId={userId.toString()} />
+        </div>
       </div>
     </div>
   );
 }
 
-function SimpleSection({ title, items }) {
+function SimpleSection({ title, items, userId }) {
   const valid = items.filter((i) => i.value);
   if (valid.length === 0) return null;
 
