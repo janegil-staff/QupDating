@@ -25,7 +25,7 @@ export async function DELETE(req, context) {
 
     // Delete messages (adjust field names to your schema!)
     await Message.deleteMany({ sender: userId });
-    await Message.deleteMany({ recipient: userId });
+    await Message.deleteMany({ receiver: userId });
 
     // Delete images from Cloudinary
     if (user.images?.length > 0) {
