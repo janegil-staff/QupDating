@@ -100,7 +100,7 @@ export default function PublicProfile({ userId }) {
           )}
         </div>
         {/* ✅ Admin Dashboard button */}
-        {loggedInUser?.role === "admin" && (
+        {loggedInUser?.role === "admin" && isOwnProfile && (
           <div className="flex justify-end mt-4">
             <a
               href="/admin"
