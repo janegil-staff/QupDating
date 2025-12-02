@@ -1,52 +1,76 @@
+// components/admin/AdminSidebar.js
 "use client";
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Menu, X } from "lucide-react";
+import { usePathname } from "next/navigation";
 
 export default function AdminSidebar() {
   const [open, setOpen] = useState(false);
+  const pathname = usePathname();
+
+  const links = [
+    { href: "/admin", label: "Dashboard" },
+    { href: "/admin/users", label: "Users" },
+    { href: "/admin/events", label: "Events" },
+    { href: "/admin/settings", label: "Settings" },
+  ];
+
+  // Close sidebar when clicking outside (mobile only)
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (open && !e.target.closest("#sidebar") && !e.target.closest("#menu-btn")) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("click", handleClickOutside);
+    return () => document.removeEventListener("click", handleClickOutside);
+  }, [open]);
 
   return (
-    <>
-      {/* Toggle button in top-right (mobile only) */}
-      <button
-        onClick={() => setOpen(!open)}
-        className="md:hidden fixed top-4 right-4 z-50 p-2 rounded bg-gray-800 text-yellow-400"
-      >
-        {open ? <X size={20} /> : <Menu size={20} />}
-      </button>
+    <div className="relative">
+      {/* Toggle button (mobile only, upper right) */}
+      <div className="fixed top-4 right-4 lg:hidden z-50">
+        <button
+          id="menu-btn"
+          className="p-2 text-white bg-gray-800 rounded-md"
+          onClick={() => setOpen(!open)}
+        >
+          {open ? "✖" : "☰"}
+        </button>
+      </div>
+
+      {/* Overlay backdrop for mobile */}
+      {open && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"></div>
+      )}
 
       {/* Sidebar */}
       <aside
-        className={`fixed md:static top-0 left-0 h-full md:h-screen w-64 bg-gray-900 text-gray-100 shadow-lg transform transition-transform duration-300 z-40
-          ${open ? "translate-x-0" : "-translate-x-full md:translate-x-0"}`}
+        id="sidebar"
+        className={`bg-gray-900 lg:static lg:block fixed top-0 left-0 h-full w-64 p-4 z-50 transform transition-transform duration-300
+          ${open ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0`}
       >
-        <div className="p-6 border-b border-gray-700">
-          <h2 className="text-xl font-bold text-yellow-400">Admin Panel</h2>
-        </div>
-        <nav className="p-4 space-y-2">
-          <Link href="/admin" className="block px-3 py-2 rounded hover:bg-gray-800" onClick={() => setOpen(false)}>
-            Dashboard
-          </Link>
-          <Link href="/admin/users" className="block px-3 py-2 rounded hover:bg-gray-800" onClick={() => setOpen(false)}>
-            Users
-          </Link>
-          <Link href="/admin/events" className="block px-3 py-2 rounded hover:bg-gray-800" onClick={() => setOpen(false)}>
-            Events
-          </Link>
-          <Link href="/admin/settings" className="block px-3 py-2 rounded hover:bg-gray-800" onClick={() => setOpen(false)}>
-            Settings
-          </Link>
+        <nav className="flex flex-col space-y-2">
+          {links.map((link) => {
+            const isActive = pathname === link.href;
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={`px-4 py-2 rounded-lg transition-colors ${
+                  isActive
+                    ? "bg-blue-600 text-white"
+                    : "text-gray-300 hover:bg-gray-700 hover:text-white"
+                }`}
+                onClick={() => setOpen(false)} // auto-close on mobile
+              >
+                {link.label}
+              </Link>
+            );
+          })}
         </nav>
       </aside>
-
-      {/* Overlay for mobile */}
-      {open && (
-        <div
-          onClick={() => setOpen(false)}
-          className="fixed inset-0 bg-black bg-opacity-50 md:hidden z-30"
-        />
-      )}
-    </>
+    </div>
   );
 }

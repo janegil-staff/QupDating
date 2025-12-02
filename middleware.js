@@ -25,7 +25,7 @@ export async function middleware(req) {
 
   // 🔒 Admin-only guard
   if (pathname.startsWith("/admin")) {
-    if (!token.isAdmin) {
+    if (token.role !== "admin") {
       return NextResponse.redirect(new URL("/unauthorized", req.url));
     }
   }

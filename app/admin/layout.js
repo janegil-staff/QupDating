@@ -1,12 +1,15 @@
+// app/admin/layout.js
+"use client";
+
 import AdminSidebar from "@/components/admin/AdminSidebar";
 
 export default function AdminLayout({ children }) {
   return (
-    <div className="min-h-screen bg-gray-900 text-gray-100 flex">
+    <div className="flex min-h-screen bg-gray-950 text-white">
       {/* Sidebar */}
       <AdminSidebar />
 
-      {/* Content area */}
+      {/* Main content */}
       <main className="flex-1 p-6">{children}</main>
     </div>
   );
