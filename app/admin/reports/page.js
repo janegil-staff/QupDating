@@ -1,11 +1,11 @@
-import React from 'react'
-
-const page = () => {
+export default function ReportsPage() {
   return (
     <div>
-      
-    </div>
-  )
-}
+      <h1 className="text-2xl font-bold mb-4">Reports</h1>
 
-export default page
+      <div className="bg-white shadow rounded-xl p-4">
+        <p>No reports yet.</p>
+      </div>
+    </div>
+  );
+}

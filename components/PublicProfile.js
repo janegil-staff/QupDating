@@ -69,7 +69,7 @@ export default function PublicProfile({ userId }) {
     : null;
 
   const isOwnProfile = session?.user?.id === profile._id;
-
+  console.log(loggedInUser);
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 text-white p-6">
       <div className="max-w-4xl mx-auto bg-neutral-900 rounded-xl shadow-xl p-6 space-y-6 relative">
@@ -99,6 +99,22 @@ export default function PublicProfile({ userId }) {
             </div>
           )}
         </div>
+        {/* ✅ Admin Dashboard button */}
+        {loggedInUser?.role === "admin" && (
+          <div className="flex justify-end mt-4">
+            <a
+              href="/admin"
+              className="inline-flex items-center gap-2 
+        bg-gray-800 hover:bg-gray-700 text-yellow-400 
+        font-medium px-4 py-2 rounded-full shadow-md 
+        transition-transform transform hover:scale-105
+        text-sm sm:text-base md:text-lg lg:text-xl border border-yellow-600"
+            >
+              <span className="hidden sm:inline">Admin Dashboard</span>
+              <span className="text-lg">⚙️</span>
+            </a>
+          </div>
+        )}
 
         {/* Header */}
         <div className="flex flex-col md:flex-row items-center gap-6">
@@ -236,7 +252,7 @@ export default function PublicProfile({ userId }) {
 
         {isOwnProfile && (
           <div className="text-right">
-            <hr className="text-red-500 pb-6" />
+            <hr className="pb-6" />
             <DeleteProfileButton userId={userId} />
           </div>
         )}

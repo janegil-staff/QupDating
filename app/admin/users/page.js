@@ -1,110 +1,166 @@
 "use client";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 
-export default function AdminUsersPage() {
+export default function UsersPage() {
   const [users, setUsers] = useState([]);
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
-  const [loading, setLoading] = useState(false);
-  const router = useRouter();
-
-  const loadUsers = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch(`/api/admin/users?page=${page}&limit=50`);
-      const data = await res.json();
-
-      setUsers((prev) => [...prev, ...(data.users || [])]);
-      setHasMore(data.hasMore);
-    } catch (err) {
-      console.error("Error loading users:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
-    loadUsers();
-  }, [page]);
+    const fetchUsers = async () => {
+      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+      const res = await fetch(`${baseUrl}/api/admin/users`, { cache: "no-store" });
+      const data = await res.json();
+      if (res.ok) setUsers(data.users);
+    };
+    fetchUsers();
+  }, []);
 
-  const handleScroll = (e) => {
-    const bottom =
-      e.target.scrollHeight - e.target.scrollTop === e.target.clientHeight;
-    if (bottom && hasMore && !loading) {
-      setPage((prev) => prev + 1);
+  const filteredUsers = users.filter((u) =>
+    [u.name, u.email, u.role].some((field) =>
+      field?.toLowerCase().includes(search.toLowerCase())
+    )
+  );
+
+  // Toggle ban/unban
+  const toggleBan = async (id, isBanned) => {
+    const res = await fetch(`/api/admin/users/${id}/ban`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ isBanned: !Boolean(isBanned) }),
+    });
+    if (res.ok) {
+      setUsers((prev) =>
+        prev.map((u) =>
+          u._id === id ? { ...u, isBanned: !Boolean(isBanned) } : u
+        )
+      );
     }
   };
 
-  const toggleBan = async (userId, isBanned) => {
-    try {
-      await fetch("/api/admin/users", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId, isBanned: !isBanned }),
-      });
+  // Toggle role
+  const changeRole = async (id, role) => {
+    const newRole = role === "user" ? "admin" : "user";
+    const res = await fetch(`/api/admin/users/${id}/role`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ role: newRole }),
+    });
+    if (res.ok) {
       setUsers((prev) =>
-        prev.map((u) =>
-          u._id === userId ? { ...u, isBanned: !isBanned } : u
-        )
+        prev.map((u) => (u._id === id ? { ...u, role: newRole } : u))
       );
-    } catch (err) {
-      console.error("Error banning user:", err);
     }
   };
 
   return (
-    <div
-      className="overflow-y-auto h-[80vh] p-4 bg-gray-900 text-white"
-      onScroll={handleScroll}
-    >
-      <h2 className="text-xl font-bold mb-4">User Management</h2>
+    <div>
+      <h1 className="text-2xl font-bold text-yellow-400 mb-6">User Management</h1>
 
-      {/* Back button */}
-      <button
-        onClick={() => router.push("/admin")}
-        className="mb-4 px-3 py-2 bg-blue-600 rounded hover:bg-blue-700"
-      >
-        ← Back to Admin Dashboard
-      </button>
+      {/* Search */}
+      <input
+        type="text"
+        placeholder="Search users..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        className="w-full md:w-1/3 px-3 py-2 rounded bg-gray-800 text-white border border-gray-700 focus:outline-none focus:border-yellow-400 mb-4"
+      />
 
-      <table className="table-auto border-separate border-spacing-y-2 w-full text-left">
-        <thead>
-          <tr className="bg-gray-800">
-            <th className="px-4 py-2">Email</th>
-            <th className="px-4 py-2">Birthdate</th>
-            <th className="px-4 py-2">Status</th>
-            <th className="px-4 py-2">Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          {Array.isArray(users) &&
-            users.map((user) => (
-              <tr key={user._id} className="bg-gray-700">
-                <td className="px-4 py-2">{user.email}</td>
+      {/* Mobile cards */}
+      <div className="space-y-4 md:hidden">
+        {filteredUsers.map((user) => (
+          <div key={user._id} className="bg-gray-800 p-4 rounded-lg shadow">
+            <p className="text-yellow-400 font-bold">{user.name}</p>
+            <p className="text-gray-300 text-sm">{user.email}</p>
+            <p className="text-gray-400 text-sm">Role: {user.role}</p>
+            <p className={Boolean(user.isBanned) ? "text-red-400" : "text-green-400"}>
+              {Boolean(user.isBanned) ? "Banned" : "Active"}
+            </p>
+            <div className="flex flex-wrap gap-2 mt-2">
+              <Link
+                href={`/admin/users/${user._id}`}
+                className="px-2 py-1 rounded bg-blue-600 text-white hover:bg-blue-500"
+              >
+                View
+              </Link>
+              <button
+                onClick={() => changeRole(user._id, user.role)}
+                className="px-2 py-1 rounded bg-yellow-500 text-black hover:bg-yellow-400"
+              >
+                {user.role === "user" ? "Make Admin" : "Make User"}
+              </button>
+              <button
+                onClick={() => toggleBan(user._id, user.isBanned)}
+                className={`px-2 py-1 rounded ${
+                  Boolean(user.isBanned)
+                    ? "bg-green-600 text-white hover:bg-green-500"
+                    : "bg-red-600 text-white hover:bg-red-500"
+                }`}
+              >
+                {Boolean(user.isBanned) ? "Unban" : "Ban"}
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Desktop table */}
+      <div className="hidden md:block overflow-x-auto rounded-lg shadow-lg border border-gray-700">
+        <table className="min-w-full text-sm">
+          <thead className="bg-gray-800 text-gray-300">
+            <tr>
+              <th className="px-4 py-2 text-left">Name</th>
+              <th className="px-4 py-2 text-left">Email</th>
+              <th className="px-4 py-2 text-left">Role</th>
+              <th className="px-4 py-2 text-left">Status</th>
+              <th className="px-4 py-2 text-left">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredUsers.map((user) => (
+              <tr
+                key={user._id}
+                className="border-t border-gray-700 hover:bg-gray-800 transition"
+              >
+                <td className="px-4 py-2">{user.name}</td>
+                <td className="px-4 py-2 break-words max-w-[200px]">{user.email}</td>
+                <td className="px-4 py-2">{user.role}</td>
                 <td className="px-4 py-2">
-                  {user.birthdate
-                    ? new Date(user.birthdate).toLocaleDateString()
-                    : "-"}
+                  {Boolean(user.isBanned) ? (
+                    <span className="text-red-400">Banned</span>
+                  ) : (
+                    <span className="text-green-400">Active</span>
+                  )}
                 </td>
-                <td className="px-4 py-2">
-                  {user.isBanned ? "Banned" : "Active"}
-                </td>
-                <td className="px-4 py-2">
+                <td className="px-4 py-2 space-x-2">
+                  <Link
+                    href={`/profile/${user._id}`}
+                    className="px-2 py-1 rounded bg-blue-600 text-white hover:bg-blue-500"
+                  >
+                    View
+                  </Link>
+                  <button
+                    onClick={() => changeRole(user._id, user.role)}
+                    className="px-2 py-1 rounded bg-yellow-500 text-black hover:bg-yellow-400"
+                  >
+                    {user.role === "user" ? "Make Admin" : "Make User"}
+                  </button>
                   <button
                     onClick={() => toggleBan(user._id, user.isBanned)}
-                    className="px-2 py-1 bg-red-600 rounded hover:bg-red-700"
+                    className={`px-2 py-1 rounded ${
+                      Boolean(user.isBanned)
+                        ? "bg-green-600 text-white hover:bg-green-500"
+                        : "bg-red-600 text-white hover:bg-red-500"
+                    }`}
                   >
-                    {user.isBanned ? "Unban" : "Ban"}
+                    {Boolean(user.isBanned) ? "Unban" : "Ban"}
                   </button>
                 </td>
               </tr>
             ))}
-        </tbody>
-      </table>
-
-      {loading && <p className="text-center mt-4">Loading...</p>}
-      {!hasMore && <p className="text-center mt-4">No more users</p>}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

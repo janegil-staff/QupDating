@@ -21,7 +21,7 @@ const userSchema = new mongoose.Schema(
     birthdate: { type: Date },
     gender: {
       type: String,
-      enum: ["", "male", "female", "other"],
+      enum: ["male", "female", "other"],
       required: true,
     },
     occupation: { type: String },
@@ -30,10 +30,10 @@ const userSchema = new mongoose.Schema(
     bodyType: { type: String },
     hasChildren: { type: Boolean },
     wantsChildren: { type: Boolean },
-    smoking: { type: String, enum: ["", "Yes", "No", "Occasionally"] },
+    smoking: { type: String, enum: ["Yes", "No", "Occasionally"] },
     drinking: {
       type: String,
-      enum: ["", "None", "Light / social drinker", "Heavy"],
+      enum: ["None", "Light / social drinker", "Heavy"],
     },
     relationshipStatus: { type: String },
     willingToRelocate: { type: Boolean },
@@ -50,13 +50,17 @@ const userSchema = new mongoose.Schema(
     lookingFor: { type: String },
     images: [{ url: String, public_id: String }],
     profileImage: {
-      type: String, // URL of the selected image
-      required: true, // fallback if none selected
+      type: String,
     },
     likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     dislikes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     matches: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
-    isAdmin: { type: Boolean, default: false },
+    role: {
+      type: String,
+      enum: ["user", "moderator", "admin", "banned"],
+      default: "user",
+    },
+    lastSeen: { type: Date, default: null },
     resetPasswordToken: { type: String },
     resetPasswordExpires: { type: Date },
     isBanned: { type: Boolean, default: false },
@@ -66,7 +70,6 @@ const userSchema = new mongoose.Schema(
     preferredAgeMin: { type: Number, default: 18 },
     preferredAgeMax: { type: Number, default: 99 },
   },
-
   { timestamps: true }
 );
 
