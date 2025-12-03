@@ -1,5 +1,12 @@
 import mongoose from "mongoose";
 
+const locationSchema = new mongoose.Schema({
+  name: { type: String, required: false }, // e.g. "Bergen, Vestland, Norway"
+  lat: { type: Number, required: false },
+  lng: { type: Number, required: false },
+  country: { type: String, required: false }, // ✅ new field
+});
+
 const EventSchema = new mongoose.Schema(
   {
     title: {
@@ -15,21 +22,16 @@ const EventSchema = new mongoose.Schema(
       type: Date,
       required: true,
     },
-    location: {
-      type: String,
-      required: true,
-    },
-    // Attendees reference User model
+    location: locationSchema,
     attendees: [
       {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
+        user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+        createdAt: { type: Date, default: Date.now },
       },
     ],
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: true,
     },
     isApproved: {
       type: Boolean,

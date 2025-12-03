@@ -60,7 +60,7 @@ const userSchema = new mongoose.Schema(
       enum: ["user", "moderator", "admin", "banned"],
       default: "user",
     },
-    lastSeen: { type: Date, default: null },
+    lastSeen: { type: Date, default: Date.now },
     resetPasswordToken: { type: String },
     resetPasswordExpires: { type: Date },
     isBanned: { type: Boolean, default: false },
@@ -69,6 +69,7 @@ const userSchema = new mongoose.Schema(
     verifyExpires: { type: Date },
     preferredAgeMin: { type: Number, default: 18 },
     preferredAgeMax: { type: Number, default: 99 },
+    profileCompletionPercent: { type: Number, default: 0 },
   },
   { timestamps: true }
 );

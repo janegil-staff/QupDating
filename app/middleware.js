@@ -1,19 +1,29 @@
-import { getToken } from "next-auth/jwt";
-import mongoose from "mongoose";
-import User from "./models/User";
+import { NextResponse } from "next/server";
+import { connectDB } from "@/lib/db";
+import User from "@/models/User";
+import { verifyJWT } from "@/lib/auth"; // your JWT/session verification helper
 
 export async function middleware(req) {
-  const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
-  if (!token) return;
+  const token = req.cookies.get("token")?.value;
 
-  if (!mongoose.connection.readyState) {
-    await mongoose.connect(process.env.MONGODB_URI);
+  if (token) {
+    try {
+      const payload = await verifyJWT(token);
+      if (payload?.userId) {
+        await connectDB();
+        await User.findByIdAndUpdate(payload.userId, {
+          $set: { lastSeen: new Date() },
+        });
+      }
+    } catch (err) {
+      console.error("❌ Middleware auth error:", err);
+    }
   }
 
-  const user = await User.findOne({ email: token.email });
-
-  // If profile incomplete, redirect to setup
-  if (user && (!user.name || user.images.length === 0)) {
-    return Response.redirect(new URL("/profile-setup", req.url));
-  }
+  return NextResponse.next();
 }
+
+// Apply only to API routes (adjust as needed)
+export const config = {
+  matcher: ["/api/:path*"],
+};

@@ -38,9 +38,8 @@ export default function UsersPage() {
     }
   };
 
-  // Toggle role
-  const changeRole = async (id, role) => {
-    const newRole = role === "user" ? "admin" : "user";
+  // Change role via dropdown
+  const changeRole = async (id, newRole) => {
     const res = await fetch(`/api/admin/users/${id}/role`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -54,7 +53,7 @@ export default function UsersPage() {
   };
 
   return (
-    <div>
+    <div className="p-6">
       <h1 className="text-2xl font-bold text-yellow-400 mb-6">User Management</h1>
 
       {/* Search */}
@@ -83,12 +82,15 @@ export default function UsersPage() {
               >
                 View
               </Link>
-              <button
-                onClick={() => changeRole(user._id, user.role)}
+              <select
+                value={user.role}
+                onChange={(e) => changeRole(user._id, e.target.value)}
                 className="px-2 py-1 rounded bg-yellow-500 text-black hover:bg-yellow-400"
               >
-                {user.role === "user" ? "Make Admin" : "Make User"}
-              </button>
+                <option value="user">User</option>
+                <option value="admin">Admin</option>
+                <option value="moderator">Moderator</option>
+              </select>
               <button
                 onClick={() => toggleBan(user._id, user.isBanned)}
                 className={`px-2 py-1 rounded ${
@@ -139,12 +141,15 @@ export default function UsersPage() {
                   >
                     View
                   </Link>
-                  <button
-                    onClick={() => changeRole(user._id, user.role)}
+                  <select
+                    value={user.role}
+                    onChange={(e) => changeRole(user._id, e.target.value)}
                     className="px-2 py-1 rounded bg-yellow-500 text-black hover:bg-yellow-400"
                   >
-                    {user.role === "user" ? "Make Admin" : "Make User"}
-                  </button>
+                    <option value="user">User</option>
+                    <option value="admin">Admin</option>
+                    <option value="moderator">Moderator</option>
+                  </select>
                   <button
                     onClick={() => toggleBan(user._id, user.isBanned)}
                     className={`px-2 py-1 rounded ${

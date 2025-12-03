@@ -1,49 +1,58 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
 import toast from "react-hot-toast";
 import { FaCalendarAlt, FaMapMarkerAlt, FaUsers } from "react-icons/fa";
 
 export default function EventsPage() {
+  const { data: session } = useSession();
+  const currentUserId = session?.user?.id;
+
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedEvent, setSelectedEvent] = useState(null);
-  const [toast, setToast] = useState(null);
 
-  const showToast = (message, type = "success") => {
-    setToast({ message, type });
-    setTimeout(() => setToast(null), 3000); // auto-hide after 3s
-  };
-
+  // Fetch all events
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const res = await fetch("/api/events"); // public events API
+        const res = await fetch("/api/events");
         if (!res.ok) throw new Error("Failed to fetch events");
         const data = await res.json();
         setEvents(data);
       } catch (err) {
         console.error(err);
+        toast.error("Error fetching events");
       } finally {
         setLoading(false);
       }
     };
     fetchEvents();
   }, []);
-
+  
   const handleRSVP = async (eventId) => {
+    if (!currentUserId) {
+      toast.error("You must be logged in to RSVP");
+      return;
+    }
     try {
       const res = await fetch(`/api/events/${eventId}/rsvp`, {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: currentUserId }),
       });
       const updated = await res.json();
       if (!res.ok) throw new Error(updated.error || "Failed to RSVP");
-      // Update the event in state with new attendee list
+
       setEvents(events.map((e) => (e._id === updated._id ? updated : e)));
-      showToast(userIsNowAttending ? "You're going!" : "RSVP removed", "success");
+      const userIsNowAttending = updated.attendees.some(
+        (u) => u._id === currentUserId
+      );
+      toast.success(userIsNowAttending ? "You're going!" : "RSVP removed");
     } catch (err) {
       console.error(err);
-      showToast("Error RSVPing: " + err.message, "error");
+      toast.error("Error RSVPing: " + err.message);
     }
   };
 
@@ -52,10 +61,12 @@ export default function EventsPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 text-gray-100 p-8">
       <div className="max-w-5xl mx-auto">
+        {/* Header */}
         <h1 className="text-3xl font-bold text-pink-500 mb-8 flex items-center gap-3">
           <FaCalendarAlt /> Upcoming Events
         </h1>
 
+        {/* Events Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {events.map((event) => (
             <div
@@ -65,10 +76,10 @@ export default function EventsPage() {
             >
               <h2 className="text-lg font-semibold">{event.title}</h2>
               <p className="text-sm text-gray-400 flex items-center gap-2">
-                <FaMapMarkerAlt /> {event.location}
+                <FaMapMarkerAlt /> {event.location?.name}
               </p>
               <p className="text-sm text-gray-400">
-                {new Date(event.date).toLocaleDateString()}
+                📅 {new Date(event.date).toLocaleDateString()}
               </p>
               <p className="mt-2 text-gray-300 line-clamp-3">
                 {event.description}
@@ -94,9 +105,14 @@ export default function EventsPage() {
                 {selectedEvent.title}
               </h2>
               <p className="text-gray-300 mb-2">{selectedEvent.description}</p>
-              <p className="text-gray-400 mb-1">📍 {selectedEvent.location}</p>
+              <p className="text-gray-400 mb-1">
+                📍 {selectedEvent.location?.name}
+              </p>
               <p className="text-gray-400 mb-4">
                 📅 {new Date(selectedEvent.date).toLocaleDateString()}
+              </p>
+              <p className="text-gray-400 mb-4">
+                Attendees: {selectedEvent.attendees?.length || 0}
               </p>
               <div className="flex justify-end">
                 <button

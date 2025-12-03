@@ -1,31 +1,41 @@
 import { NextResponse } from "next/server";
-import { getToken } from "next-auth/jwt";
-import Event from "@/models/Event";
 import { connectDB } from "@/lib/db";
+import Event from "@/models/Event";
 
 export async function POST(req, { params }) {
-  const { id } = await params;
-  const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+  try {
+    await connectDB();
+    const { id } = await params;
+    const { userId } = await req.json();
 
-  if (!token) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    const event = await Event.findById(id);
+    if (!event)
+      return NextResponse.json({ error: "Event not found" }, { status: 404 });
+
+    const already = event.attendees.includes(userId);
+    if (already) {
+      event.attendees = event.attendees.filter(
+        (uid) => uid.toString() !== userId
+      );
+    } else {
+      event.attendees.push(userId);
+    }
+
+    await event.save();
+    return NextResponse.json(await event.populate("attendees"));
+  } catch (err) {
+    console.error("❌ RSVP failed:", err);
+    return NextResponse.json({ error: "Failed to RSVP" }, { status: 500 });
   }
+}
 
-  await connectDB();
-  const event = await Event.findById(id);
-
-  if (!event) {
-    return NextResponse.json({ error: "Event not found" }, { status: 404 });
+export async function GET() {
+  try {
+    await connectDB();
+    const events = await Event.find().sort({ date: 1 }); // upcoming first
+    return NextResponse.json(events);
+  } catch (err) {
+    console.error("❌ Failed to fetch events:", err);
+    return NextResponse.json({ error: "Failed to fetch events" }, { status: 500 });
   }
-
-  // Toggle RSVP: add if not present, remove if already RSVP’d
-  const alreadyRSVP = event.attendees.includes(token.id);
-  if (alreadyRSVP) {
-    event.attendees = event.attendees.filter((uid) => uid.toString() !== token.id);
-  } else {
-    event.attendees.push(token.id);
-  }
-
-  await event.save();
-  return NextResponse.json(await event.populate("attendees"));
 }
