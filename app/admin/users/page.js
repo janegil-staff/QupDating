@@ -8,9 +8,9 @@ export default function UsersPage() {
 
   useEffect(() => {
     const fetchUsers = async () => {
-      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
-      const res = await fetch(`${baseUrl}/api/admin/users`, { cache: "no-store" });
+      const res = await fetch(`/api/admin/users`, { cache: "no-store" });
       const data = await res.json();
+      console.log(data);
       if (res.ok) setUsers(data.users);
     };
     fetchUsers();

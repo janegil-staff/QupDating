@@ -18,7 +18,7 @@ export default function Navbar() {
   ];
 
   const pathname = usePathname();
-
+console.log(status);
   if (status !== "authenticated") return null;
 
   const isActive = (href) => pathname === href;
@@ -47,7 +47,7 @@ export default function Navbar() {
           </div>
 
           <div className="flex items-center gap-4 text-sm">
-            <span className="text-gray-300">Hi, {session.user.name}</span>
+            <span className="text-gray-300">Hi, {session?.user?.name}</span>
             <button
               onClick={() => signOut({ callbackUrl: "/" })}
               className="bg-pink-600 hover:bg-pink-700 px-3 py-1 rounded text-white"
