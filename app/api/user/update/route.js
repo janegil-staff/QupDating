@@ -1,6 +1,7 @@
 import User from "@/models/User";
 import { connectDB } from "@/lib/db";
-import { calculateCompletion } from "@/lib/profileCompletion";
+import { profileCompletion } from "@/lib/profileCompletion";
+
 
 export async function PUT(req) {
   await connectDB();
@@ -9,7 +10,7 @@ export async function PUT(req) {
   const user = await User.findByIdAndUpdate(userId, updates, { new: true });
 
   // ✅ Recalculate completion
-  user.profileCompletionPercent = calculateCompletion(user);
+  user.profileCompletionPercent = profileCompletion(user);
   await user.save();
 
   return new Response(JSON.stringify(user), { status: 200 });

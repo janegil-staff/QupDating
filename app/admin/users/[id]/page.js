@@ -1,8 +1,8 @@
 import AdminLayout from "@/components/admin/AdminLayout";
 
 async function getUser(id) {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
-  const res = await fetch(`${baseUrl}/api/admin/users/${id}`, {
+
+  const res = await fetch(`/api/admin/users/${id}`, {
     cache: "no-store",
   });
   if (!res.ok) throw new Error("Failed to fetch user");
