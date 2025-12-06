@@ -11,7 +11,7 @@ export default function VerifyBanner({ user }) {
   const handleResend = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/resend-verification", {
+      const res = await fetch("/api/auth/resend-verification", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: user.email }),

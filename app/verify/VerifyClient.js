@@ -1,16 +1,37 @@
+// app/verify/page.jsx
 "use client";
+import { useSearchParams, useRouter } from "next/navigation";
+import { useEffect } from "react";
 
-import Link from "next/link";
+export default function VerifyPage() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const status = searchParams.get("status");
 
-
-export default function VerifiedRedirect() {
+  useEffect(() => {
+    console.log("STATUS ---->", status);
+    if (status === "success") {
+      // Redirect after 3 seconds
+      const timer = setTimeout(() => {
+        router.push("/dashboard");
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [status, router]);
 
   return (
-    <div className="text-center text-white py-10 space-y-4">
-      <h1 className="text-2xl font-bold text-pink-400">
-        Verification complete
-      </h1>
-      <Link href="/profile">Back to profile</Link>
+    <div className="flex flex-col items-center justify-center h-screen bg-black text-white">
+      {status === "success" ? (
+        <>
+          <h1 className="text-2xl font-bold">✅ Your profile is verified!</h1>
+          <p>You’ll be redirected shortly...</p>
+        </>
+      ) : (
+        <>
+          <h1 className="text-2xl font-bold">❌ Verification failed</h1>
+          <p>Please request a new verification email.</p>
+        </>
+      )}
     </div>
   );
 }

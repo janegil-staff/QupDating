@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import User from "@/models/User";
 import { connectDB } from "@/lib/db";
+import { withCORS, corsOptions } from "@/lib/cors";
 
 export async function GET(req) {
   await connectDB();
@@ -73,4 +74,8 @@ export async function GET(req) {
     status: 200,
     headers: { "Content-Type": "application/json" },
   });
+}
+
+export async function OPTIONS() {
+  return corsOptions();
 }

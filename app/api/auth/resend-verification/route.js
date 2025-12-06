@@ -29,10 +29,10 @@ export async function POST(req) {
     const token = crypto.randomBytes(32).toString("hex");
     user.verifyToken = token;
     user.verifyExpires = Date.now() + 1000 * 60 * 60 * 24; // 24h
+    user.isVerified = true;
     await user.save();
 
-    // 🔹 Send email
-    const verifyUrl = `https://qup.dating/verify?token=${token}`;
+    const verifyUrl = `${process.env.NEXT_PUBLIC_APP_URL}/profile/${user._id}`;
     const html = verifyEmailTemplate({ name: user.name, verifyUrl });
 
     await sendEmail({
