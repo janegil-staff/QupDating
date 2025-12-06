@@ -130,7 +130,7 @@ export default function Dashboard() {
               <SwipeCard
                 key={card._id}
                 card={card}
-                draggable={isTop}
+                draggable={isTop} 
                 onSwipe={handleSwipe}
               />
             );
