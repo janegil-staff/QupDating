@@ -329,9 +329,11 @@ export default function ChatPage({ userId }) {
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            sendMessage();
+            if (!uploadingImages) {
+              sendMessage();
+            }
           }}
-          className="fixed bottom-16 mx-auto md:static w-full px-3 py-2 bg-gray-800 flex items-center gap-2 z-50"
+          className="mb-8 md:mb-0 mx-auto md:static w-full px-3 py-2 bg-gray-800 flex items-center gap-2 z-50"
         >
           <button
             type="button"
@@ -365,7 +367,7 @@ export default function ChatPage({ userId }) {
             type="submit"
             className="bg-green-600 hover:bg-green-700 px-3 py-2 rounded-lg text-sm"
           >
-            Send
+            {uploadingImages ? "Uploading..." : "Send"}
           </button>
         </form>
 
