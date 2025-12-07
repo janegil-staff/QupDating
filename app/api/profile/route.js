@@ -14,7 +14,7 @@ export async function PUT(req) {
     }
 
     const body = await req.json();
-    console.log("Incoming profile payload:", body);
+
     const updated = await User.findByIdAndUpdate(
       session.user.id,
       {

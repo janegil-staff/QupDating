@@ -5,9 +5,10 @@ import { connectDB } from "@/lib/db";
 import User from "@/models/User";
 import sendEmail from "@/lib/sendEmail"; // 🔹 You'll need to implement this
 import verifyEmailTemplate from "@/lib/emailTemplates/verifyEmail";
+import { Rewind } from "lucide-react";
 
 export async function POST(req) {
-
+  console.log("ENTERING");
   try {
     const formData = await req.formData();
     const name = formData.get("name");
@@ -18,7 +19,6 @@ export async function POST(req) {
     const birthYear = parseInt(formData.get("birthYear"));
     const gender = formData.get("gender");
     const imagesRaw = formData.get("images");
-
     const email = rawEmail.toLowerCase().trim(); // ✅ normalize
     const birthdate = new Date(birthYear, birthMonth, birthDay);
     const images = imagesRaw ? JSON.parse(imagesRaw) : [];
@@ -34,7 +34,7 @@ export async function POST(req) {
       );
     }
 
-    // 🔹 Generate verification token
+    // 🔹 Generate verification tssoken
     const verifyToken = crypto.randomBytes(32).toString("hex");
     const verifyExpires = Date.now() + 1000 * 60 * 60 * 24; // 24h
 
@@ -51,7 +51,7 @@ export async function POST(req) {
       verifyToken,
       verifyExpires,
     });
-
+    console.log(user);
     // 🔹 Send verification email
     const verifyUrl = `https://qup.dating/verify?token=${verifyToken}`;
 
@@ -66,9 +66,35 @@ export async function POST(req) {
       console.warn("Email send failed:", err.message);
     }
 
-    return NextResponse.json({ success: true, user });
+    return NextResponse.json(
+      { message: "User registered" },
+      { user },
+      {
+        status: 200,
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Methods": "POST, OPTIONS",
+          "Access-Control-Allow-Headers": "Content-Type, Authorization",
+        },
+      }
+    );
+    // return NextResponse.json({ success: true, user });
   } catch (err) {
     console.error("Register error:", err);
     return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
+}
+
+export async function OPTIONS() {
+  return NextResponse.json(
+    {},
+    {
+      status: 200,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "POST, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type, Authorization",
+      },
+    }
+  );
 }
