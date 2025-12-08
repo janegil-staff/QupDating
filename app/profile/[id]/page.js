@@ -14,8 +14,7 @@ export default async function ProfilePage({ params }) {
   return (
     <>
       <TrackProfileView viewedUserId={user._id.toString()} />
-      <PublicProfile userId={user._id.toString()} />
-      
+      <PublicProfile userId={user._id.toString()} />      
     </>
   );
 }
