@@ -54,7 +54,7 @@ export async function POST(req) {
 
     const user = await User.create({
       name: name || "",
-      email: email || "",
+      email: trimmedEmail || "",
       password: hashedPassword,
       gender: gender || null,
       birthdate, // null if not provided
