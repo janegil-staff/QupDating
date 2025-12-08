@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
-import connectDB from "@/lib/mongodb";
 import User from "@/models/User";
+import { connectDB } from "@/lib/db";
 
 export async function GET(req) {
   const authHeader = req.headers.get("authorization");
