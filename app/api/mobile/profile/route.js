@@ -1,14 +1,17 @@
-import { authOptions } from "@/lib/auth";
+import { connectDB } from "@/lib/db";
 import User from "@/models/User";
-import { getServerSession } from "next-auth";
 
 export async function GET(req) {
-  const session = await getServerSession(authOptions);
-  if (!session) {
-    return Response.json({ error: "Not authenticated" }, { status: 401 });
+  console.log("ENTERING PROFILE");
+  const { searchParams } = new URL(req.url);
+  const email = searchParams.get("email");
+  console.log(email);
+  await connectDB();
+  if (!email) {
+    return Response.json({ error: "Email required" }, { status: 400 });
   }
 
-  const user = await User.findOne({ email: session.user.email }).lean();
+  const user = await User.findOne({ email }).lean();
   if (!user) {
     return Response.json({ error: "User not found" }, { status: 404 });
   }
