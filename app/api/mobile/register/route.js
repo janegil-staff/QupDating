@@ -2,10 +2,9 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import { connectDB } from "@/lib/db";
+import sendEmail from "@/lib/sendEmail";
 import User from "@/models/User";
-import sendEmail from "@/lib/sendEmail"; // 🔹 You'll need to implement this
 import verifyEmailTemplate from "@/lib/emailTemplates/verifyEmail";
-
 
 export async function POST(req) {
 
@@ -23,9 +22,24 @@ export async function POST(req) {
     const birthdate = new Date(birthYear, birthMonth, birthDay);
     const images = imagesRaw ? JSON.parse(imagesRaw) : [];
     const hashedPassword = await bcrypt.hash(password, 10);
+    const occupation = formData.get("occupation");
+    const education = formData.get("education");
+    const religion = formData.get("religion");
+    const bodyType = formData.get("bodyType");
+    const appearance = formData.get("appearance");
+    const smoking = formData.get("smoking");
+    const drinking = formData.get("drinking");
+    const hasChildren = formData.get("hasChildren");
+    const wantsChildren = formData.get("wantsChildren");
+    const relationshipStatus = formData.get("relationshipStatus");
+    const willingToRelocate = formData.get("willingToRelocate");
+    const bio = formData.get("bio");
+    const lookingFor = formData.get("lookingFor");
+    const location = JSON.parse(formData.get("location"));
+    const profileImage = formData.get("profileImage");
+    const preferredAge = formData.get("preferredAge");
 
     await connectDB();
-
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return NextResponse.json(
@@ -50,8 +64,24 @@ export async function POST(req) {
       isVerified: false,
       verifyToken,
       verifyExpires,
+      occupation,
+      education,
+      religion,
+      bodyType,
+      appearance,
+      smoking,
+      drinking,
+      hasChildren,
+      wantsChildren,
+      relationshipStatus,
+      willingToRelocate,
+      bio,
+      lookingFor,
+      location,
+      profileImage,
+      preferredAge,
     });
-
+    console.log("USER -->", user);
     // 🔹 Send verification email
     const verifyUrl = `https://qup.dating/verify?token=${verifyToken}`;
 
@@ -66,9 +96,20 @@ export async function POST(req) {
       console.warn("Email send failed:", err.message);
     }
 
-    return NextResponse.json({ success: true, user });
+    return NextResponse.json(
+      { message: "User registered" },
+      { user },
+      {
+        status: 200,
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Methods": "POST, OPTIONS",
+          "Access-Control-Allow-Headers": "Content-Type, Authorization",
+        },
+      }
+    );
   } catch (err) {
-    console.error("Register error:", err);
+    console.error("Error parsing formData:", err);
     return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }
