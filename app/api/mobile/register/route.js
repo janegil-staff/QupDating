@@ -13,7 +13,7 @@ export async function POST(req) {
 
     const {
       name,
-      email: rawEmail,
+      email,
       password,
       birthdate,
       gender,
@@ -35,12 +35,12 @@ export async function POST(req) {
       profileImage,
       preferredAge,
     } = body;
-
-    const email = rawEmail.toLowerCase().trim();
+    console.log("preffered age --> ": preferredAge);
+    const trimmedEmail = email.toLowerCase().trim();
     const hashedPassword = await bcrypt.hash(password, 10);
 
     await connectDB();
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ trimmedEmail });
     if (existingUser) {
       return NextResponse.json(
         { error: "User already registered" },
@@ -54,11 +54,11 @@ export async function POST(req) {
 
     const user = await User.create({
       name,
-      email,
+      email: trimmedEmail,
       password: hashedPassword,
-      birthdate,
       gender,
-      images,
+      birthdate: birthdate || null,
+      images: images || [],
       profileImage:
         profileImage ||
         (images.length > 0 ? images[0].url : "/images/placeholder.png"),
@@ -78,8 +78,8 @@ export async function POST(req) {
       willingToRelocate: !!willingToRelocate,
       bio: bio || null,
       lookingFor: lookingFor || null,
-      location,
-      preferredAge,
+      location: location || null,
+     // preferredAge,
     });
 
     // 🔹 Send verification email

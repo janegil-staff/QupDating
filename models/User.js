@@ -18,7 +18,7 @@ const userSchema = new mongoose.Schema(
       lowercase: true, // normalize
       trim: true,
     },
-    birthdate: { type: Date },
+    birthdate: { type: Date, default: null },
     gender: {
       type: String,
       enum: ["male", "female", "other"],
