@@ -19,6 +19,7 @@ export async function POST(req) {
       location,
       occupation,
       education,
+      birthdate,
       religion,
       bodyType,
       appearance,
@@ -57,7 +58,7 @@ export async function POST(req) {
       email: trimmedEmail || "",
       password: hashedPassword,
       gender: gender || null,
-      birthdate, // null if not provided
+      birthdate: birthdate || null,
       location: location || null,
       occupation: occupation || null,
       education: education || null,
