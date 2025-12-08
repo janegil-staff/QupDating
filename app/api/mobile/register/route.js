@@ -45,7 +45,10 @@ export async function POST(req) {
     await connectDB();
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return NextResponse.json({ error: "User already registered" }, { status: 400 });
+      return NextResponse.json(
+        { error: "User already registered" },
+        { status: 400 }
+      );
     }
 
     // 🔹 Generate verification token
@@ -59,7 +62,9 @@ export async function POST(req) {
       birthdate,
       gender,
       images,
-      profileImage: profileImage || (images.length > 0 ? images[0].url : "/images/placeholder.png"),
+      profileImage:
+        profileImage ||
+        (images.length > 0 ? images[0].url : "/images/placeholder.png"),
       isVerified: false,
       verifyToken,
       verifyExpires,
@@ -105,8 +110,11 @@ export async function POST(req) {
       }
     );
   } catch (err) {
-    console.error("Error parsing JSON:", err);
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
+    console.error("Error in register route:", err);
+    return NextResponse.json(
+      { error: "Server error", details: err.message },
+      { status: 500 }
+    );
   }
 }
 
