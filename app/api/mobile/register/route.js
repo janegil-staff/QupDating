@@ -7,9 +7,9 @@ import User from "@/models/User";
 import verifyEmailTemplate from "@/lib/emailTemplates/verifyEmail";
 
 export async function POST(req) {
-
   try {
     const formData = await req.formData();
+
     const name = formData.get("name");
     const rawEmail = formData.get("email");
     const password = formData.get("password");
@@ -18,10 +18,13 @@ export async function POST(req) {
     const birthYear = parseInt(formData.get("birthYear"));
     const gender = formData.get("gender");
     const imagesRaw = formData.get("images");
-    const email = rawEmail.toLowerCase().trim(); // ✅ normalize
-    const birthdate = new Date(birthYear, birthMonth, birthDay);
+    const email = rawEmail.toLowerCase().trim();
+
+    // ✅ Correct month offset
+    const birthdate = new Date(birthYear, birthMonth - 1, birthDay);
     const images = imagesRaw ? JSON.parse(imagesRaw) : [];
     const hashedPassword = await bcrypt.hash(password, 10);
+
     const occupation = formData.get("occupation");
     const education = formData.get("education");
     const religion = formData.get("religion");
@@ -42,13 +45,10 @@ export async function POST(req) {
     await connectDB();
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return NextResponse.json(
-        { error: "User already registered" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "User already registered" }, { status: 400 });
     }
 
-    // 🔹 Generate verification tssoken
+    // 🔹 Generate verification token
     const verifyToken = crypto.randomBytes(32).toString("hex");
     const verifyExpires = Date.now() + 1000 * 60 * 60 * 24; // 24h
 
@@ -59,8 +59,7 @@ export async function POST(req) {
       birthdate,
       gender,
       images,
-      profileImage:
-        images.length > 0 ? images[0].url : "/images/placeholder.png",
+      profileImage: profileImage || (images.length > 0 ? images[0].url : "/images/placeholder.png"),
       isVerified: false,
       verifyToken,
       verifyExpires,
@@ -78,13 +77,11 @@ export async function POST(req) {
       bio,
       lookingFor,
       location,
-      profileImage,
       preferredAge,
     });
-    console.log("USER -->", user);
+
     // 🔹 Send verification email
     const verifyUrl = `https://qup.dating/verify?token=${verifyToken}`;
-
     const html = verifyEmailTemplate({ name, verifyUrl });
     try {
       await sendEmail({
@@ -97,8 +94,7 @@ export async function POST(req) {
     }
 
     return NextResponse.json(
-      { message: "User registered" },
-      { user },
+      { message: "User registered", user },
       {
         status: 200,
         headers: {
