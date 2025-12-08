@@ -15,9 +15,8 @@ export async function POST(req) {
       name,
       email,
       password,
-      birthdate,
       gender,
-      images = [],
+      location,
       occupation,
       education,
       religion,
@@ -27,15 +26,16 @@ export async function POST(req) {
       drinking,
       hasChildren,
       wantsChildren,
-      relationshipStatus,
       willingToRelocate,
+      relationshipStatus,
       bio,
       lookingFor,
-      location,
-      profileImage,
       preferredAge,
+      images,
+      profileImage,
     } = body;
-    console.log("preffered age --> ": preferredAge);
+
+    console.log("preffered age --> ", preferredAge);
     const trimmedEmail = email.toLowerCase().trim();
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -53,33 +53,30 @@ export async function POST(req) {
     const verifyExpires = Date.now() + 1000 * 60 * 60 * 24; // 24h
 
     const user = await User.create({
-      name,
-      email: trimmedEmail,
+      name: name || "",
+      email: email || "",
       password: hashedPassword,
-      gender,
-      birthdate: birthdate || null,
-      images: images || [],
-      profileImage:
-        profileImage ||
-        (images.length > 0 ? images[0].url : "/images/placeholder.png"),
-      isVerified: false,
-      verifyToken,
-      verifyExpires,
+      gender: gender || null,
+      birthdate, // null if not provided
+      location: location || null,
       occupation: occupation || null,
       education: education || null,
       religion: religion || null,
+      verifyToken,
+      verifyExpires,
       bodyType: bodyType || null,
       appearance: appearance || null,
-      smoking: smoking || undefined,
-      drinking: drinking || undefined,
-      hasChildren: !!hasChildren,
-      wantsChildren: !!wantsChildren,
+      smoking: smoking ?? null,
+      drinking: drinking ?? null,
+      hasChildren: hasChildren ?? null,
+      wantsChildren: wantsChildren ?? null,
+      willingToRelocate: willingToRelocate ?? null,
       relationshipStatus: relationshipStatus || null,
-      willingToRelocate: !!willingToRelocate,
       bio: bio || null,
       lookingFor: lookingFor || null,
-      location: location || null,
-     // preferredAge,
+      // preferredAge: preferredAge || null,
+      images: images || [],
+      profileImage: profileImage || "",
     });
 
     // 🔹 Send verification email
@@ -96,15 +93,8 @@ export async function POST(req) {
     }
 
     return NextResponse.json(
-      { message: "User registered", user },
-      {
-        status: 200,
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Methods": "POST, OPTIONS",
-          "Access-Control-Allow-Headers": "Content-Type, Authorization",
-        },
-      }
+      { message: "User registered successfully", user },
+      { status: 201 }
     );
   } catch (err) {
     console.error("Error in register route:", err);
