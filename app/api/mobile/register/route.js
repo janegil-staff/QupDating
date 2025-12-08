@@ -8,39 +8,38 @@ import verifyEmailTemplate from "@/lib/emailTemplates/verifyEmail";
 
 export async function POST(req) {
   try {
-    const formData = await req.formData();
+    const body = await req.json();
 
-    const name = formData.get("name");
-    const rawEmail = formData.get("email");
-    const password = formData.get("password");
-    const birthDay = parseInt(formData.get("birthDay"));
-    const birthMonth = parseInt(formData.get("birthMonth"));
-    const birthYear = parseInt(formData.get("birthYear"));
-    const gender = formData.get("gender");
-    const imagesRaw = formData.get("images");
+    const {
+      name,
+      email: rawEmail,
+      password,
+      birthDay,
+      birthMonth,
+      birthYear,
+      gender,
+      images = [],
+      occupation,
+      education,
+      religion,
+      bodyType,
+      appearance,
+      smoking,
+      drinking,
+      hasChildren,
+      wantsChildren,
+      relationshipStatus,
+      willingToRelocate,
+      bio,
+      lookingFor,
+      location,
+      profileImage,
+      preferredAge,
+    } = body;
+
     const email = rawEmail.toLowerCase().trim();
-
-    // ✅ Correct month offset
     const birthdate = new Date(birthYear, birthMonth - 1, birthDay);
-    const images = imagesRaw ? JSON.parse(imagesRaw) : [];
     const hashedPassword = await bcrypt.hash(password, 10);
-
-    const occupation = formData.get("occupation");
-    const education = formData.get("education");
-    const religion = formData.get("religion");
-    const bodyType = formData.get("bodyType");
-    const appearance = formData.get("appearance");
-    const smoking = formData.get("smoking");
-    const drinking = formData.get("drinking");
-    const hasChildren = formData.get("hasChildren");
-    const wantsChildren = formData.get("wantsChildren");
-    const relationshipStatus = formData.get("relationshipStatus");
-    const willingToRelocate = formData.get("willingToRelocate");
-    const bio = formData.get("bio");
-    const lookingFor = formData.get("lookingFor");
-    const location = JSON.parse(formData.get("location"));
-    const profileImage = formData.get("profileImage");
-    const preferredAge = formData.get("preferredAge");
 
     await connectDB();
     const existingUser = await User.findOne({ email });
@@ -63,19 +62,19 @@ export async function POST(req) {
       isVerified: false,
       verifyToken,
       verifyExpires,
-      occupation,
-      education,
-      religion,
-      bodyType,
-      appearance,
-      smoking,
-      drinking,
-      hasChildren,
-      wantsChildren,
-      relationshipStatus,
-      willingToRelocate,
-      bio,
-      lookingFor,
+      occupation: occupation || null,
+      education: education || null,
+      religion: religion || null,
+      bodyType: bodyType || null,
+      appearance: appearance || null,
+      smoking: smoking || undefined,
+      drinking: drinking || undefined,
+      hasChildren: !!hasChildren,
+      wantsChildren: !!wantsChildren,
+      relationshipStatus: relationshipStatus || null,
+      willingToRelocate: !!willingToRelocate,
+      bio: bio || null,
+      lookingFor: lookingFor || null,
       location,
       preferredAge,
     });
@@ -105,7 +104,7 @@ export async function POST(req) {
       }
     );
   } catch (err) {
-    console.error("Error parsing formData:", err);
+    console.error("Error parsing JSON:", err);
     return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }
