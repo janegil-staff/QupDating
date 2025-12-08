@@ -11,6 +11,7 @@ function bufferToStream(buffer) {
 }
 
 export async function POST(req) {
+  console.log("ENTERING UPLOAD");
   const formData = await req.formData();
   const files = formData.getAll("images");
 

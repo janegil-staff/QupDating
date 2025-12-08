@@ -15,9 +15,7 @@ export async function POST(req) {
       name,
       email: rawEmail,
       password,
-      birthDay,
-      birthMonth,
-      birthYear,
+      birthdate,
       gender,
       images = [],
       occupation,
@@ -39,7 +37,6 @@ export async function POST(req) {
     } = body;
 
     const email = rawEmail.toLowerCase().trim();
-    const birthdate = new Date(birthYear, birthMonth - 1, birthDay);
     const hashedPassword = await bcrypt.hash(password, 10);
 
     await connectDB();
