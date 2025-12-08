@@ -7,6 +7,7 @@ import User from "@/models/User";
 import verifyEmailTemplate from "@/lib/emailTemplates/verifyEmail";
 
 export async function POST(req) {
+  console.log("ENTERING");
   try {
     const body = await req.json();
 
