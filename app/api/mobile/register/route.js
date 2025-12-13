@@ -10,30 +10,15 @@ export async function POST(req) {
   console.log("ENTERING mobile register");
   try {
     const body = await req.json();
-
     const {
       name,
       email,
       password,
       gender,
-      location,
-      occupation,
-      education,
-      birthdate,
-      religion,
-      bodyType,
-      appearance,
-      smoking,
-      drinking,
-      hasChildren,
-      wantsChildren,
-      willingToRelocate,
-      relationshipStatus,
-      bio,
-      lookingFor,
-      preferredAge,
+      birthDay,
+      birthMonth,
+      birthYear,
       images,
-      profileImage,
     } = body;
 
     console.log("body --> ", body);
@@ -58,26 +43,11 @@ export async function POST(req) {
       email: trimmedEmail || "",
       password: hashedPassword,
       gender: gender || null,
-      birthdate: birthdate || null,
-      location: location || null,
-      occupation: occupation || null,
-      education: education || null,
-      religion: religion || null,
+      birthdate: new Date(birthYear, birthMonth, birthDay) || null,
       verifyToken,
       verifyExpires,
-      bodyType: bodyType || null,
-      appearance: appearance || null,
-      smoking: smoking ?? null,
-      drinking: drinking ?? null,
-      hasChildren: hasChildren ?? null,
-      wantsChildren: wantsChildren ?? null,
-      willingToRelocate: willingToRelocate ?? null,
-      relationshipStatus: relationshipStatus || null,
-      bio: bio || null,
-      lookingFor: lookingFor || null,
-      // preferredAge: preferredAge || null,
       images: images || [],
-      profileImage: profileImage || "",
+      profileImage: images.length > 0 ? images[0] : "",
     });
 
     // 🔹 Send verification email
