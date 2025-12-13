@@ -47,7 +47,7 @@ export async function POST(req) {
       verifyToken,
       verifyExpires,
       images: images || [],
-      profileImage: images.length > 0 ? images[0] : "",
+      profileImage: images.length > 0 ? images[0].url : "",
     });
 
     // 🔹 Send verification email
