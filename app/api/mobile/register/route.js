@@ -7,7 +7,7 @@ import User from "@/models/User";
 import verifyEmailTemplate from "@/lib/emailTemplates/verifyEmail";
 
 export async function POST(req) {
-  console.log("ENTERING");
+  console.log("ENTERING mobile register");
   try {
     const body = await req.json();
 
@@ -36,7 +36,7 @@ export async function POST(req) {
       profileImage,
     } = body;
 
-    console.log("preffered age --> ", preferredAge);
+    console.log("body --> ", body);
     const trimmedEmail = email.toLowerCase().trim();
     const hashedPassword = await bcrypt.hash(password, 10);
 

@@ -8,7 +8,7 @@ import verifyEmailTemplate from "@/lib/emailTemplates/verifyEmail";
 
 
 export async function POST(req) {
-
+  console.log("ENTER REGISTERING");
   try {
     const formData = await req.formData();
     const name = formData.get("name");
@@ -23,7 +23,7 @@ export async function POST(req) {
     const birthdate = new Date(birthYear, birthMonth, birthDay);
     const images = imagesRaw ? JSON.parse(imagesRaw) : [];
     const hashedPassword = await bcrypt.hash(password, 10);
-
+    console.log("Formdata: ", formData);
     await connectDB();
 
     const existingUser = await User.findOne({ email });
@@ -51,7 +51,7 @@ export async function POST(req) {
       verifyToken,
       verifyExpires,
     });
-
+   
     // 🔹 Send verification email
     const verifyUrl = `https://qup.dating/verify?token=${verifyToken}`;
 

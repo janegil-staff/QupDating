@@ -54,3 +54,24 @@ export async function POST(req) {
     },
   });
 }
+
+export async function PATCH(req) {
+  try {
+    const authHeader = req.headers.get("authorization");
+    if (!authHeader)
+      return Response.json({ error: "Not authenticated" }, { status: 401 });
+
+    const token = authHeader.split(" ")[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    await connectDB();
+    const body = await req.json();
+
+    const user = await User.findByIdAndUpdate(decoded.id, body, {
+      new: true,
+    }).lean();
+    return Response.json(user);
+  } catch {
+    return Response.json({ error: "Couldnt patch user" }, { status: 401 });
+  }
+}

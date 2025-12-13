@@ -36,6 +36,6 @@ export async function POST(req) {
       public_id: result.public_id,
     });
   }
-
+  console.log("Uploaded images --> ", uploadedImages);
   return NextResponse.json({ images: uploadedImages });
 }
