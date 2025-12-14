@@ -7,7 +7,7 @@ export async function GET(req) {
   const authHeader = req.headers.get("authorization");
   if (!authHeader)
     return Response.json({ error: "Not authenticated" }, { status: 401 });
-
+console.log("authHeader", authHeader);
   const token = authHeader.split(" ")[1];
   console.log("TOKEN", token);
   try {
@@ -22,6 +22,7 @@ export async function GET(req) {
       user,
     });
   } catch (err) {
+    console.log(err);
     return Response.json({ error: "Invalid token" }, { status: 401 });
   }
 }
