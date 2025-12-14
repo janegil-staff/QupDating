@@ -2,10 +2,9 @@ import { connectDB } from "@/lib/db";
 import User from "@/models/User";
 
 export async function GET(req) {
-  console.log("ENTERING PROFILE");
   const { searchParams } = new URL(req.url);
   const email = searchParams.get("email");
-  console.log(email);
+ 
   await connectDB();
   if (!email) {
     return Response.json({ error: "Email required" }, { status: 400 });

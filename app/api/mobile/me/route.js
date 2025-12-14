@@ -3,17 +3,18 @@ import User from "@/models/User";
 import { connectDB } from "@/lib/db";
 
 export async function GET(req) {
+  console.log("ENTERING MOBILE/ME");
   const authHeader = req.headers.get("authorization");
   if (!authHeader)
     return Response.json({ error: "Not authenticated" }, { status: 401 });
 
   const token = authHeader.split(" ")[1];
-
+  console.log("TOKEN", token);
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     await connectDB();
     const user = await User.findById(decoded.id).lean();
-
+  console.log("USER--->", user);
     if (!user)
       return Response.json({ error: "User not found" }, { status: 404 });
 
