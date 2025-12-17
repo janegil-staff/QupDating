@@ -1,6 +1,64 @@
 import jwt from "jsonwebtoken";
 import User from "@/models/User";
 import { connectDB } from "@/lib/db";
+import { NextResponse } from "next/server";
+
+export async function PUT(req) {
+  try {
+    // 1. Auth check
+    const authHeader = req.headers.get("authorization");
+    if (!authHeader) {
+      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+    }
+    const token = authHeader.split(" ")[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    // 2. Connect DB
+    await connectDB();
+
+    // 3. Parse body
+    const body = await req.json();
+
+    // 4. Build update object
+    const updateData = {};
+    if (body.profileImage) {
+      updateData.profileImage = body.profileImage;
+    }
+
+    // If images provided, append instead of overwrite
+    if (body.images && Array.isArray(body.images)) {
+      await User.findByIdAndUpdate(
+        decoded.id,
+        { $push: { images: { $each: body.images } } }, // ✅ append new images
+        { new: true }
+      );
+    }
+
+    // 5. Update other fields if needed
+    Object.keys(body).forEach((key) => {
+      if (key !== "images" && key !== "profileImage") {
+        updateData[key] = body[key];
+      }
+    });
+
+    // 6. Apply other updates
+    const user = await User.findByIdAndUpdate(decoded.id, updateData, {
+      new: true,
+    }).lean();
+
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    return NextResponse.json(user, { status: 200 });
+  } catch (err) {
+    console.error("PUT error:", err);
+    return NextResponse.json(
+      { error: "Could not update user", details: err.message },
+      { status: 500 }
+    );
+  }
+}
 
 export async function GET(req) {
   const authHeader = req.headers.get("authorization");

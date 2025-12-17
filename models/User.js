@@ -35,14 +35,6 @@ const userSchema = new mongoose.Schema(
       type: String,
       enum: ["None", "Light / social drinker", "Heavy"],
     },
-    exercise: {
-      type: String,
-      enum: ["Never", "Sometimes", "Regularly", "Daily"],
-    },
-    diet: {
-      type: String,
-      enum: ["Vegetarian", "Vegan", "Omnivore", "Other"],
-    },
     relationshipStatus: { type: String },
     willingToRelocate: { type: Boolean },
     education: { type: String },
