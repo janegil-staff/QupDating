@@ -1,10 +1,10 @@
 import mongoose from "mongoose";
 
 const locationSchema = new mongoose.Schema({
-  name: { type: String, required: false }, // e.g. "Bergen, Vestland, Norway"
-  lat: { type: Number, required: false },
-  lng: { type: Number, required: false },
-  country: { type: String, required: false }, // ✅ new field
+  name: { type: String }, // e.g. "bergen, vestland, norway"
+  lat: { type: Number },
+  lng: { type: Number },
+  country: { type: String },
 });
 
 const userSchema = new mongoose.Schema(
@@ -14,50 +14,94 @@ const userSchema = new mongoose.Schema(
     email: {
       type: String,
       required: true,
-      unique: true, // ✅ ensures DB-level uniqueness
-      lowercase: true, // normalize
+      unique: true,
+      lowercase: true,
       trim: true,
     },
     birthdate: { type: Date, default: null },
     gender: {
       type: String,
       enum: ["male", "female", "other"],
+      lowercase: true,
       required: true,
     },
     occupation: { type: String },
-    appearance: { type: String },
+
+    // Appearance
+    appearance: {
+      type: String,
+      enum: ["normal", "pretty", "cute", "handsome", "stylish", "unique"],
+      lowercase: true,
+    },
     height: { type: Number },
-    bodyType: { type: String },
+    bodyType: {
+      type: String,
+      enum: ["slim", "average", "athletic", "curvy", "muscular"],
+      lowercase: true,
+    },
+
+    // Lifestyle
     hasChildren: { type: Boolean },
     wantsChildren: { type: Boolean },
-    smoking: { type: String, enum: ["Yes", "No", "Occasionally"] },
+    smoking: {
+      type: String,
+      enum: ["yes", "no", "occasionally"],
+      lowercase: true,
+    },
     drinking: {
       type: String,
-      enum: ["None", "Light / social drinker", "Heavy"],
+      enum: ["none", "light / social drinker", "heavy"],
+      lowercase: true,
     },
-    relationshipStatus: { type: String },
+    exercise: {
+      type: String,
+      enum: ["never", "sometimes", "regularly", "daily"],
+      lowercase: true,
+    },
+    diet: {
+      type: String,
+      enum: ["vegetarian", "vegan", "omnivore", "other"],
+      lowercase: true,
+    },
+
+    // Details
+    relationshipStatus: {
+      type: String,
+      enum: ["single", "in a relationship", "married", "divorced"],
+      lowercase: true,
+    },
     willingToRelocate: { type: Boolean },
     education: { type: String },
-    religion: { type: String },
-    tags: [{ type: String }], // e.g. ["#CatLover", "#traveling"]
+    religion: {
+      type: String,
+      enum: ["christian", "muslim", "jewish", "buddhist", "ateist", "other"],
+      lowercase: true,
+    },
+
+    // Other profile fields
+    tags: [{ type: String }],
     location: locationSchema,
     searchScope: {
       type: String,
-      enum: ["Nearby", "Regional", "National", "Worldwide"],
-      default: "Worldwide",
+      enum: ["nearby", "regional", "national", "worldwide"],
+      lowercase: true,
+      default: "worldwide",
     },
     bio: { type: String },
     lookingFor: { type: String },
     images: [{ url: String, public_id: String }],
-    profileImage: {
-      type: String,
-    },
+    profileImage: { type: String },
+
+    // Social connections
     likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     dislikes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     matches: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+
+    // Admin fields
     role: {
       type: String,
       enum: ["user", "moderator", "admin", "banned"],
+      lowercase: true,
       default: "user",
     },
     lastSeen: { type: Date, default: Date.now },
@@ -67,6 +111,8 @@ const userSchema = new mongoose.Schema(
     isVerified: { type: Boolean, default: false },
     verifyToken: { type: String },
     verifyExpires: { type: Date },
+
+    // Preferences
     preferredAgeMin: { type: Number, default: 18 },
     preferredAgeMax: { type: Number, default: 99 },
     profileCompletionPercent: { type: Number, default: 0 },

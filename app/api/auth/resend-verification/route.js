@@ -6,6 +6,7 @@ import sendEmail from "@/lib/sendEmail";
 import verifyEmailTemplate from "@/lib/emailTemplates/verifyEmail";
 
 export async function POST(req) {
+  console.log("ENTERING");
   try {
     const { email } = await req.json();
     const normalizedEmail = email.toLowerCase().trim();
@@ -13,7 +14,7 @@ export async function POST(req) {
     await connectDB();
 
     const user = await User.findOne({ email: normalizedEmail });
-
+console.log("USER -->", user);
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
