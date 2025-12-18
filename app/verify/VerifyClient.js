@@ -9,11 +9,10 @@ export default function VerifyPage() {
   const status = searchParams.get("status");
 
   useEffect(() => {
-    console.log("STATUS ---->", status);
     if (status === "success") {
       // Redirect after 3 seconds
       const timer = setTimeout(() => {
-        router.push("/dashboard");
+        router.push("https://qup.dating/dashboard");
       }, 3000);
       return () => clearTimeout(timer);
     }
