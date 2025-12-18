@@ -32,7 +32,7 @@ export async function POST(req) {
     user.isVerified = true;
     await user.save();
 
-    const verifyUrl = `${process.env.NEXT_PUBLIC_APP_URL}/profile/${user._id}`;
+    const verifyUrl = `https://qup.dating/profile/${user._id}`;
     const html = verifyEmailTemplate({ name: user.name, verifyUrl });
 
     await sendEmail({
