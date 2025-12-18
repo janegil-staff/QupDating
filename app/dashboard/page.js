@@ -134,6 +134,7 @@ export default function Dashboard() {
                 onSwipe={handleSwipe}
               />
             );
+            
           })}
           {cards.length === 0 && (
             <div className="absolute w-full h-full flex items-center justify-center text-gray-400 text-center p-4">
