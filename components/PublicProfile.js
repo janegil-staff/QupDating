@@ -5,7 +5,7 @@ import ToggleLikeButton from "./ToggleLikeButton";
 import ImageCarousel from "./ImageCarousel";
 import VerifyBanner from "./VerifyBanner";
 import DeleteProfileButton from "./DeleteProfileButton";
-
+import capitalizeFirst from "../lib/capitalFirst";
 export default function PublicProfile({ userId }) {
   const { data: session } = useSession();
 
@@ -126,7 +126,7 @@ export default function PublicProfile({ userId }) {
           <div className="text-center md:text-left">
             <h1 className="text-3xl font-bold">{profile.name}</h1>
             <p className="text-pink-400 italic">
-              {profile.relationshipStatus || "Undefined status"}
+              {capitalizeFirst(profile.relationshipStatus) || "Undefined status"}
             </p>
             <p className="text-gray-400">
               {age} years • {profile.gender}
@@ -178,8 +178,8 @@ export default function PublicProfile({ userId }) {
           <SimpleSection
             title="Appearance"
             items={[
-              { label: "Appearance", value: profile.appearance },
-              { label: "Body Type", value: profile.bodyType },
+              { label: "Appearance", value: capitalizeFirst(profile.appearance) },
+              { label: "Body Type", value: capitalizeFirst(profile.bodyType) },
               {
                 label: "Height",
                 value: profile.height ? `${profile.height} cm` : null,
@@ -191,8 +191,8 @@ export default function PublicProfile({ userId }) {
           <SimpleSection
             title="Lifestyle"
             items={[
-              { label: "Smoking", value: profile.smoking },
-              { label: "Drinking", value: profile.drinking },
+              { label: "Smoking", value: capitalizeFirst(profile.smoking) },
+              { label: "Drinking", value: capitalizeFirst(profile.drinking) },
               {
                 label: "Has Children",
                 value: profile.hasChildren ? "Yes" : "No",
@@ -212,12 +212,12 @@ export default function PublicProfile({ userId }) {
           <SimpleSection
             title="Personal Info"
             items={[
-              { label: "Religion", value: profile.religion },
-              { label: "Occupation", value: profile.occupation },
-              { label: "Education", value: profile.education },
+              { label: "Religion", value: capitalizeFirst(profile.religion) },
+              { label: "Occupation", value: capitalizeFirst(profile.occupation) },
+              { label: "Education", value: capitalizeFirst(profile.education) },
               {
                 label: "Relationship Status",
-                value: profile.relationshipStatus,
+                value: capitalizeFirst(profile.relationshipStatus),
               },
             ]}
             userId={userId}
@@ -229,7 +229,7 @@ export default function PublicProfile({ userId }) {
             What I'm Looking For
           </h2>
           <p className="mt-2 text-gray-300">
-            {profile.lookingFor || "Not specified yet."}
+            {capitalizeFirst(profile.lookingFor) || "Not specified yet."}
           </p>
         </div>
 

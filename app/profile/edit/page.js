@@ -368,12 +368,12 @@ export default function EditProfilePage() {
                     className="mt-1 pt-3 block w-full border rounded px-3 py-2"
                   >
                     <option value="">Choose...</option>
-                    <option value="Normal">Normal</option>
-                    <option value="Pretty">Pretty</option>
-                    <option value="Cute">Cute</option>
-                    <option value="Handsome">Handsome</option>
-                    <option value="Stylish">Stylish</option>
-                    <option value="Unique">Unique</option>
+                    <option value="normal">Normal</option>
+                    <option value="pretty">Pretty</option>
+                    <option value="cute">Cute</option>
+                    <option value="handsome">Handsome</option>
+                    <option value="stylish">Stylish</option>
+                    <option value="unique">Unique</option>
                   </select>
                 </div>
                 <div>
@@ -386,11 +386,11 @@ export default function EditProfilePage() {
                     className="mt-1 pt-3 block w-full border rounded px-3 py-2"
                   >
                     <option value="">Choose...</option>
-                    <option value="Slim">Slim</option>
-                    <option value="Average">Average</option>
-                    <option value="Athletic">Athletic</option>
-                    <option value="Curvy">Curvy</option>
-                    <option value="Muscular">Muscular</option>
+                    <option value="slim">Slim</option>
+                    <option value="average">Average</option>
+                    <option value="athletic">Athletic</option>
+                    <option value="curvy">Curvy</option>
+                    <option value="muscular">Muscular</option>
                   </select>
                 </div>
               </div>
@@ -408,9 +408,9 @@ export default function EditProfilePage() {
                     className="mt-1 block w-full border rounded px-3 py-2"
                   >
                     <option value="">Choose...</option>
-                    <option value="Yes">Yes</option>
-                    <option value="No">No</option>
-                    <option value="Occasionally">Occasionally</option>
+                    <option value="yes">Yes</option>
+                    <option value="no">No</option>
+                    <option value="occasionally">Occasionally</option>
                   </select>
                 </div>
                 <div>
@@ -424,7 +424,7 @@ export default function EditProfilePage() {
                   >
                     <option value="">Choose...</option>
                     <option value="None">None</option>
-                    <option value="Light / social drinker">
+                    <option value="light / social drinker">
                       Light / social
                     </option>
                     <option value="Heavy">Heavy</option>
@@ -442,9 +442,9 @@ export default function EditProfilePage() {
                     className="mt-1 block w-full border rounded px-3 py-2"
                   >
                     <option value="">Choose...</option>
-                    <option value="Single">Single</option>
-                    <option value="In a relationship">In a relationship</option>
-                    <option value="Married">Married</option>
+                    <option value="single">Single</option>
+                    <option value="in a relationship">In a relationship</option>
+                    <option value="married">Married</option>
                   </select>
                 </div>
                 <div>
@@ -520,16 +520,16 @@ export default function EditProfilePage() {
                     className="mt-1 pt-3 block w-full border rounded px-3 py-2"
                   >
                     <option value="">Choose...</option>
-                    <option value="Christianity">Christianity</option>
-                    <option value="Islam">Islam</option>
-                    <option value="Hinduism">Hinduism</option>
-                    <option value="Buddhism">Buddhism</option>
-                    <option value="Judaism">Judaism</option>
-                    <option value="Sikhism">Sikhism</option>
-                    <option value="Spiritual">Spiritual</option>
-                    <option value="Agnostic">Agnostic</option>
-                    <option value="Atheist">Atheist</option>
-                    <option value="None">Prefer not to say</option>
+                    <option value="christianity">Christianity</option>
+                    <option value="islam">Islam</option>
+                    <option value="hinduism">Hinduism</option>
+                    <option value="buddhism">Buddhism</option>
+                    <option value="judaism">Judaism</option>
+                    <option value="sikhism">Sikhism</option>
+                    <option value="spiritual">Spiritual</option>
+                    <option value="agnostic">Agnostic</option>
+                    <option value="atheist">Atheist</option>
+                    <option value="none">Prefer not to say</option>
                   </select>
                 </div>
                 <div className="md:col-span-2">
@@ -564,14 +564,14 @@ export default function EditProfilePage() {
                     className="mt-1 block w-full border rounded px-3 py-2"
                   >
                     <option value="">Choose...</option>
-                    <option value="Friendship">Friendship</option>
-                    <option value="Relationship">Relationship</option>
-                    <option value="Dating">Dating</option>
-                    <option value="Marriage">Marriage</option>
-                    <option value="Casual">Casual</option>
-                    <option value="Networking">Networking</option>
-                    <option value="Activity Partner">Activity Partner</option>
-                    <option value="Open to see where it goes">
+                    <option value="friendship">Friendship</option>
+                    <option value="relationship">Relationship</option>
+                    <option value="dating">Dating</option>
+                    <option value="marriage">Marriage</option>
+                    <option value="casual">Casual</option>
+                    <option value="networking">Networking</option>
+                    <option value="activity Partner">Activity Partner</option>
+                    <option value="open to see where it goes">
                       Open to see where it goes
                     </option>
                   </select>
