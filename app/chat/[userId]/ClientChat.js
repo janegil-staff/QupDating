@@ -33,12 +33,69 @@ export default function ChatPage({ userId }) {
     sessionUserId && selectedUserId
       ? [sessionUserId, selectedUserId].sort().join("-")
       : null;
-
+  // 1) Connect socket once
   useEffect(() => {
     socket.connect();
     return () => socket.disconnect();
   }, []);
 
+  // 2) Load DB messages FIRST, then join room
+  useEffect(() => {
+    if (!roomId) return;
+
+    let isMounted = true;
+
+    async function loadMessages() {
+      try {
+        const res = await fetch(`/api/messages?roomId=${roomId}`);
+        const data = await res.json();
+
+        if (!isMounted) return;
+
+        setMessages(data.messages || []);
+
+        socket.emit("join", roomId);
+      } catch (err) {
+        console.error("Failed to load messages", err);
+      }
+    }
+
+    loadMessages();
+
+    return () => {
+      isMounted = false;
+      socket.emit("leave", roomId);
+    };
+  }, [roomId]);
+
+  // 3) Listen for incoming socket messages
+  useEffect(() => {
+    const handleIncoming = (msg) => {
+      setMessages((prev) => {
+        if (prev.some((m) => m._id === msg._id)) return prev;
+        return [...prev, msg];
+      });
+    };
+
+    socket.on("receive-message", handleIncoming);
+    socket.on("typing", () => setTyping(true));
+    socket.on("stopTyping", () => setTyping(false));
+
+    return () => {
+      socket.off("receive-message", handleIncoming);
+      socket.off("typing");
+      socket.off("stopTyping");
+    };
+  }, []);
+
+  // 4) Auto-scroll (only once)
+  useEffect(() => {
+    if (endRef.current) {
+      endRef.current.scrollIntoView({ behavior: "auto" });
+    }
+  }, [messages, typing]);
+
+  // 5) Close emoji picker when clicking outside
   useEffect(() => {
     function handleClickOutside(e) {
       if (pickerRef.current && !pickerRef.current.contains(e.target)) {
@@ -49,6 +106,7 @@ export default function ChatPage({ userId }) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [showPicker]);
 
+  // 6) Fetch selected user profile
   useEffect(() => {
     async function fetchUser() {
       if (!selectedUserId) return;
@@ -58,6 +116,7 @@ export default function ChatPage({ userId }) {
     fetchUser();
   }, [selectedUserId]);
 
+  // 7) Fetch matches
   useEffect(() => {
     async function fetchMatches() {
       if (!sessionUserId) return;
@@ -74,39 +133,6 @@ export default function ChatPage({ userId }) {
     }
     fetchMatches();
   }, [sessionUserId]);
-
-  useEffect(() => {
-    if (!roomId) return;
-    console.log("🌐 WEB JOINING ROOM:", roomId);
-    socket.emit("join", roomId);
-    const handleIncoming = (msg) => {
-      setMessages((prev) => {
-        if (prev.some((m) => m._id === msg._id)) return prev;
-        return [...prev, msg];
-      });
-    };
-    socket.on("receive-message", handleIncoming);
-    socket.on("typing", () => setTyping(true));
-    socket.on("stopTyping", () => setTyping(false));
-    return () => {
-      socket.emit("leave", roomId);
-      socket.off("receive-message", handleIncoming);
-      socket.off("typing");
-      socket.off("stopTyping");
-    };
-  }, [roomId]);
-
-  useEffect(() => {
-    if (!roomId) return;
-    fetch(`/api/messages?roomId=${roomId}`)
-      .then((res) => res.json())
-      .then((data) => setMessages(data.messages || []))
-      .catch(() => toast.error("Failed to load messages"));
-  }, [roomId]);
-
-  useEffect(() => {
-    if (endRef.current) endRef.current.scrollIntoView({ behavior: "auto" });
-  }, [messages, typing]);
 
   const handleInputChange = (e) => {
     setInput(e.target.value);
