@@ -19,7 +19,7 @@ export function useWebRTC(roomId) {
   const [status, setStatus] = useState("idle"); // idle | ready | connecting | connected
 
   useEffect(() => {
-    const socket = io(process.env.NEXT_PUBLIC_SIGNALING_URL || "http://localhost:3000", {
+    const socket = io(process.env.NEXT_PUBLIC_SIGNALING_URL || "https://qup.dating", {
       transports: ["websocket"],
     });
     socketRef.current = socket;

@@ -19,16 +19,17 @@ export default function ChatPage({ roomId, currentUser }) {
     return () => socket.disconnect();
   }, [roomId]);
 
-  const sendMessage = () => {
-    if (!input.trim()) return;
-    socket.emit("sendMessage", {
-      roomId,
-      senderId: currentUser._id,
-      text: input,
+  const sendMessage = async () => {
+    if (!text.trim()) return;
+    const res = await fetch(`/api/mobile/messages/${otherUserId}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: text }),
     });
-    setInput("");
+    const data = await res.json();
+    socket.emit("send-message", { roomId, message: data.message });
   };
-
+  
   return (
     <main className="bg-gray-900 text-white min-h-screen flex flex-col">
       <section className="flex-1 overflow-y-auto p-6 space-y-4">

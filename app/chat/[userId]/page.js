@@ -23,6 +23,7 @@ export default async function ChatPage({ params }) {
       ? [session.user.id, userId].sort().join("-")
       : null;
 
+      
   return <ClientChat userId={userId} />;
 
 }

@@ -1,13 +1,11 @@
 "use client";
 import { useEffect, useState, useRef } from "react";
-import { io } from "socket.io-client";
 import toast from "react-hot-toast";
 import { useSession } from "next-auth/react";
 import EmojiPicker from "emoji-picker-react";
 import { getAgeFromDate } from "@/lib/getAgeFromDate";
 import VerifiedBadge from "@/components/VerifiedBadge";
-
-const socket = io({ path: "/api/socket" });
+import { socket } from "@/socket";
 
 export default function ChatPage({ userId }) {
   const { data: session } = useSession();
@@ -35,6 +33,11 @@ export default function ChatPage({ userId }) {
     sessionUserId && selectedUserId
       ? [sessionUserId, selectedUserId].sort().join("-")
       : null;
+
+  useEffect(() => {
+    socket.connect();
+    return () => socket.disconnect();
+  }, []);
 
   useEffect(() => {
     function handleClickOutside(e) {
@@ -74,23 +77,22 @@ export default function ChatPage({ userId }) {
 
   useEffect(() => {
     if (!roomId) return;
-
-    socket.connect();
+    console.log("🌐 WEB JOINING ROOM:", roomId);
     socket.emit("join", roomId);
-
-    socket.on("connect", () => console.log("🔌 Socket connected:", socket.id));
-    socket.on("message", (msg) => {
+    const handleIncoming = (msg) => {
       setMessages((prev) => {
         if (prev.some((m) => m._id === msg._id)) return prev;
         return [...prev, msg];
       });
-    });
+    };
+    socket.on("receive-message", handleIncoming);
     socket.on("typing", () => setTyping(true));
     socket.on("stopTyping", () => setTyping(false));
-
     return () => {
-      socket.off("message");
-      socket.disconnect();
+      socket.emit("leave", roomId);
+      socket.off("receive-message", handleIncoming);
+      socket.off("typing");
+      socket.off("stopTyping");
     };
   }, [roomId]);
 
@@ -149,7 +151,7 @@ export default function ChatPage({ userId }) {
       roomId,
     };
 
-    socket.emit("message", msg);
+    socket.emit("send-message", { roomId, message: msg });
 
     setMessages((prev) => [...prev, msg]);
 

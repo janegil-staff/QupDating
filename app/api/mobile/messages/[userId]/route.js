@@ -56,7 +56,7 @@ export async function POST(req, { params }) {
     await connectDB();
 
     const { userId } = await params;
-    console.log(userId);
+
     if (!userId) {
       return NextResponse.json({ error: "Missing userId" }, { status: 400 });
     }
