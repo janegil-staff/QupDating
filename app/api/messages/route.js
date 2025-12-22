@@ -1,16 +1,18 @@
 import { connectDB } from "@/lib/db";
 import Message from "@/models/Message";
-import mongoose from "mongoose";
 import { NextResponse } from "next/server";
 
 export async function POST(req) {
   await connectDB();
   const body = await req.json();
-console.log(body)
+  console.log(body);
   const { roomId, content, sender, receiver, images } = body;
 
   if (!roomId || !sender || !receiver) {
-    return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Missing required fields" },
+      { status: 400 }
+    );
   }
 
   try {
@@ -30,38 +32,25 @@ console.log(body)
   }
 }
 
-
 export async function GET(req) {
-  await connectDB();
-  const { searchParams } = new URL(req.url);
-  const roomId = searchParams.get("roomId");
-  const cursor = searchParams.get("cursor");
-
-  if (!roomId)
-    return NextResponse.json({ error: "Missing roomId" }, { status: 400 });
-
-  const query = {
-    roomId,
-    ...(cursor && { _id: { $lt: new mongoose.Types.ObjectId(cursor) } }),
-  };
-
-  let messages = await Message.find(query)
-    .sort({ _id: -1 }) // fetch newest first
-    .limit(20)
-    .populate("sender")
-    .lean();
-
-  const nextCursor =
-    messages.length === 20
-      ? messages[messages.length - 1]._id.toString()
-      : null;
-
-  // reverse so UI sees oldest → newest
-  messages = messages.reverse();
-
-  return NextResponse.json({
-    messages,
-    nextCursor,
-    hasMore: messages.length === 20,
-  });
+  try {
+    await connectDB();
+    const { searchParams } = new URL(req.url);
+    const roomId = searchParams.get("roomId");
+    if (!roomId) {
+      return NextResponse.json({ error: "Missing roomId" }, { status: 400 });
+    }
+    const messages = await Message.find({ roomId })
+      .sort({ createdAt: 1 })
+      .populate("sender")
+      .populate("receiver")
+      .lean();
+    return NextResponse.json({ messages });
+  } catch (err) {
+    console.error("Error fetching messages:", err);
+    return NextResponse.json(
+      { error: "Failed to fetch messages" },
+      { status: 500 }
+    );
+  }
 }
