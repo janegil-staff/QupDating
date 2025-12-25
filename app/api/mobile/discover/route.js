@@ -18,7 +18,7 @@ export async function GET(req) {
     const limit = 20;
 
     const oppositeGender = currentUser.gender === "male" ? "female" : "male";
-
+    const now = new Date();
     const query = {
       _id: { $ne: currentUser._id },
       isBanned: false,
@@ -71,7 +71,7 @@ export async function GET(req) {
       .limit(limit)
       .select("_id name birthdate bio profileImage isVerified")
       .lean();
-      
+
     const nextCursor =
       users.length > 0 ? users[users.length - 1]._id.toString() : null;
 
