@@ -5,9 +5,9 @@ import { connectDB } from "@/lib/db";
 
 export async function GET(req) {
   try {
-    const user = await getMobileUser(req);
+    const currentUser = await getMobileUser(req);
 
-    if (!user) {
+    if (!currentUser) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -17,13 +17,53 @@ export async function GET(req) {
     const cursor = searchParams.get("cursor");
     const limit = 20;
 
+    const oppositeGender = currentUser.gender === "male" ? "female" : "male";
+
     const query = {
-      _id: { $ne: user._id },
+      _id: { $ne: currentUser._id },
       isBanned: false,
+      gender: oppositeGender,
+      $nor: [
+        { _id: { $in: currentUser.likes } },
+        { _id: { $in: currentUser.dislikes } },
+        { _id: { $in: currentUser.matches } },
+      ],
+      $expr: {
+        $and: [
+          {
+            $gte: [
+              {
+                $divide: [
+                  { $subtract: [now, "$birthdate"] },
+                  1000 * 60 * 60 * 24 * 365,
+                ],
+              },
+              currentUser.preferredAgeMin || 18,
+            ],
+          },
+          {
+            $lte: [
+              {
+                $divide: [
+                  { $subtract: [now, "$birthdate"] },
+                  1000 * 60 * 60 * 24 * 365,
+                ],
+              },
+              currentUser.preferredAgeMax || 99,
+            ],
+          },
+        ],
+      },
     };
 
-    if (cursor) {
-      query._id = { ...query._id, $lt: cursor };
+    // ✅ Apply searchScope filter
+    if (currentUser.searchScope === "Nearby") {
+      query["location.country"] = currentUser.location.country;
+    } else if (currentUser.searchScope === "National") {
+      query["location.country"] = currentUser.location.country;
+      // could expand to include region/state later
+    } else if (currentUser.searchScope === "Worldwide") {
+      // no restriction
     }
 
     const users = await User.find(query)
@@ -31,10 +71,13 @@ export async function GET(req) {
       .limit(limit)
       .select("_id name birthdate bio profileImage isVerified")
       .lean();
+      
+    const nextCursor =
+      users.length > 0 ? users[users.length - 1]._id.toString() : null;
 
     return NextResponse.json({
       users,
-      nextCursor: users.length ? users[users.length - 1]._id : null,
+      nextCursor,
     });
   } catch (err) {
     console.error("Discover fetch failed:", err);
