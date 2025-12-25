@@ -29,7 +29,7 @@ export async function GET(req) {
     const users = await User.find(query)
       .sort({ _id: -1 })
       .limit(limit)
-      .select("name birthdate bio profileImage isVerified")
+      .select("_id name birthdate bio profileImage isVerified")
       .lean();
 
     return NextResponse.json({

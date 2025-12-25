@@ -4,6 +4,7 @@ import User from "@/models/User";
 import { connectDB } from "@/lib/db";
 
 export async function POST(req) {
+  console.log("SIGNING WITH:", process.env.JWT_SECRET);
   await connectDB();
   const { email, password } = await req.json();
 
