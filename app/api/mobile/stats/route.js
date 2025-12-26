@@ -48,7 +48,7 @@ export async function GET(req) {
       JSON.stringify({
         profileViews,
         newLikes,
-        newMatches: user.matches.length / 2,
+        newMatches: Math.ceil(user.matches.length / 2),
         newMessages: totalMessages,
       }),
       { status: 200 }
