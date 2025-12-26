@@ -67,7 +67,7 @@ export async function POST(req) {
   } catch (err) {
     console.error("Error in register route:", err);
     return NextResponse.json(
-      { error: "Server error", details: err.message },
+      { error: "duplicate", details: err.message },
       { status: 500 }
     );
   }
