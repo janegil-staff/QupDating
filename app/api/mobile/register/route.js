@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import { connectDB } from "@/lib/db";
@@ -9,16 +10,7 @@ import verifyEmailTemplate from "@/lib/emailTemplates/verifyEmail";
 export async function POST(req) {
   try {
     const body = await req.json();
-    const {
-      name,
-      email,
-      password,
-      gender,
-      birthDay,
-      birthMonth,
-      birthYear,
-      images,
-    } = body;
+    const { name, email, password, gender, birthdate, images } = body;
 
     const trimmedEmail = email.toLowerCase().trim();
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -41,11 +33,12 @@ export async function POST(req) {
       email: trimmedEmail || "",
       password: hashedPassword,
       gender: gender || null,
-      birthdate: new Date(birthYear, birthMonth, birthDay) || null,
+      birthdate: birthdate || null,
       verifyToken,
       verifyExpires,
-      images: images || [],
-      profileImage: images.length > 0 ? images[0].url : "",
+      images: Array.isArray(images) ? images : [],
+      profileImage:
+        Array.isArray(images) && images.length > 0 ? images[0].url : "",
     });
 
     // 🔹 Send verification email
@@ -60,9 +53,11 @@ export async function POST(req) {
     } catch (err) {
       console.warn("Email send failed:", err.message);
     }
-
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "30d",
+    });
     return NextResponse.json(
-      { message: "User registered successfully", user },
+      { message: "User registered successfully", user, token },
       { status: 201 }
     );
   } catch (err) {
