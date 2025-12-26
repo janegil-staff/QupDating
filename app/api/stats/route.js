@@ -44,7 +44,7 @@ export async function GET(req) {
       JSON.stringify({
         profileViews,
         newLikes,
-        newMatches: newMatches.matches.length / 2,
+        newMatches: Math.ceil(newMatches.matches.length / 2),
         newMessages: totalMessages,
       }),
       { status: 200, headers: { "Content-Type": "application/json" } }
