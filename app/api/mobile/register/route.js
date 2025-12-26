@@ -19,8 +19,12 @@ export async function POST(req) {
     const existingUser = await User.findOne({ trimmedEmail });
     if (existingUser) {
       return NextResponse.json(
-        { error: "User already registered" },
-        { status: 400 }
+        {
+          error: "duplicate",
+          message:
+            "An account with this email already exists. Try logging in instead.",
+        },
+        { status: 409 }
       );
     }
 
