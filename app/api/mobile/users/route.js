@@ -30,7 +30,8 @@ export async function GET(req) {
   }
 
   // 4. Determine opposite gender
-  const oppositeGender = currentUser.gender === "male" ? "female" : "male";
+  const oppositeGender =
+    currentUser.gender === "male" ? "female" : "male";
 
   const now = new Date();
 
@@ -81,7 +82,7 @@ export async function GET(req) {
   // 7. Fetch users
   const users = await User.find(query)
     .sort({ _id: -1 })
-    .select("name bio profileImage");
+    .select("name bio profileImage isVerified");
 
   return Response.json(users, {
     status: 200,
