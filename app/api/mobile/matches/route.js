@@ -27,7 +27,7 @@ export async function GET(req) {
     // 🔥 Load the logged‑in user
     const user = await User.findById(decoded.id).populate(
       "matches",
-      "name profileImage bio"
+      "name profileImage bio isVerified"
     );
 
     if (!user) {
