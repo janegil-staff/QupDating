@@ -7,30 +7,33 @@ export async function GET(req) {
   try {
     await connectDB();
 
-    // Read Authorization header
     const authHeader = req.headers.get("authorization");
 
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    if (!authHeader?.startsWith("Bearer ")) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const token = authHeader.split(" ")[1];
-    
-    // Decode JWT (same secret as NextAuth)
     const decoded = jwt.verify(token, process.env.NEXTAUTH_SECRET);
 
-    if (!decoded || !decoded.id) {
+    if (!decoded?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Fetch user + liked users
+    // People I liked
     const me = await User.findById(decoded.id).populate(
       "likes",
       "_id name profileImage birthdate bio isVerified"
     );
 
+    // People who liked me
+    const likedMeUsers = await User.find({
+      likes: decoded.id,
+    }).select("_id name profileImage birthdate bio isVerified");
+
     return NextResponse.json({
-      users: me.likes || [],
+      likedUsers: me.likes || [],
+      likedMeUsers,
     });
   } catch (err) {
     console.error("GET /mobile/likes error:", err);
