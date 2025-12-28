@@ -21,7 +21,7 @@ const userSchema = new mongoose.Schema(
     birthdate: { type: Date, default: null },
     gender: {
       type: String,
-      enum: ["male", "female", "other"],
+      enum: ["male", "female", "other", ""],
       lowercase: true,
       required: true,
     },
@@ -30,13 +30,13 @@ const userSchema = new mongoose.Schema(
     // Appearance
     appearance: {
       type: String,
-      enum: ["normal", "pretty", "cute", "handsome", "stylish", "unique"],
+      enum: ["normal", "pretty", "cute", "handsome", "stylish", "unique", ""],
       lowercase: true,
     },
     height: { type: Number },
     bodyType: {
       type: String,
-      enum: ["slim", "average", "athletic", "curvy", "muscular"],
+      enum: ["slim", "average", "athletic", "curvy", "muscular", ""],
       lowercase: true,
     },
 
@@ -45,36 +45,36 @@ const userSchema = new mongoose.Schema(
     wantsChildren: { type: Boolean },
     smoking: {
       type: String,
-      enum: ["yes", "no", "occasionally"],
+      enum: ["yes", "no", "occasionally", ""],
       lowercase: true,
     },
     drinking: {
       type: String,
-      enum: ["none", "light / social drinker", "heavy"],
+      enum: ["none", "light / social drinker", "heavy", ""],
       lowercase: true,
     },
     exercise: {
       type: String,
-      enum: ["never", "sometimes", "regularly", "daily"],
+      enum: ["never", "sometimes", "regularly", "daily", ""],
       lowercase: true,
     },
     diet: {
       type: String,
-      enum: ["vegetarian", "vegan", "omnivore", "other"],
+      enum: ["vegetarian", "vegan", "omnivore", "other", ""],
       lowercase: true,
     },
 
     // Details
     relationshipStatus: {
       type: String,
-      enum: ["single", "in a relationship", "married", "divorced"],
+      enum: ["single", "in a relationship", "married", "divorced", ""],
       lowercase: true,
     },
     willingToRelocate: { type: Boolean },
     education: { type: String },
     religion: {
       type: String,
-      enum: ["christian", "muslim", "jewish", "buddhist", "ateist", "other"],
+      enum: ["christian", "muslim", "jewish", "buddhist", "ateist", "other", ""],
       lowercase: true,
     },
 
@@ -83,7 +83,7 @@ const userSchema = new mongoose.Schema(
     location: locationSchema,
     searchScope: {
       type: String,
-      enum: ["nearby", "regional", "national", "worldwide"],
+      enum: ["nearby", "regional", "national", "worldwide", ""],
       lowercase: true,
       default: "worldwide",
     },
@@ -100,7 +100,7 @@ const userSchema = new mongoose.Schema(
     // Admin fields
     role: {
       type: String,
-      enum: ["user", "moderator", "admin", "banned"],
+      enum: ["user", "moderator", "admin", "banned", ""],
       lowercase: true,
       default: "user",
     },
