@@ -294,7 +294,7 @@ export default function ChatPage({ userId }) {
                         <img
                           key={i}
                           src={img.url}
-                          alt="uploaded"
+                          alt="upload"
                           className="max-w-[200px] rounded-md cursor-pointer hover:opacity-80 transition"
                           onClick={() => setPreviewImage(img.url)}
                         />
