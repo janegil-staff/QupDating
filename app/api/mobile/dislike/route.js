@@ -25,7 +25,7 @@ export async function POST(req) {
       return Response.json({ error: "Missing targetUserId" }, { status: 400 });
     }
 
-    await User.findByIdAndUpdate(decoded.id, {
+    const updatedUser = await User.findByIdAndUpdate(decoded.id, {
       $pull: {
         likes: targetUserId,
         matches: targetUserId,
