@@ -25,14 +25,18 @@ export async function POST(req) {
       return Response.json({ error: "Missing targetUserId" }, { status: 400 });
     }
 
-    const updatedUser = await User.findByIdAndUpdate(
-      decoded.id,
-      {
-        $pull: { likes: targetUserId },
-        $addToSet: { dislikes: targetUserId }
+    await User.findByIdAndUpdate(decoded.id, {
+      $pull: {
+        likes: targetUserId,
+        matches: targetUserId,
       },
-      { new: true }
-    );
+      $addToSet: { dislikes: targetUserId },
+    });
+
+    await User.findByIdAndUpdate(targetUserId, {
+      $pull: { matches: decoded.id },
+    });
+
     console.log("updated user", updatedUser);
     return Response.json({ success: true, user: updatedUser });
   } catch (err) {
