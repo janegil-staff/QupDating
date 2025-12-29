@@ -53,7 +53,7 @@ export default function EditProfilePage() {
     lookingFor: "",
     images: [],
     profileImage: "",
-    searchScope: "Worldwide",
+    searchScope: "worldwide",
     preferredAgeMin: 18,
     preferredAgeMax: 99,
   };
@@ -90,7 +90,7 @@ export default function EditProfilePage() {
           drinking: user.drinking || "",
           relationshipStatus: user.relationshipStatus || "",
           willingToRelocate: user.willingToRelocate ?? null,
-          searchScope: user.searchScope || "Worldwide",
+          searchScope: user.searchScope || "worldwide",
           education: user.education || "",
           religion: user.religion || "",
           tags: Array.isArray(user.tags)
@@ -162,7 +162,7 @@ export default function EditProfilePage() {
           lng: form.location?.lng,
           country: form.location?.country, // ✅ include country
         },
-        searchScope: form.searchScope || "Worldwide",
+        searchScope: form.searchScope || "worldwide",
         preferredAgeMin: form.preferredAgeMin || 18,
         preferredAgeMax: form.preferredAgeMax || 99,
       };
@@ -622,9 +622,9 @@ export default function EditProfilePage() {
 
                   <button
                     type="button"
-                    onClick={() => setField("searchScope", "Worldwide")}
+                    onClick={() => setField("searchScope", "worldwide")}
                     className={`px-4 py-2 rounded ${
-                      form.searchScope === "Worldwide"
+                      form.searchScope === "worldwide"
                         ? "bg-pink-600 text-white"
                         : "bg-gray-700 text-gray-300"
                     }`}

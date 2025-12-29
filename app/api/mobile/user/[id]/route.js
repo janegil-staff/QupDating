@@ -27,7 +27,7 @@ export async function GET(req, { params }) {
     }
 
     const user = await User.findById(id).lean();
-
+    
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
