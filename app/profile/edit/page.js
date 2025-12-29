@@ -528,7 +528,7 @@ export default function EditProfilePage() {
                     <option value="sikhism">Sikhism</option>
                     <option value="spiritual">Spiritual</option>
                     <option value="agnostic">Agnostic</option>
-                    <option value="atheist">Atheist</option>
+                    <option value="ateist">Ateist</option>
                     <option value="none">Prefer not to say</option>
                   </select>
                 </div>
