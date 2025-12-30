@@ -49,7 +49,8 @@ export default function RegisterPage() {
       });
 
       if (result.ok) {
-        toast.success(`Please check your email to verify your profile.`);
+        //   toast.success(`Please check your email to verify your profile.`);
+        toast.success(`Registration successfull.`);
         router.push("/profile/edit");
       }
     } catch (error) {
