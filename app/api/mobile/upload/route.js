@@ -3,7 +3,6 @@ import cloudinary from "@/lib/cloudinary";
 
 export async function POST(req) {
   try {
-    console.log("ENTERING UPLOAD");
     const formData = await req.formData();
     const files = formData.getAll("images");
 
@@ -14,15 +13,22 @@ export async function POST(req) {
 
       const result = await new Promise((resolve, reject) => {
         const uploadStream = cloudinary.uploader.upload_stream(
-          { folder: "dating-app/profiles" },
+          {
+            folder: "dating-app/messages",
+            resource_type: "image",
+            format: "jpg", // forces HEIC → JPG
+            quality: "auto",
+          },
           (error, result) => {
+            // ✅ THIS is the callback
             if (error) reject(error);
             else resolve(result);
           }
         );
-        uploadStream.end(buffer);
-      });
 
+        // ✅ THIS sends the image to Cloudinary
+        stream.pipe(uploadStream);
+      });
       uploadedImages.push({
         url: result.secure_url,
         public_id: result.public_id,
