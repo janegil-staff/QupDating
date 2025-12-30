@@ -6,6 +6,8 @@ import ImageCarousel from "./ImageCarousel";
 import VerifyBanner from "./VerifyBanner";
 import DeleteProfileButton from "./DeleteProfileButton";
 import capitalizeFirst from "../lib/capitalFirst";
+import { signOut } from "next-auth/react";
+
 export default function PublicProfile({ userId }) {
   const { data: session } = useSession();
 
@@ -69,13 +71,21 @@ export default function PublicProfile({ userId }) {
     : null;
 
   const isOwnProfile = session?.user?.id === profile._id;
-  console.log(loggedInUser);
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 text-white p-6">
       <div className="max-w-4xl mx-auto bg-neutral-900 rounded-xl shadow-xl p-6 space-y-6 relative">
         {isOwnProfile && !isVerified && <VerifyBanner user={session.user} />}
 
         <div className="flex justify-end">
+          {isOwnProfile && (
+            <button
+              onClick={() => signOut({ callbackUrl: "/" })}
+              className="bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 rounded-full shadow-md transition-transform transform hover:scale-105 mr-4"
+            >
+              Logout
+            </button>
+          )}
           {!isOwnProfile && (
             <div className="float-right">
               <ToggleLikeButton
@@ -99,6 +109,7 @@ export default function PublicProfile({ userId }) {
             </div>
           )}
         </div>
+
         {/* ✅ Admin Dashboard button */}
         {loggedInUser?.role === "admin" && isOwnProfile && (
           <div className="flex justify-end mt-4">
@@ -126,7 +137,8 @@ export default function PublicProfile({ userId }) {
           <div className="text-center md:text-left">
             <h1 className="text-3xl font-bold">{profile.name}</h1>
             <p className="text-pink-400 italic">
-              {capitalizeFirst(profile.relationshipStatus) || "Undefined status"}
+              {capitalizeFirst(profile.relationshipStatus) ||
+                "Undefined status"}
             </p>
             <p className="text-gray-400">
               {age} years • {profile.gender}
@@ -178,7 +190,10 @@ export default function PublicProfile({ userId }) {
           <SimpleSection
             title="Appearance"
             items={[
-              { label: "Appearance", value: capitalizeFirst(profile.appearance) },
+              {
+                label: "Appearance",
+                value: capitalizeFirst(profile.appearance),
+              },
               { label: "Body Type", value: capitalizeFirst(profile.bodyType) },
               {
                 label: "Height",
@@ -213,7 +228,10 @@ export default function PublicProfile({ userId }) {
             title="Personal Info"
             items={[
               { label: "Religion", value: capitalizeFirst(profile.religion) },
-              { label: "Occupation", value: capitalizeFirst(profile.occupation) },
+              {
+                label: "Occupation",
+                value: capitalizeFirst(profile.occupation),
+              },
               { label: "Education", value: capitalizeFirst(profile.education) },
               {
                 label: "Relationship Status",

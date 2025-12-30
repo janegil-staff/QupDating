@@ -11,6 +11,7 @@ export default function Navbar() {
     { href: "/dashboard", label: "Home", icon: "🏠" },
     { href: "/matches", label: "Matches", icon: "💖" },
     { href: "/discover", label: "Discover", icon: "🔍" },
+    { href: "/likes", label: "Likes", icon: "❤️" },
     { href: "/profile/edit", label: "Edit", icon: "✏️" },
     ...(session?.user?.id
       ? [{ href: `/profile/${session.user.id}`, label: "Profile", icon: "👤" }]
@@ -18,7 +19,7 @@ export default function Navbar() {
   ];
 
   const pathname = usePathname();
-console.log(status);
+
   if (status !== "authenticated") return null;
 
   const isActive = (href) => pathname === href;
@@ -73,13 +74,6 @@ console.log(status);
               <span>{label}</span>
             </Link>
           ))}
-          <button
-            onClick={() => signOut({ callbackUrl: process.env.NEXT_PUBLIC_BASE_URL })}
-            className="flex flex-col items-center text-xs text-gray-400 hover:text-red-500"
-          >
-            <span className="text-lg">🚪</span>
-            <span>Log out</span>
-          </button>
         </div>
       </nav>
     </>

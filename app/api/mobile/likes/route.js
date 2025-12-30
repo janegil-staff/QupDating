@@ -14,7 +14,7 @@ export async function GET(req) {
     }
 
     const token = authHeader.split(" ")[1];
-    const decoded = jwt.verify(token, process.env.NEXTAUTH_SECRET);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     if (!decoded?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
