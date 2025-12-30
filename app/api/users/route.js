@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import User from "@/models/User";
 import { connectDB } from "@/lib/db";
 import { withCORS, corsOptions } from "@/lib/cors";
+import { NextResponse } from "next/server";
 
 export async function GET(req) {
   await connectDB();
