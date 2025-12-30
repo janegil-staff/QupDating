@@ -36,7 +36,7 @@ export default function LoginClient() {
     if (res.ok && !res.error) {
       router.push("/profile/edit");
     } else {
-      setError("Feil e-post eller passord.");
+      setError(res.error || "Login failed");
     }
   };
 
