@@ -9,10 +9,15 @@ export async function POST(req) {
   const { email, password } = await req.json();
 
   const user = await User.findOne({ email });
-  if (!user) return Response.json({ error: "Invalid credentials" }, { status: 401 });
+  if (!user)
+    return Response.json({ error: "Invalid credentials" }, { status: 401 });
 
+  if (user.isBanned) {
+    throw new Error("Your account has been banned");
+  }
   const valid = await bcrypt.compare(password, user.password);
-  if (!valid) return Response.json({ error: "Invalid credentials" }, { status: 401 });
+  if (!valid)
+    return Response.json({ error: "Invalid credentials" }, { status: 401 });
 
   // ✅ Ensure secret exists
   if (!process.env.JWT_SECRET) {
