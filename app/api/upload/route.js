@@ -11,7 +11,6 @@ function bufferToStream(buffer) {
 }
 
 export async function POST(req) {
-  console.log("ENTERING UPLOAD");
   const formData = await req.formData();
   const files = formData.getAll("images");
 
@@ -22,13 +21,21 @@ export async function POST(req) {
     const stream = bufferToStream(buffer);
 
     const result = await new Promise((resolve, reject) => {
-      cloudinary.uploader.upload_stream(
-        { folder: "dating-app/profiles" },
-        (error, result) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        {
+          folder: "dating-app/messages",
+          resource_type: "image",
+          format: "jpg",       // forces HEIC → JPG
+          quality: "auto",
+        },
+        (error, result) => {   // ✅ THIS is the callback
           if (error) reject(error);
           else resolve(result);
         }
-      ).end(buffer);
+      );
+
+      // ✅ THIS sends the image to Cloudinary
+      stream.pipe(uploadStream);
     });
 
     uploadedImages.push({
@@ -36,6 +43,6 @@ export async function POST(req) {
       public_id: result.public_id,
     });
   }
-  console.log("Uploaded images --> ", uploadedImages);
+
   return NextResponse.json({ images: uploadedImages });
 }
