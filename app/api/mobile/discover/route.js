@@ -19,15 +19,18 @@ export async function GET(req) {
 
     const oppositeGender = currentUser.gender === "male" ? "female" : "male";
     const now = new Date();
+
+    const excludeIds = [
+      currentUser._id,
+      ...currentUser.likes,
+      ...currentUser.dislikes,
+      ...currentUser.matches,
+    ];
+
     const query = {
-      _id: { $ne: currentUser._id },
+      _id: { $nin: excludeIds },
       isBanned: false,
       gender: oppositeGender,
-      $nor: [
-        { _id: { $in: currentUser.likes } },
-        { _id: { $in: currentUser.dislikes } },
-        { _id: { $in: currentUser.matches } },
-      ],
       $expr: {
         $and: [
           {
@@ -56,19 +59,15 @@ export async function GET(req) {
       },
     };
 
-    // ✅ Apply searchScope filter
+    // Search scope
     if (currentUser.searchScope === "Nearby") {
       query["location.country"] = currentUser.location.country;
     } else if (currentUser.searchScope === "National") {
       query["location.country"] = currentUser.location.country;
-      // could expand to include region/state later
-    } else if (currentUser.searchScope === "Worldwide") {
-      // no restriction
     }
 
     const users = await User.find(query)
       .sort({ _id: -1 })
-     // .limit(limit)
       .select("_id name birthdate bio profileImage isVerified")
       .lean();
 

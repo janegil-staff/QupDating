@@ -20,11 +20,10 @@ export async function GET(req) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // People I liked
-    const me = await User.findById(decoded.id).populate(
-      "likes",
-      "_id name profileImage birthdate bio isVerified"
-    );
+    // Fetch logged-in user with likes + dislikes populated
+    const me = await User.findById(decoded.id)
+      .populate("likes", "_id name profileImage birthdate bio isVerified")
+      .populate("dislikes", "_id name profileImage birthdate bio isVerified");
 
     // People who liked me
     const likedMeUsers = await User.find({
@@ -34,6 +33,7 @@ export async function GET(req) {
     return NextResponse.json({
       likedUsers: me.likes || [],
       likedMeUsers,
+      dislikedUsers: me.dislikes || [],
     });
   } catch (err) {
     console.error("GET /mobile/likes error:", err);
