@@ -34,8 +34,11 @@ export async function POST(req) {
       );
     }
 
+    // Ensure arrays exist
     currentUser.likes ??= [];
+    currentUser.dislikes ??= [];
     currentUser.matches ??= [];
+
     targetUser.likes ??= [];
     targetUser.matches ??= [];
 
@@ -45,6 +48,7 @@ export async function POST(req) {
     const alreadyLiked = currentUser.likes.some((id) =>
       id.equals(toUserId)
     );
+
     let isMatch = false;
     let action = "";
 
@@ -53,23 +57,35 @@ export async function POST(req) {
       currentUser.likes = currentUser.likes.filter(
         (id) => !id.equals(toUserId)
       );
+
+      // Remove match both sides
       currentUser.matches = currentUser.matches.filter(
         (id) => !id.equals(toUserId)
       );
       targetUser.matches = targetUser.matches.filter(
         (id) => !id.equals(currentUserId)
       );
+
       action = "unliked";
     } else {
       // ❤️ Like
       currentUser.likes.push(toUserId);
+
+      // ⭐ IMPORTANT: Remove from dislikes if present
+      currentUser.dislikes = currentUser.dislikes.filter(
+        (id) => !id.equals(toUserId)
+      );
+
       action = "liked";
 
+      // Check for mutual like → match
       const mutualLike = targetUser.likes.some((id) =>
         id.equals(currentUserId)
       );
+
       if (mutualLike) {
         isMatch = true;
+
         if (!currentUser.matches.some((id) => id.equals(toUserId))) {
           currentUser.matches.push(toUserId);
         }

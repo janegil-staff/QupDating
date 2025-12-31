@@ -74,7 +74,16 @@ const userSchema = new mongoose.Schema(
     education: { type: String },
     religion: {
       type: String,
-      enum: ["christian", "muslim", "jewish", "buddhist", "ateist", "other", ""],
+      enum: [
+        "christian",
+        "muslim",
+        "jewish",
+        "buddhist",
+        "ateist",
+        "other",
+        "agnostic",
+        "",
+      ],
       lowercase: true,
     },
 
