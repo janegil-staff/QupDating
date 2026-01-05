@@ -82,6 +82,7 @@ const userSchema = new mongoose.Schema(
         "ateist",
         "other",
         "agnostic",
+        "none",
         "",
       ],
       lowercase: true,
