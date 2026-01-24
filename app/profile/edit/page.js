@@ -520,7 +520,7 @@ export default function EditProfilePage() {
                     className="mt-1 pt-3 block w-full border rounded px-3 py-2"
                   >
                     <option value="">Choose...</option>
-                    <option value="christianity">Christianity</option>
+                    <option value="christian">Christian</option>
                     <option value="islam">Islam</option>
                     <option value="hinduism">Hinduism</option>
                     <option value="buddhism">Buddhism</option>
