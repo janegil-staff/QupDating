@@ -22,7 +22,7 @@ export default function SwipeCard({ card, draggable, onSwipe }) {
     >
       {/* IMAGE */}
       <img
-        src={card.profileImage || "/default-avatar.png"}
+        src={card.profileImage || "https://res.cloudinary.com/dbcdsonhz/image/upload/v1769110864/dating-app/empty-profile-image_dlwotm.png"}
         alt={card.name}
         className="w-full h-full object-cover pointer-events-none select-none"
         draggable={false}

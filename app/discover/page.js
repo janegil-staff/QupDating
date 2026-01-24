@@ -128,7 +128,7 @@ export default function DiscoverPage() {
               {user.isVerified && <VerifiedBadge className="ml-2" />}
 
               <img
-                src={user.profileImage || "/placeholder.jpg"}
+                src={user.profileImage || "https://res.cloudinary.com/dbcdsonhz/image/upload/v1769110864/dating-app/empty-profile-image_dlwotm.png"}
                 alt={user.name}
                 className="w-full h-64 object-cover rounded-lg cursor-pointer hover:opacity-90 transition"
               />

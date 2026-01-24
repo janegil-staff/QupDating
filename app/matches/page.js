@@ -39,7 +39,7 @@ export default function MatchesPage() {
             <div key={match._id} className="bg-gray-800 p-4 rounded shadow">
               <Link href={`/profile/${match._id}`}>
                 <img
-                  src={match.profileImage || "/placeholder.jpg"}
+                  src={match.profileImage || "https://res.cloudinary.com/dbcdsonhz/image/upload/v1769110864/dating-app/empty-profile-image_dlwotm.png"}
                   alt={match.name}
                   className="w-full h-64 object-cover rounded cursor-pointer hover:opacity-90 transition"
                 />

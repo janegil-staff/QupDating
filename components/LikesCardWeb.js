@@ -81,7 +81,7 @@ export default function LikesCardWeb({
         className="cursor-pointer"
       >
         <img
-          src={user.profileImage}
+          src={user.profileImage || "https://res.cloudinary.com/dbcdsonhz/image/upload/v1769110864/dating-app/empty-profile-image_dlwotm.png"}
           className="w-full h-60 object-cover rounded-lg mb-3"
         />
         <h3 className="text-white text-xl font-bold">{user.name}</h3>

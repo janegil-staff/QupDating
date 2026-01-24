@@ -130,7 +130,11 @@ export default function PublicProfile({ userId }) {
         {/* Header */}
         <div className="flex flex-col md:flex-row items-center gap-6">
           <img
-            src={profile.profileImage || "/default-avatar.png"}
+            src={
+              profile.profileImage
+                ? profile.profileImage
+                : "https://res.cloudinary.com/dbcdsonhz/image/upload/v1769110864/dating-app/empty-profile-image_dlwotm.png"
+            }
             alt="Profile photo"
             className="w-32 h-32 rounded-full object-cover border-4 border-pink-600 shadow-lg"
           />
