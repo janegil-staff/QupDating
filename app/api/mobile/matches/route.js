@@ -2,10 +2,11 @@ import { NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 import User from "@/models/User";
 import { connectDB } from "@/lib/db";
+import Message from "@/models/Message";
 
 export async function GET(req) {
   try {
-    await connectDB(); // 🔥 ensure DB is connected
+    await connectDB();
 
     const authHeader = req.headers.get("authorization");
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -24,7 +25,6 @@ export async function GET(req) {
       );
     }
 
-    // 🔥 Load the logged‑in user
     const user = await User.findById(decoded.id).populate(
       "matches",
       "name profileImage bio isVerified"
@@ -34,9 +34,23 @@ export async function GET(req) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    return NextResponse.json({
-      matches: user.matches || [],
-    });
+    // ⭐ FIX: Build a normal array, not responses
+    const results = await Promise.all(
+      user.matches.map(async (match) => {
+        const unreadCount = await Message.countDocuments({
+          sender: match._id,
+          receiver: user._id,
+          read: false,
+        });
+
+        return {
+          ...match.toObject(),
+          unreadCount,
+        };
+      })
+    );
+
+    return NextResponse.json({ matches: results });
   } catch (err) {
     console.error("Matches error:", err);
     return NextResponse.json({ error: "Server error" }, { status: 500 });
