@@ -9,9 +9,10 @@ const MessageSchema = new mongoose.Schema(
     senderName: String,
     senderImage: String,
     images: [{ url: String, public_id: String }],
+    read: { type: Boolean, default: false },
   },
 
-  { timestamps: true }
+  { timestamps: true },
 );
 
 export default mongoose.models.Message ||
