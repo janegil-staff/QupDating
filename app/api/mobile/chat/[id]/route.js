@@ -15,6 +15,11 @@ export async function GET(req, { params }) {
   const token = auth.split(" ")[1];
   const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
+  await Message.updateMany(
+    { sender: id, receiver: decoded.id, read: false },
+    { $set: { read: true } },
+  );
+  
   const messages = await Message.find({
     $or: [
       { sender: decoded.id, receiver: id },
