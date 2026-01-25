@@ -17,9 +17,6 @@ export async function GET(req, { params }) {
   const decoded = jwt.verify(token, process.env.JWT_SECRET);
   const currentUserId = decoded.id;
 
-  console.log("otherUserId:", otherUserId);
-  console.log("currentUserId:", currentUserId);
-
   // ⭐ Mark unread messages as read
   const updated = await Message.updateMany(
     {
@@ -30,7 +27,6 @@ export async function GET(req, { params }) {
     { $set: { read: true } }
   );
 
-  console.log("updated:", updated);
 
   // ⭐ Fetch full conversation
   const messages = await Message.find({
