@@ -2,9 +2,11 @@ import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import Message from "@/models/Message";
 import jwt from "jsonwebtoken";
+
 export async function GET(req, { params }) {
   await connectDB();
-  const { id: otherUserId } = params;
+
+  const otherUserId = params.id; // or params.otherUserId depending on folder name
 
   const auth = req.headers.get("authorization");
   if (!auth?.startsWith("Bearer ")) {
@@ -15,17 +17,22 @@ export async function GET(req, { params }) {
   const decoded = jwt.verify(token, process.env.JWT_SECRET);
   const currentUserId = decoded.id;
 
-  // ⭐ 1. Mark unread messages as read
-  await Message.updateMany(
+  console.log("otherUserId:", otherUserId);
+  console.log("currentUserId:", currentUserId);
+
+  // ⭐ Mark unread messages as read
+  const updated = await Message.updateMany(
     {
       sender: otherUserId,
       receiver: currentUserId,
       read: false,
     },
-    { $set: { read: true } },
+    { $set: { read: true } }
   );
 
-  // ⭐ 2. Fetch full conversation
+  console.log("updated:", updated);
+
+  // ⭐ Fetch full conversation
   const messages = await Message.find({
     $or: [
       { sender: currentUserId, receiver: otherUserId },
@@ -35,6 +42,7 @@ export async function GET(req, { params }) {
 
   return NextResponse.json({ messages });
 }
+
 
 export async function POST(req, { params }) {
   await connectDB();
