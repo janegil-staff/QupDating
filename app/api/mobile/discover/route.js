@@ -60,9 +60,9 @@ export async function GET(req) {
     };
 
     // Search scope
-    if (currentUser.searchScope === "Nearby") {
+    if (currentUser.searchScope === "nearby") {
       query["location.country"] = currentUser.location.country;
-    } else if (currentUser.searchScope === "National") {
+    } else if (currentUser.searchScope === "national") {
       query["location.country"] = currentUser.location.country;
     }
 
