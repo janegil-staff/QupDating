@@ -58,11 +58,9 @@ export async function GET(req) {
         ],
       },
     };
+    const scope = (currentUser.searchScope || "").toLowerCase();
 
-    // Search scope
-    if (currentUser.searchScope === "nearby") {
-      query["location.country"] = currentUser.location.country;
-    } else if (currentUser.searchScope === "national") {
+    if (scope === "nearby" || scope === "national") {
       query["location.country"] = currentUser.location.country;
     }
 
