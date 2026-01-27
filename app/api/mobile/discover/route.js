@@ -58,15 +58,25 @@ export async function GET(req) {
         ],
       },
     };
+
+    // ⭐ Normalize searchScope (handles "Nearby", "nearby", "NEARBY", etc.)
     const scope = (currentUser.searchScope || "").toLowerCase();
 
+    // ⭐ Apply country filter for both nearby + national
     if (scope === "nearby" || scope === "national") {
-      query["location.country"] = currentUser.location.country;
+      if (currentUser.location?.country) {
+        query["location.country"] = {
+          $exists: true,
+          $eq: currentUser.location.country,
+        };
+      }
     }
+
+    // ⭐ Worldwide → no country filter (returns everyone)
 
     const users = await User.find(query)
       .sort({ _id: -1 })
-      .select("_id name birthdate bio profileImage isVerified")
+      .select("_id name birthdate bio profileImage isVerified location")
       .lean();
 
     const nextCursor =
