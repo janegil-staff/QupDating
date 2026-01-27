@@ -62,12 +62,9 @@ export async function GET(req) {
     const scope = (currentUser.searchScope || "").toLowerCase();
 
     if (scope === "nearby" || scope === "national") {
-      query["location.country"] = {
-        $exists: true,
-        $ne: "",
-        $ne: null,
-        $eq: currentUser.location.country,
-      };
+      query.$expr.$and.push({
+        $eq: ["$location.country", currentUser.location.country],
+      });
     }
 
     const users = await User.find(query)
