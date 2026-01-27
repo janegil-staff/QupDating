@@ -59,20 +59,16 @@ export async function GET(req) {
       },
     };
 
-    // ⭐ Normalize searchScope (handles "Nearby", "nearby", "NEARBY", etc.)
     const scope = (currentUser.searchScope || "").toLowerCase();
 
-    // ⭐ Apply country filter for both nearby + national
     if (scope === "nearby" || scope === "national") {
-      if (currentUser.location?.country) {
-        query["location.country"] = {
-          $exists: true,
-          $eq: currentUser.location.country,
-        };
-      }
+      query["location.country"] = {
+        $exists: true,
+        $ne: "",
+        $ne: null,
+        $eq: currentUser.location.country,
+      };
     }
-
-    // ⭐ Worldwide → no country filter (returns everyone)
 
     const users = await User.find(query)
       .sort({ _id: -1 })
