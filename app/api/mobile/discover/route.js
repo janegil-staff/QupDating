@@ -6,7 +6,7 @@ import { connectDB } from "@/lib/db";
 export async function GET(req) {
   try {
     const currentUser = await getMobileUser(req);
-    const { country } = req.query;
+
     if (!currentUser) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -27,56 +27,46 @@ export async function GET(req) {
       ...currentUser.matches,
     ];
 
-    // Normalize searchScope
-    const scope = (currentUser.searchScope || "").toLowerCase();
-
-    // Build $expr conditions
-    const exprConditions = [
-      // Age >= preferredAgeMin
-      {
-        $gte: [
-          {
-            $divide: [
-              { $subtract: [now, "$birthdate"] },
-              1000 * 60 * 60 * 24 * 365,
-            ],
-          },
-          currentUser.preferredAgeMin || 18,
-        ],
-      },
-
-      // Age <= preferredAgeMax
-      {
-        $lte: [
-          {
-            $divide: [
-              { $subtract: [now, "$birthdate"] },
-              1000 * 60 * 60 * 24 * 365,
-            ],
-          },
-          currentUser.preferredAgeMax || 99,
-        ],
-      },
-    ];
-
-    // ⭐ COUNTRY FILTER INSIDE $expr (this is the fix)
-    if (scope === "nearby" || scope === "national") {
-      exprConditions.push({
-        $eq: ["$location.country", currentUser.location.country],
-      });
-    }
-
     const query = {
       _id: { $nin: excludeIds },
       isBanned: false,
       gender: oppositeGender,
-      $expr: { $and: exprConditions },
+      $expr: {
+        $and: [
+          {
+            $gte: [
+              {
+                $divide: [
+                  { $subtract: [now, "$birthdate"] },
+                  1000 * 60 * 60 * 24 * 365,
+                ],
+              },
+              currentUser.preferredAgeMin || 18,
+            ],
+          },
+          {
+            $lte: [
+              {
+                $divide: [
+                  { $subtract: [now, "$birthdate"] },
+                  1000 * 60 * 60 * 24 * 365,
+                ],
+              },
+              currentUser.preferredAgeMax || 99,
+            ],
+          },
+        ],
+      },
     };
 
-    if (country) {
-      query["location.country"] = country;
+    const scope = (currentUser.searchScope || "").toLowerCase();
+
+    if (scope === "nearby" || scope === "national") {
+      query.$expr.$and.push({
+        $eq: ["$location.country", currentUser.location.country],
+      });
     }
-    
+
     const users = await User.find(query)
       .sort({ _id: -1 })
       .select("_id name birthdate bio profileImage isVerified location")

@@ -6,7 +6,7 @@ import { connectDB } from "@/lib/db";
 
 export async function GET(req) {
   await connectDB();
-
+  const { country } = req.query;
   // 1. Extract and sanitize token
   const rawAuth = req.headers.get("authorization") || "";
   const token = rawAuth.replace("Bearer", "").trim();
@@ -30,8 +30,7 @@ export async function GET(req) {
   }
 
   // 4. Determine opposite gender
-  const oppositeGender =
-    currentUser.gender === "male" ? "female" : "male";
+  const oppositeGender = currentUser.gender === "male" ? "female" : "male";
 
   const now = new Date();
 
@@ -79,6 +78,9 @@ export async function GET(req) {
     query["location.country"] = currentUser.location.country;
   }
 
+  if (country) {
+    query["location.country"] = country;
+  }
   // 7. Fetch users
   const users = await User.find(query)
     .sort({ _id: -1 })
