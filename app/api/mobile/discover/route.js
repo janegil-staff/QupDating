@@ -6,7 +6,7 @@ import { connectDB } from "@/lib/db";
 export async function GET(req) {
   try {
     const currentUser = await getMobileUser(req);
-
+    const { country } = req.query;
     if (!currentUser) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -59,13 +59,15 @@ export async function GET(req) {
       },
     ];
 
-    // ⭐ Add country filter INSIDE $expr (this is the fix)
+    // ⭐ COUNTRY FILTER INSIDE $expr (this is the fix)
     if (scope === "nearby" || scope === "national") {
       exprConditions.push({
         $eq: ["$location.country", currentUser.location.country],
       });
     }
-
+    if (country) {
+      exprConditions["location.country"] = country;
+    }
     const query = {
       _id: { $nin: excludeIds },
       isBanned: false,
