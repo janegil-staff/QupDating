@@ -27,45 +27,51 @@ export async function GET(req) {
       ...currentUser.matches,
     ];
 
+    // Normalize searchScope
+    const scope = (currentUser.searchScope || "").toLowerCase();
+
+    // Build $expr conditions
+    const exprConditions = [
+      // Age >= preferredAgeMin
+      {
+        $gte: [
+          {
+            $divide: [
+              { $subtract: [now, "$birthdate"] },
+              1000 * 60 * 60 * 24 * 365,
+            ],
+          },
+          currentUser.preferredAgeMin || 18,
+        ],
+      },
+
+      // Age <= preferredAgeMax
+      {
+        $lte: [
+          {
+            $divide: [
+              { $subtract: [now, "$birthdate"] },
+              1000 * 60 * 60 * 24 * 365,
+            ],
+          },
+          currentUser.preferredAgeMax || 99,
+        ],
+      },
+    ];
+
+    // ⭐ Add country filter INSIDE $expr (this is the fix)
+    if (scope === "nearby" || scope === "national") {
+      exprConditions.push({
+        $eq: ["$location.country", currentUser.location.country],
+      });
+    }
+
     const query = {
       _id: { $nin: excludeIds },
       isBanned: false,
       gender: oppositeGender,
-      $expr: {
-        $and: [
-          {
-            $gte: [
-              {
-                $divide: [
-                  { $subtract: [now, "$birthdate"] },
-                  1000 * 60 * 60 * 24 * 365,
-                ],
-              },
-              currentUser.preferredAgeMin || 18,
-            ],
-          },
-          {
-            $lte: [
-              {
-                $divide: [
-                  { $subtract: [now, "$birthdate"] },
-                  1000 * 60 * 60 * 24 * 365,
-                ],
-              },
-              currentUser.preferredAgeMax || 99,
-            ],
-          },
-        ],
-      },
+      $expr: { $and: exprConditions },
     };
-
-    const scope = (currentUser.searchScope || "").toLowerCase();
-
-    if (scope === "nearby" || scope === "national") {
-      query.$expr.$and.push({
-        $eq: ["$location.country", currentUser.location.country],
-      });
-    }
 
     const users = await User.find(query)
       .sort({ _id: -1 })
