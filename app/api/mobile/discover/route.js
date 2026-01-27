@@ -65,9 +65,7 @@ export async function GET(req) {
         $eq: ["$location.country", currentUser.location.country],
       });
     }
-    if (country) {
-      exprConditions["location.country"] = country;
-    }
+
     const query = {
       _id: { $nin: excludeIds },
       isBanned: false,
@@ -75,6 +73,10 @@ export async function GET(req) {
       $expr: { $and: exprConditions },
     };
 
+    if (country) {
+      query["location.country"] = country;
+    }
+    
     const users = await User.find(query)
       .sort({ _id: -1 })
       .select("_id name birthdate bio profileImage isVerified location")
