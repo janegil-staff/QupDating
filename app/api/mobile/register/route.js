@@ -24,7 +24,7 @@ export async function POST(req) {
           message:
             "An account with this email already exists. Try logging in instead.",
         },
-        { status: 409 }
+        { status: 409 },
       );
     }
 
@@ -46,8 +46,11 @@ export async function POST(req) {
     });
 
     // 🔹 Send verification email
+    /*
     const verifyUrl = `https://qup.dating/verify?token=${verifyToken}`;
+    
     const html = verifyEmailTemplate({ name, verifyUrl });
+ 
     try {
       await sendEmail({
         to: email,
@@ -57,18 +60,19 @@ export async function POST(req) {
     } catch (err) {
       console.warn("Email send failed:", err.message);
     }
+      */
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
       expiresIn: "30d",
     });
     return NextResponse.json(
       { message: "User registered successfully", user, token },
-      { status: 201 }
+      { status: 201 },
     );
   } catch (err) {
     console.error("Error in register route:", err);
     return NextResponse.json(
       { error: "duplicate", details: err.message },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -83,6 +87,6 @@ export async function OPTIONS() {
         "Access-Control-Allow-Methods": "POST, OPTIONS",
         "Access-Control-Allow-Headers": "Content-Type, Authorization",
       },
-    }
+    },
   );
 }
