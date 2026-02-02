@@ -16,7 +16,8 @@ export async function POST(req) {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     await connectDB();
-    const existingUser = await User.findOne({ trimmedEmail });
+    await connectDB();
+    const existingUser = await User.findOne({ email: trimmedEmail });
     if (existingUser) {
       return NextResponse.json(
         {
