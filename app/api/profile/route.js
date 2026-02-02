@@ -5,22 +5,6 @@ import { authOptions } from "@/lib/auth";
 import User from "@/models/User";
 import { connectDB } from "@/lib/db";
 
-function calculateAge(birthdate) {
-  const today = new Date();
-  const dob = new Date(birthdate);
-
-  let age = today.getFullYear() - dob.getFullYear();
-  const monthDiff = today.getMonth() - dob.getMonth();
-  const dayDiff = today.getDate() - dob.getDate();
-
-  if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
-    age--;
-  }
-
-  return age;
-}
-
-
 export async function PUT(req) {
   try {
     await connectDB();
@@ -56,27 +40,17 @@ export async function PUT(req) {
     );
   }
 }
-export async function GET(req) {
-  const session = await getServerSession(req, authOptions);
 
+export async function GET() {
+  const session = await getServerSession(authOptions); // ✅ App Router style
   if (!session?.user?.email) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   await connectDB();
   const user = await User.findOne({ email: session.user.email }).lean();
-
-  // Inject correct age into response
-  const age = calculateAge(user.birthdate);
-
-  return NextResponse.json({
-    user: {
-      ...user,
-      age, // override or add correct age
-    },
-  });
+  return NextResponse.json({ user });
 }
-
 
 if (!mongoose.connection.readyState) {
   mongoose.connect(process.env.MONGODB_URI);

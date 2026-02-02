@@ -3,25 +3,11 @@ import { connectDB } from "@/lib/db";
 import User from "@/models/User";
 import jwt from "jsonwebtoken";
 
-function calculateAge(birthdate) {
-  const today = new Date();
-  const dob = new Date(birthdate);
-
-  let age = today.getFullYear() - dob.getFullYear();
-  const monthDiff = today.getMonth() - dob.getMonth();
-  const dayDiff = today.getDate() - dob.getDate();
-
-  if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
-    age--;
-  }
-
-  return age;
-}
-
 export async function GET(req, { params }) {
   try {
     await connectDB();
 
+    // 🔥 FIX: params is a Promise → must await it
     const { id } = await params;
 
     const authHeader = req.headers.get("authorization");
@@ -46,15 +32,7 @@ export async function GET(req, { params }) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    // 🔥 Inject correct age
-    const age = calculateAge(user.birthdate);
-
-    return NextResponse.json({
-      user: {
-        ...user,
-        age, // override or add correct age
-      },
-    });
+    return NextResponse.json({ user });
   } catch (err) {
     console.error("User profile error:", err);
     return NextResponse.json({ error: "Server error" }, { status: 500 });

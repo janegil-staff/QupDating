@@ -3,21 +3,6 @@ import User from "@/models/User";
 import { connectDB } from "@/lib/db";
 import { NextResponse } from "next/server";
 
-function calculateAge(birthdate) {
-  const today = new Date();
-  const dob = new Date(birthdate);
-
-  let age = today.getFullYear() - dob.getFullYear();
-  const monthDiff = today.getMonth() - dob.getMonth();
-  const dayDiff = today.getDate() - dob.getDate();
-
-  if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
-    age--;
-  }
-
-  return age;
-}
-
 export async function PUT(req) {
   try {
     // 1. Auth check
@@ -45,7 +30,7 @@ export async function PUT(req) {
       await User.findByIdAndUpdate(
         decoded.id,
         { $push: { images: { $each: body.images } } }, // ✅ append new images
-        { new: true },
+        { new: true }
       );
     }
 
@@ -70,10 +55,11 @@ export async function PUT(req) {
     console.error("PUT error:", err);
     return NextResponse.json(
       { error: "Could not update user", details: err.message },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
+
 export async function GET(req) {
   const authHeader = req.headers.get("authorization");
   if (!authHeader)
@@ -89,14 +75,8 @@ export async function GET(req) {
     if (!user)
       return Response.json({ error: "User not found" }, { status: 404 });
 
-    // 🔥 Correct age calculation
-    const age = calculateAge(user.birthdate);
-
     return Response.json({
-      user: {
-        ...user,
-        age, // override or add correct age
-      },
+      user,
     });
   } catch (err) {
     return Response.json({ error: "Invalid token" }, { status: 401 });
@@ -120,7 +100,7 @@ export async function POST(req) {
   const token = jwt.sign(
     { id: user._id.toString(), email: user.email },
     process.env.JWT_SECRET,
-    { expiresIn: "7d" },
+    { expiresIn: "7d" }
   );
 
   return Response.json({
