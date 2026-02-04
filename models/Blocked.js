@@ -13,9 +13,8 @@ const BlockedSchema = new mongoose.Schema(
       required: true,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
-// Force the collection name to be exactly "Blocked"
 export default mongoose.models.Blocked ||
-  mongoose.model("Blocked", BlockedSchema, "Blocked");
+  mongoose.model("Blocked", MessageSchema);

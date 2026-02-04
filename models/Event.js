@@ -38,7 +38,7 @@ const EventSchema = new mongoose.Schema(
       default: false, // admins can approve events before they go public
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 // Avoid recompiling model in dev
