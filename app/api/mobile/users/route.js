@@ -3,6 +3,8 @@ export const runtime = "nodejs";
 import jwt from "jsonwebtoken";
 import User from "@/models/User";
 import { connectDB } from "@/lib/db";
+import Blocked from "@/models/Blocked";
+import Report from "@/models/Report";
 
 export async function GET(req) {
   await connectDB();
@@ -30,10 +32,24 @@ export async function GET(req) {
   }
 
   // 4. Determine opposite gender
-  const oppositeGender =
-    currentUser.gender === "male" ? "female" : "male";
+  const oppositeGender = currentUser.gender === "male" ? "female" : "male";
 
   const now = new Date();
+  // Fetch reported users
+  const reports = await Report.find({ reporter: currentUser._id });
+  const reportedIds = reports.map((r) => r.reportedUser.toString());
+
+  // Users who reported the current user
+  const reportedByOthers = await Report.find({ reportedUser: currentUser._id });
+  const reportedByIds = reportedByOthers.map((r) => r.reporter.toString());
+
+  // Users the current user has blocked
+  const blocks = await Blocked.find({ blocker: currentUser._id });
+  const blockedIds = blocks.map((b) => b.blockedUser.toString());
+
+  // Users who blocked the current user
+  const blockedBy = await Blocked.find({ blockedUser: currentUser._id });
+  const blockedByIds = blockedBy.map((b) => b.blocker.toString());
 
   // 5. Build query
   const query = {
@@ -43,6 +59,10 @@ export async function GET(req) {
       { _id: { $in: currentUser.likes } },
       { _id: { $in: currentUser.dislikes } },
       { _id: { $in: currentUser.matches } },
+      { _id: { $in: reportedIds } },
+      { _id: { $in: reportedByIds } },
+      { _id: { $in: blockedIds } },
+      { _id: { $in: blockedByIds } },
     ],
     $expr: {
       $and: [

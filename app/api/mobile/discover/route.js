@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import User from "@/models/User";
 import { getMobileUser } from "@/lib/getMobileUser";
 import { connectDB } from "@/lib/db";
+import Blocked from "@/models/Blocked";
+import Report from "@/models/Report";
 
 export async function GET(req) {
   try {
@@ -19,6 +21,7 @@ export async function GET(req) {
 
     const oppositeGender = currentUser.gender === "male" ? "female" : "male";
     const now = new Date();
+
     const reports = await Report.find({ reporter: currentUser._id });
     const reportedIds = reports.map((r) => r.reportedUser.toString());
 
@@ -27,6 +30,12 @@ export async function GET(req) {
     });
     const reportedByIds = reportedByOthers.map((r) => r.reporter.toString());
 
+    const blocks = await Blocked.find({ blockerId: currentUser._id });
+    const blockedIds = blocks.map((b) => b.blockedId.toString());
+
+    const blockedBy = await Blocked.find({ blockedId: currentUser._id });
+    const blockedByIds = blockedBy.map((b) => b.blockerId.toString());
+
     const excludeIds = [
       currentUser._id,
       ...currentUser.likes,
@@ -34,6 +43,8 @@ export async function GET(req) {
       ...currentUser.matches,
       ...reportedIds,
       ...reportedByIds,
+      ...blockedIds,
+      ...blockedByIds,
     ];
 
     const query = {
