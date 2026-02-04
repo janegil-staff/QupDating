@@ -30,12 +30,12 @@ export async function GET(req) {
     });
     const reportedByIds = reportedByOthers.map((r) => r.reporter.toString());
 
-    const blocks = await Blocked.find({ blockerId: currentUser._id });
-    const blockedIds = blocks.map((b) => b.blockedId.toString());
-
-    const blockedBy = await Blocked.find({ blockedId: currentUser._id });
-    const blockedByIds = blockedBy.map((b) => b.blockerId.toString());
-
+   const blocks = await Blocked.find({ blocker: currentUser._id });
+   const blockedIds = blocks.map((b) => b.blockedUser.toString());
+ 
+   const blockedBy = await Blocked.find({ blockedUser: currentUser._id });
+   const blockedByIds = blockedBy.map((b) => b.blocker.toString());
+ 
     const excludeIds = [
       currentUser._id,
       ...currentUser.likes,
