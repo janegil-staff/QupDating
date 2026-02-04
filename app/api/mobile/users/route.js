@@ -3,7 +3,6 @@ export const runtime = "nodejs";
 import jwt from "jsonwebtoken";
 import User from "@/models/User";
 import { connectDB } from "@/lib/db";
-import Report from "@/models/Report";
 
 export async function GET(req) {
   await connectDB();
@@ -31,12 +30,11 @@ export async function GET(req) {
   }
 
   // 4. Determine opposite gender
-  const oppositeGender = currentUser.gender === "male" ? "female" : "male";
+  const oppositeGender =
+    currentUser.gender === "male" ? "female" : "male";
 
   const now = new Date();
 
-  const reported = await Report.find({ reportedUser: currentUser._id });
-  const reportedIds = reported.map((r) => r.reportedUser);
   // 5. Build query
   const query = {
     _id: { $ne: currentUser._id },
@@ -45,7 +43,6 @@ export async function GET(req) {
       { _id: { $in: currentUser.likes } },
       { _id: { $in: currentUser.dislikes } },
       { _id: { $in: currentUser.matches } },
-      { _id: { $in: reportedIds } },
     ],
     $expr: {
       $and: [
