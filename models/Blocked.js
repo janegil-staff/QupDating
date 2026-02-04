@@ -17,4 +17,4 @@ const BlockedSchema = new mongoose.Schema(
 );
 
 export default mongoose.models.Blocked ||
-  mongoose.model("Blocked", MessageSchema);
+  mongoose.model("Blocked", BlockedSchema);
