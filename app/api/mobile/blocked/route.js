@@ -1,6 +1,6 @@
 import Blocked from "@/models/Blocked";
-import { getUserFromRequest } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
+import { getUserFromRequest } from "@/lib/getUSerFromRequest";
 
 export async function GET(req) {
   await connectDB();
