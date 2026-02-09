@@ -1,39 +1,60 @@
-import { NextResponse } from "next/server";
-import jwt from "jsonwebtoken";
-import { connectDB } from "@/lib/db";
-import Message from "@/models/Message";
+import { NextResponse } from 'next/server';
+import { connectDB } from '@/lib/db';
+import Message from '@/models/Message';
+import { verifyAuth } from '@/lib/auth';
 
-export async function POST(req, { params }) {
-
+/**
+ * POST /api/mobile/chat/[userId]/read
+ * Mark all messages from specified user as read
+ */
+export async function POST(request, { params }) {
   try {
-    await connectDB();
-    const p = await params;
-    const otherUserId = await p.id;
-
-    const auth = req.headers.get("authorization");
-    if (!auth?.startsWith("Bearer ")) {
-      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+    // Verify authentication
+    const authResult = await verifyAuth(request);
+    if (!authResult.success) {
+      return NextResponse.json(
+        { success: false, error: authResult.error },
+        { status: authResult.status }
+      );
     }
 
-    const token = auth.split(" ")[1];
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const currentUserId = decoded.id;
+    const currentUserId = authResult.user.id;
+    const { userId: otherUserId } = params;
 
-    // ⭐ Mark unread messages as read
-    const updated = await Message.updateMany(
+    // Connect to database
+    await connectDB();
+
+    // Update all unread messages from otherUser to currentUser
+    const result = await Message.updateMany(
       {
         sender: otherUserId,
         receiver: currentUserId,
-        read: false,
+        read: false
       },
-      { $set: { read: true } },
+      {
+        $set: { 
+          read: true, 
+          readAt: new Date() 
+        }
+      }
     );
+
+    console.log(`✅ Marked ${result.modifiedCount} messages as read`);
+
     return NextResponse.json({
       success: true,
-      updated: updated.modifiedCount,
+      markedAsRead: result.modifiedCount
     });
-  } catch (err) {
-    console.error("Clear badge error:", err);
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
+
+  } catch (error) {
+    console.error('❌ Error marking messages as read:', error);
+    return NextResponse.json(
+      {
+        success: false,
+        error: 'Failed to mark messages as read',
+        message: error.message
+      },
+      { status: 500 }
+    );
   }
 }
