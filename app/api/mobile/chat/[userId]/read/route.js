@@ -7,8 +7,11 @@ import { verifyAuth } from '@/lib/auth-middleware';
  * POST /api/mobile/chat/[userId]/read
  * Mark all messages from specified user as read
  */
-export async function POST(request, { params }) {
+export async function POST(request, context) {
   try {
+    // Next.js 15+ - params might be a promise
+    const params = await Promise.resolve(context.params);
+    
     // Verify authentication
     const authResult = await verifyAuth(request);
     if (!authResult.success) {
@@ -19,7 +22,7 @@ export async function POST(request, { params }) {
     }
 
     const currentUserId = authResult.user.id;
-    const { id: otherUserId } = params;
+    const { userId: otherUserId } = params;
 
     // Connect to database
     await connectDB();

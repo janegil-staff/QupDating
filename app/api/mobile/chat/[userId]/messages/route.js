@@ -8,8 +8,11 @@ import { verifyAuth } from '@/lib/auth-middleware';
  * GET /api/mobile/chat/[userId]/messages
  * Fetch all messages between current user and specified user
  */
-export async function GET(request, { params }) {
+export async function GET(request, context) {
   try {
+    // Next.js 15+ - params might be a promise
+    const params = await Promise.resolve(context.params);
+    
     // Verify authentication
     const authResult = await verifyAuth(request);
     if (!authResult.success) {
@@ -20,7 +23,7 @@ export async function GET(request, { params }) {
     }
 
     const currentUserId = authResult.user.id;
-    const { id: otherUserId } = params;
+    const { userId: otherUserId } = params;
 
     // Connect to database
     await connectDB();
