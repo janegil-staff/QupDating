@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
 import Message from '@/models/Message';
-import { verifyAuth } from '@/lib/auth';
+import { verifyAuth } from '@/lib/auth-middleware';
 
 /**
  * POST /api/mobile/chat/[userId]/read
@@ -19,7 +19,7 @@ export async function POST(request, { params }) {
     }
 
     const currentUserId = authResult.user.id;
-    const { userId: otherUserId } = params;
+    const { id: otherUserId } = params;
 
     // Connect to database
     await connectDB();
