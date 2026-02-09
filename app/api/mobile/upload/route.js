@@ -1,16 +1,19 @@
+export const runtime = "nodejs"; // REQUIRED for Cloudinary + streams
+
 import { NextResponse } from "next/server";
 import cloudinary from "@/lib/cloudinary";
 import { Readable } from "stream";
 
 export async function POST(req) {
   try {
+    console.log("📤 Upload endpoint hit");
+
     const formData = await req.formData();
     const files = formData.getAll("images");
 
-    console.log("📤 Upload endpoint called");
-    console.log("📋 Files received:", files.length);
+    console.log("📦 Files received:", files.length);
 
-    if (files.length === 0) {
+    if (!files || files.length === 0) {
       return NextResponse.json(
         { error: "No images provided" },
         { status: 400 }
@@ -21,43 +24,49 @@ export async function POST(req) {
 
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
-      console.log(`📤 Processing image ${i + 1}/${files.length}`);
-      
-      const buffer = Buffer.from(await file.arrayBuffer());
-      console.log(`   Buffer size: ${buffer.length} bytes`);
 
+      console.log(`➡️ Processing file ${i + 1}/${files.length}`);
+      console.log("   File type:", file.type);
+      console.log("   File name:", file.name);
+
+      // Convert to buffer
+      const arrayBuffer = await file.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+
+      console.log("   Buffer size:", buffer.length);
+
+      // Upload to Cloudinary
       const result = await new Promise((resolve, reject) => {
         const uploadStream = cloudinary.uploader.upload_stream(
           {
             folder: "dating-app/messages",
             resource_type: "image",
-            format: "jpg", // forces HEIC → JPG
+            format: "jpg", // HEIC → JPG
             quality: "auto",
           },
           (error, result) => {
             if (error) {
-              console.error(`   ❌ Upload error:`, error);
+              console.error("   ❌ Cloudinary error:", error);
               reject(error);
             } else {
-              console.log(`   ✅ Uploaded:`, result.secure_url);
+              console.log("   ✅ Uploaded:", result.secure_url);
               resolve(result);
             }
           }
         );
 
-        // Convert buffer to stream and pipe to Cloudinary
-        const stream = Readable.from(buffer);
-        stream.pipe(uploadStream);
+        Readable.from(buffer).pipe(uploadStream);
       });
 
       uploadedImages.push({
         url: result.secure_url,
         public_id: result.public_id,
+        width: result.width,
+        height: result.height,
       });
     }
 
-    console.log("✅ All images uploaded successfully");
-    console.log("📋 URLs:", uploadedImages.map(img => img.url));
+    console.log("🎉 All uploads complete");
 
     return NextResponse.json(
       { images: uploadedImages },
@@ -71,7 +80,8 @@ export async function POST(req) {
       }
     );
   } catch (err) {
-    console.error("💥 Upload error:", err);
+    console.error("💥 Upload failed:", err);
+
     return NextResponse.json(
       { error: "Upload failed", details: err.message },
       { status: 500 }
