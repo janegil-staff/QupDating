@@ -27,6 +27,42 @@ const userSchema = new mongoose.Schema(
     },
     occupation: { type: String },
 
+    // ⭐ NEW PROFESSIONAL FIELDS (REQUIRED FOR APPLE)
+    jobTitle: { type: String, required: true },
+    company: { type: String, required: true },
+    industry: { 
+      type: String, 
+      required: true,
+      enum: [
+        'Technology',
+        'Finance',
+        'Healthcare',
+        'Education',
+        'Marketing',
+        'Sales',
+        'Engineering',
+        'Law',
+        'Consulting',
+        'Real Estate',
+        'Media',
+        'Other',
+        ''
+      ]
+    },
+    educationLevel: { 
+      type: String, 
+      required: true,
+      enum: [
+        'High School',
+        'Bachelor\'s Degree',
+        'Master\'s Degree',
+        'MBA',
+        'PhD',
+        'Professional Degree (MD, JD, etc)',
+        ''
+      ]
+    },
+
     // Appearance
     appearance: {
       type: String,
@@ -118,7 +154,7 @@ const userSchema = new mongoose.Schema(
     resetPasswordToken: { type: String },
     resetPasswordExpires: { type: Date },
     isBanned: { type: Boolean, default: false },
-    isVerified: { type: Boolean, default: false },
+    isVerified: { type: Boolean, default: false }, // ⭐ Used for professional verification badge
     verifyToken: { type: String },
     verifyExpires: { type: Date },
 
