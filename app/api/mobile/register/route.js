@@ -10,7 +10,7 @@ import verifyEmailTemplate from "@/lib/emailTemplates/verifyEmail";
 export async function POST(req) {
   try {
     const body = await req.json();
-    const { name, email, password, gender, birthdate, images, jobTitle, company, industry, educationLevel, bio } = body;
+    const { name, email, password, gender, birthdate, images, occupation, company, industry, education, bio } = body;
 
     const trimmedEmail = email.toLowerCase().trim();
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -38,10 +38,10 @@ export async function POST(req) {
       password: hashedPassword,
       gender: gender || "male",
       birthdate: birthdate || new Date(new Date().getFullYear() - 20, 0, 1),
-      jobTitle: jobTitle || "", // ← sjekk at denne er med
+      occupation: occupation || "", // ← sjekk at denne er med
       company: company || "", // ← sjekk at denne er med
       industry: industry || "", // ← legg til
-      educationLevel: educationLevel || "", // ← legg til
+      education: education || "", // ← legg til
       bio: bio || "", // ← legg til
       verifyToken,
       verifyExpires,

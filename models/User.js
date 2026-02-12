@@ -30,7 +30,6 @@ const userSchema = new mongoose.Schema(
       default: "male",
     },
     occupation: { type: String },
-    jobTitle: { type: String },
     company: { type: String },
     industry: {
       type: String,
@@ -50,7 +49,7 @@ const userSchema = new mongoose.Schema(
         "",
       ],
     },
-    educationLevel: {
+    education: {
       type: String,
       enum: [
         "High School",
