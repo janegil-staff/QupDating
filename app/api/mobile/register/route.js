@@ -10,13 +10,13 @@ import verifyEmailTemplate from "@/lib/emailTemplates/verifyEmail";
 export async function POST(req) {
   try {
     const body = await req.json();
-    const { name, email, password, gender, birthdate, images } = body;
+    const { name, email, password, gender, birthdate, images, jobTitle, company, industry, educationLevel, bio } = body;
 
     const trimmedEmail = email.toLowerCase().trim();
     const hashedPassword = await bcrypt.hash(password, 10);
 
     await connectDB();
-    await connectDB();
+
     const existingUser = await User.findOne({ email: trimmedEmail });
     if (existingUser) {
       return NextResponse.json(
@@ -32,20 +32,23 @@ export async function POST(req) {
     // 🔹 Generate verification token
     const verifyToken = crypto.randomBytes(32).toString("hex");
     const verifyExpires = Date.now() + 1000 * 60 * 60 * 24; // 24h
-
     const user = await User.create({
       name: name || "",
       email: trimmedEmail || "",
       password: hashedPassword,
-      gender: gender || null,
-      birthdate: birthdate || null,
+      gender: gender || "male",
+      birthdate: birthdate || new Date(new Date().getFullYear() - 20, 0, 1),
+      jobTitle: jobTitle || "", // ← sjekk at denne er med
+      company: company || "", // ← sjekk at denne er med
+      industry: industry || "", // ← legg til
+      educationLevel: educationLevel || "", // ← legg til
+      bio: bio || "", // ← legg til
       verifyToken,
       verifyExpires,
       images: Array.isArray(images) ? images : [],
       profileImage:
         Array.isArray(images) && images.length > 0 ? images[0].url : "",
     });
-
     // 🔹 Send verification email
     /*
     const verifyUrl = `https://qup.dating/verify?token=${verifyToken}`;
