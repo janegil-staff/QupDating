@@ -18,20 +18,22 @@ const userSchema = new mongoose.Schema(
       lowercase: true,
       trim: true,
     },
-    birthdate: { type: Date, default: null },
+    birthdate: {
+      type: Date,
+      default: () => new Date(new Date().getFullYear() - 20, 0, 1),
+    },
     gender: {
       type: String,
       enum: ["male", "female", "other", ""],
       lowercase: true,
       required: true,
-      default: "male"
+      default: "male",
     },
     occupation: { type: String },
-    jobTitle: { type: String, required: true },
-    company: { type: String, required: true },
+    jobTitle: { type: String },
+    company: { type: String },
     industry: {
       type: String,
-      required: true,
       enum: [
         "Technology",
         "Finance",
@@ -50,7 +52,6 @@ const userSchema = new mongoose.Schema(
     },
     educationLevel: {
       type: String,
-      required: true,
       enum: [
         "High School",
         "Bachelor's Degree",
@@ -78,21 +79,24 @@ const userSchema = new mongoose.Schema(
       type: String,
       enum: ["normal", "pretty", "cute", "handsome", "stylish", "unique", ""],
       lowercase: true,
+      default: "normal",
     },
     height: { type: Number },
     bodyType: {
       type: String,
       enum: ["slim", "average", "athletic", "curvy", "muscular", ""],
       lowercase: true,
+      default: "average",
     },
 
     // Lifestyle
-    hasChildren: { type: Boolean },
-    wantsChildren: { type: Boolean },
+    hasChildren: { type: Boolean, default: false },
+    wantsChildren: { type: Boolean, default: false },
     smoking: {
       type: String,
       enum: ["yes", "no", "occasionally", ""],
       lowercase: true,
+      default: "no",
     },
     drinking: {
       type: String,
@@ -116,7 +120,7 @@ const userSchema = new mongoose.Schema(
       enum: ["single", "in a relationship", "married", "divorced", ""],
       lowercase: true,
     },
-    willingToRelocate: { type: Boolean },
+    willingToRelocate: { type: Boolean, default: false },
     education: { type: String },
     religion: {
       type: String,
@@ -143,8 +147,8 @@ const userSchema = new mongoose.Schema(
       lowercase: true,
       default: "worldwide",
     },
-    bio: { type: String },
-    lookingFor: { type: String },
+    bio: { type: String, default: "" },
+    lookingFor: { type: String, default: "relationship" },
     images: [{ url: String, public_id: String }],
     profileImage: { type: String },
 
