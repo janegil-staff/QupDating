@@ -24,10 +24,9 @@ const userSchema = new mongoose.Schema(
       enum: ["male", "female", "other", ""],
       lowercase: true,
       required: true,
+      default: "male"
     },
     occupation: { type: String },
-
-    // ⭐ NEW PROFESSIONAL FIELDS (REQUIRED FOR APPLE)
     jobTitle: { type: String, required: true },
     company: { type: String, required: true },
     industry: {
