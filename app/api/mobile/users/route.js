@@ -102,7 +102,7 @@ export async function GET(req) {
   // 7. Fetch users
   const users = await User.find(query)
     .sort({ _id: -1 })
-    .select("name bio profileImage isVerified");
+    .select("name bio profileImage isVerified linkedin");
 
   return Response.json(users, {
     status: 200,

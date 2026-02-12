@@ -22,13 +22,13 @@ export async function GET(req) {
 
     // Fetch logged-in user with likes + dislikes populated
     const me = await User.findById(decoded.id)
-      .populate("likes", "_id name profileImage birthdate bio isVerified")
-      .populate("dislikes", "_id name profileImage birthdate bio isVerified");
+      .populate("likes", "_id name profileImage birthdate bio isVerified linkedin")
+      .populate("dislikes", "_id name profileImage birthdate bio isVerified linkedin");
 
     // People who liked me
     const likedMeUsers = await User.find({
       likes: decoded.id,
-    }).select("_id name profileImage birthdate bio isVerified");
+    }).select("_id name profileImage birthdate bio isVerified linkedin");
 
     return NextResponse.json({
       likedUsers: me.likes || [],
