@@ -19,6 +19,11 @@ export async function GET(req) {
     const cursor = searchParams.get("cursor");
     const limit = 20;
 
+    // Filters
+    const filterIndustry = searchParams.get("industry");
+    const filterEducation = searchParams.get("education");
+    const filterLookingFor = searchParams.get("lookingFor");
+
     const oppositeGender = currentUser.gender === "male" ? "female" : "male";
     const now = new Date();
 
@@ -30,12 +35,12 @@ export async function GET(req) {
     });
     const reportedByIds = reportedByOthers.map((r) => r.reporter.toString());
 
-   const blocks = await Blocked.find({ blocker: currentUser._id });
-   const blockedIds = blocks.map((b) => b.blockedUser.toString());
- 
-   const blockedBy = await Blocked.find({ blockedUser: currentUser._id });
-   const blockedByIds = blockedBy.map((b) => b.blocker.toString());
- 
+    const blocks = await Blocked.find({ blocker: currentUser._id });
+    const blockedIds = blocks.map((b) => b.blockedUser.toString());
+
+    const blockedBy = await Blocked.find({ blockedUser: currentUser._id });
+    const blockedByIds = blockedBy.map((b) => b.blocker.toString());
+
     const excludeIds = [
       currentUser._id,
       ...currentUser.likes,
@@ -79,21 +84,44 @@ export async function GET(req) {
       },
     };
 
+    // Location scope filter
     const scope = (currentUser.searchScope || "").toLowerCase();
-
     if (scope === "nearby" || scope === "national") {
       query.$expr.$and.push({
-        $eq: ["$location.country", currentUser.location.country],
+        $eq: ["$location.country", currentUser.location?.country],
       });
+    }
+
+    // Career filters
+    if (filterIndustry) {
+      query.industry = { $regex: new RegExp(filterIndustry, "i") };
+    }
+
+    if (filterEducation) {
+      query.education = { $regex: new RegExp(filterEducation, "i") };
+    }
+
+    if (filterLookingFor) {
+      query.lookingFor = { $regex: new RegExp(filterLookingFor, "i") };
+    }
+
+    // Cursor pagination
+    if (cursor) {
+      query._id = { ...query._id, $lt: cursor };
     }
 
     const users = await User.find(query)
       .sort({ _id: -1 })
-      .select("_id name birthdate bio profileImage isVerified location linkedin")
+      .limit(limit)
+      .select(
+        "_id name birthdate bio profileImage isVerified location linkedin occupation company industry education lookingFor"
+      )
       .lean();
 
     const nextCursor =
-      users.length > 0 ? users[users.length - 1]._id.toString() : null;
+      users.length === limit
+        ? users[users.length - 1]._id.toString()
+        : null;
 
     return NextResponse.json({
       users,
