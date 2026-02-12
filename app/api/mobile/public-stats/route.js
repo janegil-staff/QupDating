@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
-import dbConnect from "@/lib/mongodb";
 import User from "@/models/User";
+import { connectDB } from "@/lib/db";
 
 export async function GET() {
   try {
-    await dbConnect();
+    await connectDB();
 
     const totalUsers = await User.countDocuments({ isVerified: true });
     const linkedinVerified = await User.countDocuments({
