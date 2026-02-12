@@ -89,7 +89,7 @@ export async function GET(req) {
 
     const users = await User.find(query)
       .sort({ _id: -1 })
-      .select("_id name birthdate bio profileImage isVerified location")
+      .select("_id name birthdate bio profileImage isVerified location linkedin")
       .lean();
 
     const nextCursor =
