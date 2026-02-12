@@ -30,39 +30,50 @@ const userSchema = new mongoose.Schema(
     // ⭐ NEW PROFESSIONAL FIELDS (REQUIRED FOR APPLE)
     jobTitle: { type: String, required: true },
     company: { type: String, required: true },
-    industry: { 
-      type: String, 
+    industry: {
+      type: String,
       required: true,
       enum: [
-        'Technology',
-        'Finance',
-        'Healthcare',
-        'Education',
-        'Marketing',
-        'Sales',
-        'Engineering',
-        'Law',
-        'Consulting',
-        'Real Estate',
-        'Media',
-        'Other',
-        ''
-      ]
+        "Technology",
+        "Finance",
+        "Healthcare",
+        "Education",
+        "Marketing",
+        "Sales",
+        "Engineering",
+        "Law",
+        "Consulting",
+        "Real Estate",
+        "Media",
+        "Other",
+        "",
+      ],
     },
-    educationLevel: { 
-      type: String, 
+    educationLevel: {
+      type: String,
       required: true,
       enum: [
-        'High School',
-        'Bachelor\'s Degree',
-        'Master\'s Degree',
-        'MBA',
-        'PhD',
-        'Professional Degree (MD, JD, etc)',
-        ''
-      ]
+        "High School",
+        "Bachelor's Degree",
+        "Master's Degree",
+        "MBA",
+        "PhD",
+        "Professional Degree (MD, JD, etc)",
+        "",
+      ],
     },
-
+    linkedin: {
+      isVerified: { type: Boolean, default: false },
+      verifiedAt: { type: Date },
+      linkedinId: { type: String, index: true },
+      profileData: {
+        name: { type: String },
+        email: { type: String },
+        picture: { type: String },
+        givenName: { type: String },
+        familyName: { type: String },
+      },
+    },
     // Appearance
     appearance: {
       type: String,
@@ -163,7 +174,7 @@ const userSchema = new mongoose.Schema(
     preferredAgeMax: { type: Number, default: 99 },
     profileCompletionPercent: { type: Number, default: 0 },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 export default mongoose.models.User || mongoose.model("User", userSchema);
