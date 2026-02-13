@@ -2,8 +2,8 @@
 import { NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 import jwksClient from "jwks-rsa";
-import connectDB from "@/lib/mongodb";
 import User from "@/models/User";
+import { connectDB } from "@/lib/db";
 
 const JWT_SECRET = process.env.JWT_SECRET;
 const APPLE_BUNDLE_ID = process.env.APPLE_BUNDLE_ID;
