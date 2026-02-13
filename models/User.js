@@ -10,7 +10,7 @@ const locationSchema = new mongoose.Schema({
 const userSchema = new mongoose.Schema(
   {
     name: { type: String, required: true },
-    password: { type: String, required: true },
+    password: { type: String, required: false }, // Not required for Apple/Google sign-in users
     email: {
       type: String,
       required: true,
@@ -61,6 +61,13 @@ const userSchema = new mongoose.Schema(
         "",
       ],
     },
+
+    // ── Social Auth Providers ──
+    provider: {
+      type: String,
+      enum: ["google", "apple"],
+    },
+
     linkedin: {
       isVerified: { type: Boolean, default: false },
       verifiedAt: { type: Date },
@@ -73,6 +80,21 @@ const userSchema = new mongoose.Schema(
         familyName: { type: String },
       },
     },
+    apple: {
+      appleUserId: { type: String, index: true },
+      email: { type: String },
+      isVerified: { type: Boolean, default: false },
+      verifiedAt: { type: Date },
+    },
+    google: {
+      googleId: { type: String, index: true },
+      email: { type: String },
+      name: { type: String },
+      picture: { type: String },
+      isVerified: { type: Boolean, default: false },
+      verifiedAt: { type: Date },
+    },
+
     // Appearance
     appearance: {
       type: String,
@@ -120,7 +142,6 @@ const userSchema = new mongoose.Schema(
       lowercase: true,
     },
     willingToRelocate: { type: Boolean, default: false },
-    education: { type: String },
     religion: {
       type: String,
       enum: [
