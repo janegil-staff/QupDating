@@ -63,6 +63,7 @@ export async function POST(req) {
     const randomPassword = crypto.randomBytes(32).toString("hex");
 
     const user = await User.create({
+      isVerified: true,
       name: name || linkedinName || "",
       email: trimmedEmail,
       password: randomPassword, // Not usable for login — LinkedIn only
