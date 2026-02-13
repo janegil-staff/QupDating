@@ -102,7 +102,13 @@ export async function GET(req) {
   // 7. Fetch users
   const users = await User.find(query)
     .sort({ _id: -1 })
-    .select("name bio profileImage isVerified linkedin");
+    .select(
+      "name bio profileImage images birthdate gender location occupation education isVerified linkedin apple google height appearance bodyType tags",
+    );
+
+  console.log("Current user gender:", currentUser.gender);
+  console.log("Query oppositeGender:", oppositeGender);
+  console.log("Users found:", users.length);
 
   return Response.json(users, {
     status: 200,
