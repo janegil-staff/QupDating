@@ -66,6 +66,7 @@ export async function POST(req) {
         };
       }
 
+      user.isVerified = true;
       user.lastSeen = new Date();
       await user.save();
 

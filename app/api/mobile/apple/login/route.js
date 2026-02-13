@@ -115,7 +115,8 @@ export async function POST(req) {
       if (userName && (!user.name || user.name === "User")) {
         user.name = userName;
       }
-
+      
+      user.isVerified = true;
       user.lastSeen = new Date();
       await user.save();
 
