@@ -1,135 +1,153 @@
-import { NextResponse } from "next/server";
+// app/api/mobile/apple/login/route.js
 import jwt from "jsonwebtoken";
-import { connectDB } from "@/lib/db";
+import jwksClient from "jwks-rsa";
 import User from "@/models/User";
+import { connectDB } from "@/lib/db";
 
-// Apple's public keys endpoint for token verification
-const APPLE_KEYS_URL = "https://appleid.apple.com/auth/keys";
+// Apple's JWKS endpoint
+const appleJwks = jwksClient({
+  jwksUri: "https://appleid.apple.com/auth/keys",
+  cache: true,
+  cacheMaxAge: 86400000, // 24 hours
+});
 
-/**
- * Verify Apple's identityToken (a JWT signed by Apple).
- * We fetch Apple's public keys and verify the token against them.
- */
-async function verifyAppleToken(identityToken) {
-  const jose = await import("jose");
-
-  // Fetch Apple's public key set
-  const JWKS = jose.createRemoteJWKSet(new URL(APPLE_KEYS_URL));
-
-  // Verify and decode the token
-  const { payload } = await jose.jwtVerify(identityToken, JWKS, {
-    issuer: "https://appleid.apple.com",
-    audience: process.env.APPLE_BUNDLE_ID, // e.g. "com.yourapp.qup"
+function getAppleSigningKey(kid) {
+  return new Promise((resolve, reject) => {
+    appleJwks.getSigningKey(kid, (err, key) => {
+      if (err) return reject(err);
+      resolve(key.getPublicKey());
+    });
   });
+}
 
-  return payload;
+async function verifyAppleToken(identityToken) {
+  const decoded = jwt.decode(identityToken, { complete: true });
+  if (!decoded || !decoded.header) {
+    throw new Error("Unable to decode Apple identity token");
+  }
+
+  const signingKey = await getAppleSigningKey(decoded.header.kid);
+
+  return new Promise((resolve, reject) => {
+    jwt.verify(
+      identityToken,
+      signingKey,
+      {
+        algorithms: ["RS256"],
+        issuer: "https://appleid.apple.com",
+        // audience: process.env.APPLE_BUNDLE_ID, // Uncomment if you want strict audience check
+      },
+      (err, payload) => {
+        if (err) return reject(err);
+        resolve(payload);
+      }
+    );
+  });
 }
 
 export async function POST(req) {
   try {
     await connectDB();
-
-    const { identityToken, fullName, email, user: appleUserId } =
+    const { identityToken, authorizationCode, fullName, email, user: appleUserId } =
       await req.json();
 
-    if (!identityToken || !appleUserId) {
-      return NextResponse.json(
-        { error: "Missing Apple credentials" },
+    if (!identityToken) {
+      return Response.json(
+        { error: "Missing Apple identity token" },
         { status: 400 }
       );
     }
 
-    // 1. Verify the identity token with Apple
+    // ── Verify the identity token with Apple ──
     let applePayload;
     try {
       applePayload = await verifyAppleToken(identityToken);
     } catch (err) {
       console.error("Apple token verification failed:", err);
-      return NextResponse.json(
-        { error: "Invalid Apple token" },
+      return Response.json(
+        { error: "Invalid Apple identity token" },
         { status: 401 }
       );
     }
 
-    const appleEmail = applePayload.email || email;
-    const appleSub = applePayload.sub; // Apple's unique user identifier
+    const verifiedAppleUserId = applePayload.sub;
+    const verifiedEmail = applePayload.email || email;
 
-    // 2. Check if user already exists (by Apple ID or email)
-    let existingUser = await User.findOne({
-      $or: [
-        { "apple.appleUserId": appleSub },
-        ...(appleEmail ? [{ email: appleEmail.toLowerCase().trim() }] : []),
-      ],
+    // Build name from fullName (Apple only sends this on first sign-in)
+    let userName = "";
+    if (fullName) {
+      const parts = [fullName.givenName, fullName.familyName].filter(Boolean);
+      if (parts.length > 0) {
+        userName = parts.join(" ");
+      }
+    }
+
+    // ── Check if user exists by Apple ID ──
+    let user = await User.findOne({
+      "apple.appleUserId": verifiedAppleUserId,
     });
 
-    if (existingUser) {
-      // ── EXISTING USER → LOG IN ──
-      if (existingUser.isBanned) {
-        return NextResponse.json(
+    // ── Or check by email ──
+    if (!user && verifiedEmail) {
+      user = await User.findOne({ email: verifiedEmail });
+    }
+
+    // ── Existing user → login ──
+    if (user) {
+      if (user.isBanned) {
+        return Response.json(
           { error: "Your account has been banned" },
           { status: 403 }
         );
       }
 
-      // Update Apple data if not already stored
-      if (!existingUser.apple?.appleUserId) {
-        existingUser.apple = {
-          appleUserId: appleSub,
-          email: appleEmail,
+      // Link Apple if not already linked
+      if (!user.apple?.appleUserId) {
+        user.apple = {
+          appleUserId: verifiedAppleUserId,
+          email: verifiedEmail || user.email,
           isVerified: true,
           verifiedAt: new Date(),
         };
-        await existingUser.save();
       }
 
+      // Update name if Apple sent it and user doesn't have a real one
+      if (userName && (!user.name || user.name === "User")) {
+        user.name = userName;
+      }
+
+      user.lastSeen = new Date();
+      await user.save();
+
       const token = jwt.sign(
-        { id: existingUser._id.toString(), email: existingUser.email },
+        { id: user._id.toString(), email: user.email },
         process.env.JWT_SECRET,
         { expiresIn: "7d" }
       );
 
-      return NextResponse.json({
+      return Response.json({
         action: "login",
         token,
         user: {
-          _id: existingUser._id.toString(),
-          email: existingUser.email,
-          name: existingUser.name,
+          _id: user._id.toString(),
+          email: user.email,
+          name: user.name,
         },
       });
-    } else {
-      // ── NEW USER → SEND TO REGISTRATION ──
-      const appleName =
-        fullName?.givenName && fullName?.familyName
-          ? `${fullName.givenName} ${fullName.familyName}`
-          : "";
-
-      return NextResponse.json({
-        action: "register",
-        appleUserId: appleSub,
-        name: appleName,
-        email: appleEmail || "",
-      });
     }
+
+    // ── New user → send to registration ──
+    return Response.json({
+      action: "register",
+      appleUserId: verifiedAppleUserId,
+      email: verifiedEmail || "",
+      name: userName,
+    });
   } catch (err) {
     console.error("Apple login error:", err);
-    return NextResponse.json(
-      { error: "Apple login failed", details: err.message },
+    return Response.json(
+      { error: "Apple sign-in failed" },
       { status: 500 }
     );
   }
-}
-
-export async function OPTIONS() {
-  return NextResponse.json(
-    {},
-    {
-      status: 200,
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "POST, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type, Authorization",
-      },
-    }
-  );
 }

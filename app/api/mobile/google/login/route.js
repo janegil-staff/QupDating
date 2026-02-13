@@ -1,136 +1,104 @@
-import { NextResponse } from "next/server";
+// app/api/mobile/google/login/route.js
 import jwt from "jsonwebtoken";
-import { connectDB } from "@/lib/db";
 import User from "@/models/User";
-
-/**
- * Verify Google access token by calling Google's userinfo endpoint.
- * Returns the user's Google profile data.
- */
-async function verifyGoogleToken(accessToken) {
-  const res = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
-    headers: { Authorization: `Bearer ${accessToken}` },
-  });
-
-  if (!res.ok) {
-    throw new Error("Invalid Google access token");
-  }
-
-  return res.json();
-  // Returns: { sub, name, given_name, family_name, picture, email, email_verified }
-}
+import { connectDB } from "@/lib/db";
 
 export async function POST(req) {
   try {
     await connectDB();
-
     const { accessToken } = await req.json();
 
     if (!accessToken) {
-      return NextResponse.json(
+      return Response.json(
         { error: "Missing Google access token" },
         { status: 400 }
       );
     }
 
-    // 1. Verify the token with Google and get profile data
-    let googleProfile;
-    try {
-      googleProfile = await verifyGoogleToken(accessToken);
-    } catch (err) {
-      console.error("Google token verification failed:", err);
-      return NextResponse.json(
-        { error: "Invalid Google token" },
+    // ── Fetch Google profile using access token ──
+    const googleRes = await fetch(
+      `https://www.googleapis.com/oauth2/v3/userinfo?access_token=${accessToken}`
+    );
+
+    if (!googleRes.ok) {
+      return Response.json(
+        { error: "Invalid Google access token" },
         { status: 401 }
       );
     }
 
-    const googleId = googleProfile.sub;
-    const googleEmail = googleProfile.email?.toLowerCase().trim();
-    const googleName = googleProfile.name || "";
-    const googlePicture = googleProfile.picture || "";
+    const googleUser = await googleRes.json();
+    // googleUser = { sub, email, name, picture, ... }
 
-    if (!googleEmail) {
-      return NextResponse.json(
-        { error: "No email associated with this Google account" },
-        { status: 400 }
+    if (!googleUser.email) {
+      return Response.json(
+        { error: "Could not retrieve email from Google" },
+        { status: 401 }
       );
     }
 
-    // 2. Check if user already exists (by Google ID or email)
-    let existingUser = await User.findOne({
-      $or: [
-        { "google.googleId": googleId },
-        { email: googleEmail },
-      ],
-    });
+    // ── Check if user exists by Google ID ──
+    let user = await User.findOne({ "google.googleId": googleUser.sub });
 
-    if (existingUser) {
-      // ── EXISTING USER → LOG IN ──
-      if (existingUser.isBanned) {
-        return NextResponse.json(
+    // ── Or check by email ──
+    if (!user) {
+      user = await User.findOne({ email: googleUser.email });
+    }
+
+    // ── Existing user → login ──
+    if (user) {
+      if (user.isBanned) {
+        return Response.json(
           { error: "Your account has been banned" },
           { status: 403 }
         );
       }
 
-      // Update Google data if not already stored
-      if (!existingUser.google?.googleId) {
-        existingUser.google = {
-          googleId,
-          email: googleEmail,
-          name: googleName,
-          picture: googlePicture,
+      // Link Google if not already linked
+      if (!user.google?.googleId) {
+        user.google = {
+          googleId: googleUser.sub,
+          email: googleUser.email,
+          name: googleUser.name,
+          picture: googleUser.picture,
           isVerified: true,
           verifiedAt: new Date(),
         };
-        await existingUser.save();
       }
 
+      user.lastSeen = new Date();
+      await user.save();
+
       const token = jwt.sign(
-        { id: existingUser._id.toString(), email: existingUser.email },
+        { id: user._id.toString(), email: user.email },
         process.env.JWT_SECRET,
         { expiresIn: "7d" }
       );
 
-      return NextResponse.json({
+      return Response.json({
         action: "login",
         token,
         user: {
-          _id: existingUser._id.toString(),
-          email: existingUser.email,
-          name: existingUser.name,
+          _id: user._id.toString(),
+          email: user.email,
+          name: user.name,
         },
       });
-    } else {
-      // ── NEW USER → SEND TO REGISTRATION ──
-      return NextResponse.json({
-        action: "register",
-        googleId,
-        name: googleName,
-        email: googleEmail,
-        picture: googlePicture,
-      });
     }
+
+    // ── New user → send to registration ──
+    return Response.json({
+      action: "register",
+      googleId: googleUser.sub,
+      email: googleUser.email,
+      name: googleUser.name || "",
+      picture: googleUser.picture || "",
+    });
   } catch (err) {
     console.error("Google login error:", err);
-    return NextResponse.json(
-      { error: "Google login failed", details: err.message },
+    return Response.json(
+      { error: "Google sign-in failed" },
       { status: 500 }
     );
   }
-}
-
-export async function OPTIONS() {
-  return NextResponse.json(
-    {},
-    {
-      status: 200,
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "POST, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type, Authorization",
-      },
-    }
-  );
 }
