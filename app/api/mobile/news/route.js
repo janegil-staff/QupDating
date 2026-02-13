@@ -1,7 +1,7 @@
 // app/api/mobile/news/route.js
 import { NextResponse } from "next/server";
-import connectDB from "@/lib/mongodb";
 import News from "@/models/News";
+import { connectDB } from "@/lib/db";
 
 export async function GET() {
   try {
