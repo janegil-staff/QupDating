@@ -1,4 +1,4 @@
-// app/privacy-choices/page.js
+"use client"
 export default function PrivacyChoices() {
   return (
     <>
