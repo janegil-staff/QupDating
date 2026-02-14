@@ -34,72 +34,55 @@ export async function GET(req) {
   // 4. Determine opposite gender
   const oppositeGender = currentUser.gender === "male" ? "female" : "male";
 
-  const now = new Date();
-  // Fetch reported users
+  // 5. Fetch reported and blocked users
   const reports = await Report.find({ reporter: currentUser._id });
   const reportedIds = reports.map((r) => r.reportedUser.toString());
 
-  // Users who reported the current user
   const reportedByOthers = await Report.find({ reportedUser: currentUser._id });
   const reportedByIds = reportedByOthers.map((r) => r.reporter.toString());
 
-  // Users the current user has blocked
   const blocks = await Blocked.find({ blocker: currentUser._id });
   const blockedIds = blocks.map((b) => b.blockedUser.toString());
 
-  // Users who blocked the current user
   const blockedBy = await Blocked.find({ blockedUser: currentUser._id });
   const blockedByIds = blockedBy.map((b) => b.blocker.toString());
 
-  // 5. Build query
+  // 6. Combine all excluded IDs
+  const excludedIds = [
+    ...(currentUser.likes || []),
+    ...(currentUser.dislikes || []),
+    ...(currentUser.matches || []),
+    ...reportedIds,
+    ...reportedByIds,
+    ...blockedIds,
+    ...blockedByIds,
+  ].map((id) => id.toString());
+
+  // 7. Calculate age range as date range
+  const now = new Date();
+
+  const maxBirthdate = new Date();
+  maxBirthdate.setFullYear(now.getFullYear() - (currentUser.preferredAgeMin || 18));
+
+  const minBirthdate = new Date();
+  minBirthdate.setFullYear(now.getFullYear() - (currentUser.preferredAgeMax || 99));
+
+  // 8. Build query
   const query = {
-    _id: { $ne: currentUser._id },
+    _id: { $ne: currentUser._id, $nin: excludedIds },
     gender: oppositeGender,
-    $nor: [
-      { _id: { $in: currentUser.likes } },
-      { _id: { $in: currentUser.dislikes } },
-      { _id: { $in: currentUser.matches } },
-      { _id: { $in: reportedIds } },
-      { _id: { $in: reportedByIds } },
-      { _id: { $in: blockedIds } },
-      { _id: { $in: blockedByIds } },
-    ],
-    $expr: {
-      $and: [
-        {
-          $gte: [
-            {
-              $divide: [
-                { $subtract: [now, "$birthdate"] },
-                1000 * 60 * 60 * 24 * 365,
-              ],
-            },
-            currentUser.preferredAgeMin || 18,
-          ],
-        },
-        {
-          $lte: [
-            {
-              $divide: [
-                { $subtract: [now, "$birthdate"] },
-                1000 * 60 * 60 * 24 * 365,
-              ],
-            },
-            currentUser.preferredAgeMax || 99,
-          ],
-        },
-      ],
-    },
+    birthdate: { $gte: minBirthdate, $lte: maxBirthdate },
   };
 
-  // 6. Apply search scope
-  if (currentUser.searchScope === "nearby") {
+  // 9. Apply search scope
+  if (currentUser.searchScope === "nearby" && currentUser.location?.country) {
+    query["location.city"] = currentUser.location.city;
     query["location.country"] = currentUser.location.country;
-  } else if (currentUser.searchScope === "national") {
+  } else if (currentUser.searchScope === "national" && currentUser.location?.country) {
     query["location.country"] = currentUser.location.country;
   }
 
-  // 7. Fetch users
+  // 10. Fetch users
   const users = await User.find(query)
     .sort({ _id: -1 })
     .select(
@@ -108,6 +91,7 @@ export async function GET(req) {
 
   console.log("Current user gender:", currentUser.gender);
   console.log("Query oppositeGender:", oppositeGender);
+  console.log("Query:", JSON.stringify(query, null, 2));
   console.log("Users found:", users.length);
 
   return Response.json(users, {
