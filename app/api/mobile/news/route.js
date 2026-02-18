@@ -20,7 +20,7 @@ export async function GET() {
           { text: "Welcome to QUP! Complete your profile to get more matches.", type: "update" },
           { text: "Tip: Verified profiles get 3x more matches. Verify now!", type: "tip" },
           { text: "Tip: Write a thoughtful bio — it's your first impression.", type: "tip" },
-          { text: "New: Sign in with Apple and Google for faster access.", type: "update" },
+          { text: "New: Sign in with Apple and LinkedIn for faster access.", type: "update" },
           { text: "Tip: Be genuine in your messages — authenticity attracts.", type: "tip" },
         ],
       });
